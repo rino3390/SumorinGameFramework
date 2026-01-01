@@ -1,0 +1,22 @@
+{
+  "name": "com.rino.gameframework.core",
+  "version": "0.1.0",
+  "displayName": "Rino Game Framework Core",
+  "description": "Unity MVP 架構共用框架，提供 DDD 核心、遊戲資料管理、通用工具等功能。",
+  "unity": "6000.3",
+  "documentationUrl": "",
+  "changelogUrl": "",
+  "licensesUrl": "",
+  "author": {
+    "name": "Rino",
+    "email": "",
+    "url": ""
+  },
+  "keywords": [
+    "mvp",
+    "ddd",
+    "framework",
+    "architecture"
+  ],
+  "category": "Framework"
+}

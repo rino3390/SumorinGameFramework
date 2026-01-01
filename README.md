@@ -9,7 +9,7 @@ Unity MVP 架構共用框架，提供 DDD 核心、遊戲資料管理、通用�
 在 Unity Package Manager 中選擇 "Add package from git URL..."，輸入：
 
 ```
-https://github.com/你的帳號/RinoGameFramework.git?path=Core
+https://github.com/rino3390/RinoGameFramework.git?path=Core
 ```
 
 ### 依賴套件
@@ -37,7 +37,10 @@ https://github.com/你的帳號/RinoGameFramework.git?path=Core
       "name": "OpenUPM",
       "url": "https://package.openupm.com",
       "scopes": [
+        "com.svermeulen.extenject",
         "com.cysharp.unitask",
+        "com.cysharp.messagepipe",
+        "com.cysharp.messagepipe.zenject",
         "com.neuecc.unirx"
       ]
     }
@@ -52,11 +55,3 @@ https://github.com/你的帳號/RinoGameFramework.git?path=Core
 | DDDCore | Entity、Repository、EventBus 基礎架構 |
 | GameManager | 遊戲資料管理編輯器視窗 |
 | RinoUtility | 通用工具方法 |
-
-## 架構
-
-本框架遵循 MVP（Model-View-Presenter）架構設計，詳細說明請參考 [MVP 架構開發準則](../docs/MVP_Architecture_Guidelines.md)。
-
-## 授權
-
-MIT License
