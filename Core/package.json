@@ -18,5 +18,12 @@
     "framework",
     "architecture"
   ],
-  "category": "Framework"
+  "category": "Framework",
+  "samples": [
+    {
+      "displayName": "GameManager Sample",
+      "description": "GameManager Tab 範例，展示如何使用 CreateNewDataEditor 建立資料管理 Tab",
+      "path": "Samples~/GameManager"
+    }
+  ]
 }

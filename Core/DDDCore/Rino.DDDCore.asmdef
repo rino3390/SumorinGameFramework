@@ -1,6 +1,6 @@
 {
-  "name": "Rino.GameFramework.Core",
-  "rootNamespace": "Rino.GameFramework.Core",
+  "name": "Rino.DDDCore",
+  "rootNamespace": "Rino.GameFramework.Core.DDDCore",
   "references": [
     "Zenject"
   ],

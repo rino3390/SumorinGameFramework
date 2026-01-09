@@ -1,8 +1,8 @@
 {
-  "name": "Rino.GameFramework.Core.Editor",
-  "rootNamespace": "Rino.GameFramework.Core.Editor",
+  "name": "Rino.RinoUtility.Editor",
+  "rootNamespace": "Rino.GameFramework.Core.RinoUtility.Editor",
   "references": [
-    "Rino.GameFramework.Core",
+    "Rino.RinoUtility",
     "Unity.Localization",
     "Unity.TextMeshPro"
   ],

@@ -1,0 +1,22 @@
+{
+  "name": "Rino.GameFramework.Sample.GameManager.Editor",
+  "rootNamespace": "Rino.GameFramework.Sample.GameManager.Editor",
+  "references": [
+    "Rino.GameFramework.Sample.GameManager",
+    "Rino.GameManager.Base",
+    "Rino.SOBase",
+    "Sirenix.OdinInspector.Attributes",
+    "Sirenix.OdinInspector.Editor"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

@@ -1,0 +1,20 @@
+{
+    "name": "Rino.GameManager.Base",
+    "rootNamespace": "Rino.GameFramework.Core.GameManagerBase.EditorBase",
+    "references": [
+        "Rino.SOBase",
+        "Rino.RinoUtility",
+        "Rino.RinoUtility.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
