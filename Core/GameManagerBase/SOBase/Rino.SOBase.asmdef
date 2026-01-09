@@ -1,0 +1,20 @@
+{
+  "name": "Rino.SOBase",
+  "rootNamespace": "Rino.GameFramework.Core.GameManagerBase.SOBase",
+  "references": [
+    "Rino.RinoUtility",
+    "Rino.RinoUtility.Editor",
+    "Sirenix.OdinInspector",
+    "Sirenix.OdinInspector.Editor",
+    "Unity.Localization"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
