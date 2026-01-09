@@ -14,86 +14,43 @@ namespace Rino.GameFramework.Core.ModuleInstaller
     /// </summary>
     public class ModuleInstaller : EditorWindow
     {
-        private const string DefaultManifestUrl = "https://raw.githubusercontent.com/rino3390/RinoGameFramework/main/ModuleTemplates/modules.json";
+        private const string ManifestUrl = "https://raw.githubusercontent.com/rino3390/RinoGameFramework/main/ModuleTemplates/modules.json";
         private const string InstallBasePath = "Assets/Script/Domains";
-        private const string SettingsKey = "ModuleInstaller_ManifestUrl";
 
-        private string manifestUrl;
-        private string installPath;
         private ModuleManifest manifest;
         private List<ModuleRuntimeData> modules = new();
         private Vector2 scrollPosition;
         private bool isLoading;
-        private string statusMessage;
-        private MessageType statusMessageType;
+        private string errorMessage;
 
         [MenuItem("Tools/Module Installer", priority = 100)]
         public static void OpenWindow()
         {
             var window = GetWindow<ModuleInstaller>("Module Installer");
-            window.minSize = new Vector2(500, 400);
+            window.minSize = new Vector2(400, 300);
             window.Show();
         }
 
         private void OnEnable()
         {
-            manifestUrl = EditorPrefs.GetString(SettingsKey, DefaultManifestUrl);
-            installPath = InstallBasePath;
             RefreshModuleList();
         }
 
         private void OnGUI()
         {
-            DrawHeader();
-            DrawSettings();
-            EditorGUILayout.Space(10);
-
             if (isLoading)
             {
                 EditorGUILayout.HelpBox("載入中...", MessageType.Info);
                 return;
             }
 
-            if (!string.IsNullOrEmpty(statusMessage))
+            if (!string.IsNullOrEmpty(errorMessage))
             {
-                EditorGUILayout.HelpBox(statusMessage, statusMessageType);
+                EditorGUILayout.HelpBox(errorMessage, MessageType.Error);
+                return;
             }
 
             DrawModuleList();
-        }
-
-        private void DrawHeader()
-        {
-            EditorGUILayout.Space(5);
-            EditorGUILayout.LabelField("Module Installer", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("從 GitHub 安裝可選模組到專案中", EditorStyles.miniLabel);
-            EditorGUILayout.Space(5);
-        }
-
-        private void DrawSettings()
-        {
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-
-            EditorGUILayout.LabelField("設定", EditorStyles.boldLabel);
-
-            EditorGUI.BeginChangeCheck();
-            manifestUrl = EditorGUILayout.TextField("Manifest URL", manifestUrl);
-            if (EditorGUI.EndChangeCheck())
-            {
-                EditorPrefs.SetString(SettingsKey, manifestUrl);
-            }
-
-            installPath = EditorGUILayout.TextField("安裝路徑", installPath);
-
-            EditorGUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-            if (GUILayout.Button("重新整理", GUILayout.Width(100)))
-            {
-                RefreshModuleList();
-            }
-            EditorGUILayout.EndHorizontal();
-
-            EditorGUILayout.EndVertical();
         }
 
         private void DrawModuleList()
@@ -247,13 +204,13 @@ namespace Rino.GameFramework.Core.ModuleInstaller
         private void RefreshModuleList()
         {
             isLoading = true;
-            statusMessage = null;
+            errorMessage = null;
             FetchManifest();
         }
 
         private void FetchManifest()
         {
-            var request = UnityWebRequest.Get(manifestUrl);
+            var request = UnityWebRequest.Get(ManifestUrl);
             var operation = request.SendWebRequest();
 
             EditorApplication.update += CheckFetchComplete;
@@ -266,8 +223,7 @@ namespace Rino.GameFramework.Core.ModuleInstaller
 
                 if (request.result != UnityWebRequest.Result.Success)
                 {
-                    statusMessage = $"無法載入模組清單: {request.error}";
-                    statusMessageType = MessageType.Error;
+                    errorMessage = $"無法載入模組清單: {request.error}";
                     isLoading = false;
                     Repaint();
                     return;
@@ -278,13 +234,10 @@ namespace Rino.GameFramework.Core.ModuleInstaller
                     manifest = JsonUtility.FromJson<ModuleManifest>(request.downloadHandler.text);
                     modules = manifest.modules.Select(m => new ModuleRuntimeData(m)).ToList();
                     CheckAllModuleStatus();
-                    statusMessage = $"已載入 {modules.Count} 個模組";
-                    statusMessageType = MessageType.Info;
                 }
                 catch (Exception e)
                 {
-                    statusMessage = $"解析模組清單失敗: {e.Message}";
-                    statusMessageType = MessageType.Error;
+                    errorMessage = $"解析模組清單失敗: {e.Message}";
                 }
 
                 isLoading = false;
@@ -355,10 +308,10 @@ namespace Rino.GameFramework.Core.ModuleInstaller
         {
             // 從 ModuleTemplates/ModuleName/file.cs 取得 ModuleName/file.cs
             var parts = relativePath.Split('/');
-            if (parts.Length < 2) return Path.Combine(installPath, relativePath);
+            if (parts.Length < 2) return Path.Combine(InstallBasePath, relativePath);
 
             var domainPath = string.Join("/", parts);
-            return Path.Combine(Application.dataPath, installPath.Replace("Assets/", ""), domainPath)
+            return Path.Combine(Application.dataPath, InstallBasePath.Replace("Assets/", ""), domainPath)
                 .Replace("\\", "/");
         }
 
@@ -378,8 +331,6 @@ namespace Rino.GameFramework.Core.ModuleInstaller
             }
 
             isLoading = true;
-            statusMessage = $"正在安裝 {module.Info.name}...";
-            statusMessageType = MessageType.Info;
             Repaint();
 
             DownloadModuleFiles(module, module.Info.files);
@@ -388,8 +339,6 @@ namespace Rino.GameFramework.Core.ModuleInstaller
         private void RepairModule(ModuleRuntimeData module)
         {
             isLoading = true;
-            statusMessage = $"正在修復 {module.Info.name}...";
-            statusMessageType = MessageType.Info;
             Repaint();
 
             DownloadModuleFiles(module, module.MissingFiles);
@@ -446,13 +395,7 @@ namespace Rino.GameFramework.Core.ModuleInstaller
 
                 if (failedFiles.Count > 0)
                 {
-                    statusMessage = $"安裝 {module.Info.name} 時發生錯誤:\n{string.Join("\n", failedFiles)}";
-                    statusMessageType = MessageType.Error;
-                }
-                else
-                {
-                    statusMessage = $"{module.Info.name} 安裝完成";
-                    statusMessageType = MessageType.Info;
+                    errorMessage = $"安裝 {module.Info.name} 時發生錯誤:\n{string.Join("\n", failedFiles)}";
                 }
 
                 isLoading = false;
@@ -524,9 +467,6 @@ namespace Rino.GameFramework.Core.ModuleInstaller
             AssetDatabase.Refresh();
             CheckModuleStatus(module);
             CheckAllModuleStatus();
-
-            statusMessage = $"{module.Info.name} 已移除";
-            statusMessageType = MessageType.Info;
             Repaint();
         }
 
