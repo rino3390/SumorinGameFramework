@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0",
+  "baseUrl": "https://raw.githubusercontent.com/rino3390/RinoGameFramework/main/ModuleTemplates/",
+  "modules": [
+    {
+      "id": "sample-domain",
+      "name": "Sample Domain",
+      "description": "範例 Domain 模組，展示基本的 DDD 架構實作",
+      "version": "1.0.0",
+      "dependencies": [],
+      "files": [
+        "SampleDomain/SampleEntity.cs",
+        "SampleDomain/SampleRepository.cs",
+        "SampleDomain/SampleDomain.asmdef"
+      ]
+    }
+  ]
+}

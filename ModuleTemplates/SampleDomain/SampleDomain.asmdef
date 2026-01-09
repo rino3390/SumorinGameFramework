@@ -1,0 +1,16 @@
+{
+    "name": "Game.Domain.Sample",
+    "rootNamespace": "Game.Domain.Sample",
+    "references": [
+        "Rino.DDDCore"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
