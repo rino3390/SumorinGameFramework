@@ -1,0 +1,20 @@
+{
+  "name": "Rino.RinoUtility.Editor",
+  "rootNamespace": "Rino.GameFramework.Core.RinoUtility.Editor",
+  "references": [
+    "Rino.RinoUtility",
+    "Unity.Localization",
+    "Unity.TextMeshPro"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
