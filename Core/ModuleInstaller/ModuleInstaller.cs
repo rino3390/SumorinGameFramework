@@ -98,16 +98,41 @@ namespace Rino.GameFramework.Core.ModuleInstaller
 
         private void DrawModuleList()
         {
-            EditorGUILayout.LabelField($"可用模組 ({modules.Count})", EditorStyles.boldLabel);
-
             scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
 
-            foreach (var module in modules)
+            // 分離基礎模組與可選模組
+            var baseModules = modules.Where(IsBaseModule).ToList();
+            var optionalModules = modules.Where(m => !IsBaseModule(m)).ToList();
+
+            // 基礎模組區塊
+            if (baseModules.Count > 0)
             {
-                DrawModuleItem(module);
+                EditorGUILayout.LabelField("基礎模組", EditorStyles.boldLabel);
+                foreach (var module in baseModules)
+                {
+                    DrawModuleItem(module);
+                }
+                EditorGUILayout.Space(10);
+            }
+
+            // 可選模組區塊
+            if (optionalModules.Count > 0)
+            {
+                EditorGUILayout.LabelField($"可選模組 ({optionalModules.Count})", EditorStyles.boldLabel);
+                foreach (var module in optionalModules)
+                {
+                    DrawModuleItem(module);
+                }
             }
 
             EditorGUILayout.EndScrollView();
+        }
+
+        private bool IsBaseModule(ModuleRuntimeData module)
+        {
+            // FolderStructure 是基礎模組
+            return module.Info.id.Equals("folder-structure", StringComparison.OrdinalIgnoreCase) ||
+                   module.Info.name.Equals("FolderStructure", StringComparison.OrdinalIgnoreCase);
         }
 
         private void DrawModuleItem(ModuleRuntimeData module)
@@ -124,18 +149,17 @@ namespace Rino.GameFramework.Core.ModuleInstaller
             EditorGUILayout.LabelField($"版本: {module.Info.version} | ID: {module.Info.id}", EditorStyles.miniLabel);
             EditorGUILayout.LabelField(module.Info.description, EditorStyles.wordWrappedLabel);
 
-            // 依賴資訊
+            // 依賴資訊（含狀態圖示）
             if (module.Info.dependencies.Count > 0)
             {
-                var depsText = string.Join(", ", module.Info.dependencies);
-                EditorGUILayout.LabelField($"依賴: {depsText}", EditorStyles.miniLabel);
-            }
-
-            // 未滿足的依賴警告
-            if (module.HasUnmetDependencies)
-            {
-                var missingDeps = string.Join(", ", module.MissingDependencies);
-                EditorGUILayout.HelpBox($"缺少依賴: {missingDeps}", MessageType.Warning);
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("依賴:", EditorStyles.miniLabel, GUILayout.Width(35));
+                foreach (var dep in module.Info.dependencies)
+                {
+                    var isSatisfied = !module.MissingDependencies.Contains(dep);
+                    DrawDependencyStatus(dep, isSatisfied);
+                }
+                EditorGUILayout.EndHorizontal();
             }
 
             // 部分安裝警告
@@ -209,6 +233,15 @@ namespace Rino.GameFramework.Core.ModuleInstaller
             }
 
             GUI.backgroundColor = originalColor;
+        }
+
+        private void DrawDependencyStatus(string dependencyName, bool isSatisfied)
+        {
+            var originalColor = GUI.contentColor;
+            var symbol = isSatisfied ? "\u2713" : "\u2717";
+            GUI.contentColor = isSatisfied ? new Color(0.3f, 0.8f, 0.3f) : new Color(0.9f, 0.3f, 0.3f);
+            GUILayout.Label($"{symbol} {dependencyName}", EditorStyles.miniLabel);
+            GUI.contentColor = originalColor;
         }
 
         private void RefreshModuleList()
@@ -440,14 +473,6 @@ namespace Rino.GameFramework.Core.ModuleInstaller
 
         private void RemoveModule(ModuleRuntimeData module)
         {
-            // 確認對話框
-            if (!EditorUtility.DisplayDialog("確認移除",
-                    $"確定要移除 {module.Info.name} 嗎？\n\n這將刪除以下檔案：\n{string.Join("\n", module.InstalledFiles)}",
-                    "移除", "取消"))
-            {
-                return;
-            }
-
             // 檢查是否有其他模組依賴此模組
             var dependentModules = modules
                 .Where(m => m.Status == ModuleInstallStatus.Installed &&
@@ -455,11 +480,26 @@ namespace Rino.GameFramework.Core.ModuleInstaller
                 .Select(m => m.Info.name)
                 .ToList();
 
-            if (dependentModules.Count > 0)
+            // 建立確認訊息
+            var message = "";
+            var isBaseModule = IsBaseModule(module);
+
+            if (isBaseModule)
             {
-                EditorUtility.DisplayDialog("無法移除",
-                    $"以下模組依賴 {module.Info.name}：\n{string.Join("\n", dependentModules)}\n\n請先移除這些模組。",
-                    "確定");
+                // FolderStructure 特殊警告
+                message = "⚠️ 警告：這會刪除所有資料夾結構，其他模組將無法運作\n\n";
+            }
+            else if (dependentModules.Count > 0)
+            {
+                // 被依賴模組警告
+                message = $"⚠️ 警告：「{string.Join("」「", dependentModules)}」模組依賴此模組\n\n";
+            }
+
+            message += $"確定要移除「{module.Info.name}」嗎？\n\n這將刪除以下檔案：\n• {string.Join("\n• ", module.InstalledFiles)}";
+
+            // 確認對話框
+            if (!EditorUtility.DisplayDialog("確認移除", message, "確定移除", "取消"))
+            {
                 return;
             }
 
