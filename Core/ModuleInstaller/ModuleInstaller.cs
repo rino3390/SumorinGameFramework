@@ -24,6 +24,8 @@ namespace Rino.GameFramework.Core.ModuleInstaller
         private List<ModuleRuntimeData> modules = new();
         private Vector2 scrollPosition;
         private bool isLoading;
+        private bool isDownloading;
+        private ModuleRuntimeData downloadingModule;
         private string errorMessage;
 
         [MenuItem("Tools/Module Installer", priority = 100)]
@@ -43,14 +45,13 @@ namespace Rino.GameFramework.Core.ModuleInstaller
         {
             if (isLoading)
             {
-                EditorGUILayout.HelpBox("載入中...", MessageType.Info);
+                EditorGUILayout.HelpBox("載入模組清單中...", MessageType.Info);
                 return;
             }
 
             if (!string.IsNullOrEmpty(errorMessage))
             {
                 EditorGUILayout.HelpBox(errorMessage, MessageType.Error);
-                return;
             }
 
             DrawModuleList();
@@ -133,39 +134,48 @@ namespace Rino.GameFramework.Core.ModuleInstaller
             EditorGUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
-            GUI.enabled = !isLoading;
+            var isThisModuleDownloading = isDownloading && downloadingModule == module;
 
-            switch (module.Status)
+            if (isThisModuleDownloading)
             {
-                case ModuleInstallStatus.NotInstalled:
-                    GUI.enabled = !module.HasUnmetDependencies && !isLoading;
-                    if (GUILayout.Button("安裝", GUILayout.Width(80)))
-                    {
-                        InstallModule(module);
-                    }
-                    GUI.enabled = !isLoading;
-                    break;
-
-                case ModuleInstallStatus.Installed:
-                    if (GUILayout.Button("移除", GUILayout.Width(80)))
-                    {
-                        RemoveModule(module);
-                    }
-                    break;
-
-                case ModuleInstallStatus.PartiallyInstalled:
-                    if (GUILayout.Button("修復", GUILayout.Width(80)))
-                    {
-                        RepairModule(module);
-                    }
-                    if (GUILayout.Button("移除", GUILayout.Width(80)))
-                    {
-                        RemoveModule(module);
-                    }
-                    break;
+                GUILayout.Label("下載中...", EditorStyles.boldLabel);
             }
+            else
+            {
+                GUI.enabled = !isDownloading;
 
-            GUI.enabled = true;
+                switch (module.Status)
+                {
+                    case ModuleInstallStatus.NotInstalled:
+                        GUI.enabled = !module.HasUnmetDependencies && !isDownloading;
+                        if (GUILayout.Button("安裝", GUILayout.Width(80)))
+                        {
+                            InstallModule(module);
+                        }
+                        GUI.enabled = !isDownloading;
+                        break;
+
+                    case ModuleInstallStatus.Installed:
+                        if (GUILayout.Button("移除", GUILayout.Width(80)))
+                        {
+                            RemoveModule(module);
+                        }
+                        break;
+
+                    case ModuleInstallStatus.PartiallyInstalled:
+                        if (GUILayout.Button("修復", GUILayout.Width(80)))
+                        {
+                            RepairModule(module);
+                        }
+                        if (GUILayout.Button("移除", GUILayout.Width(80)))
+                        {
+                            RemoveModule(module);
+                        }
+                        break;
+                }
+
+                GUI.enabled = true;
+            }
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.EndVertical();
@@ -199,7 +209,7 @@ namespace Rino.GameFramework.Core.ModuleInstaller
         {
             var originalColor = GUI.contentColor;
             var symbol = isSatisfied ? "✓" : "✗";
-            GUI.contentColor = isSatisfied ? new Color(0.3f, 0.8f, 0.3f) : new Color(0.9f, 0.3f, 0.3f);
+            GUI.contentColor = isSatisfied ? new Color(0.3f, 0.8f, 0.3f) : new Color(1f, 0.4f, 0.4f);
             GUILayout.Label($"{symbol} {dependencyName}", EditorStyles.label);
             GUI.contentColor = originalColor;
         }
@@ -349,7 +359,8 @@ namespace Rino.GameFramework.Core.ModuleInstaller
                 return;
             }
 
-            isLoading = true;
+            isDownloading = true;
+            downloadingModule = module;
             Repaint();
 
             DownloadModuleFiles(module, module.Info.files);
@@ -357,7 +368,8 @@ namespace Rino.GameFramework.Core.ModuleInstaller
 
         private void RepairModule(ModuleRuntimeData module)
         {
-            isLoading = true;
+            isDownloading = true;
+            downloadingModule = module;
             Repaint();
 
             DownloadModuleFiles(module, module.MissingFiles);
@@ -399,7 +411,9 @@ namespace Rino.GameFramework.Core.ModuleInstaller
                     }
                     else
                     {
-                        SaveFile(localPath, request.downloadHandler.data);
+                        // 空檔案（如 .gitkeep）也要建立
+                        var data = request.downloadHandler.data ?? Array.Empty<byte>();
+                        SaveFile(localPath, data);
                     }
 
                     DownloadNextFile();
@@ -417,7 +431,8 @@ namespace Rino.GameFramework.Core.ModuleInstaller
                     errorMessage = $"安裝 {module.Info.name} 時發生錯誤:\n{string.Join("\n", failedFiles)}";
                 }
 
-                isLoading = false;
+                isDownloading = false;
+                downloadingModule = null;
                 Repaint();
             }
         }
