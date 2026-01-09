@@ -1,12 +1,8 @@
 {
-  "name": "Game.Controller",
-  "rootNamespace": "Game.Controller",
+  "name": "Game.View",
+  "rootNamespace": "Game.View",
   "references": [
-    "Rino.GameFramework.Core",
-    "Game.Model",
-    "Game.Repository",
-    "Game.Event",
-    "Game.Utility"
+    "Rino.DDDCore"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

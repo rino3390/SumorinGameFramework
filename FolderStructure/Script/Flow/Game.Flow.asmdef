@@ -1,10 +1,9 @@
 {
-  "name": "Game.Model",
-  "rootNamespace": "Game.Model",
+  "name": "Game.Flow",
+  "rootNamespace": "Game.Flow",
   "references": [
-    "Rino.GameFramework.Core",
-    "Game.Event",
-    "Game.Utility"
+    "Rino.DDDCore",
+    "Game.Presenter"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

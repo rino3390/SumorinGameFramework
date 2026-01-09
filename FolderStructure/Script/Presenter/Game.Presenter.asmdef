@@ -1,8 +1,9 @@
 {
-  "name": "Game.DataScript",
-  "rootNamespace": "Game.DataScript",
+  "name": "Game.Presenter",
+  "rootNamespace": "Game.Presenter",
   "references": [
-    "Game.Utility"
+    "Rino.DDDCore",
+    "Game.View"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],
