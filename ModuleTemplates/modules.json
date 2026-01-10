@@ -1,17 +1,33 @@
 {
   "version": "1.0.0",
-  "baseUrl": "https://raw.githubusercontent.com/rino3390/RinoGameFramework/main/ModuleTemplates/",
+  "baseUrl": "https://raw.githubusercontent.com/rino3390/RinoGameFramework/main/",
   "modules": [
     {
-      "id": "sample-domain",
-      "name": "Sample Domain",
-      "description": "範例 Domain 模組，展示基本的 DDD 架構實作",
+      "id": "folder-structure",
+      "name": "FolderStructure",
+      "description": "專案資料夾結構模板，提供標準的 Unity 專案目錄配置",
       "version": "1.0.0",
       "dependencies": [],
       "files": [
-        "SampleDomain/SampleEntity.cs",
-        "SampleDomain/SampleRepository.cs",
-        "SampleDomain/SampleDomain.asmdef"
+        "FolderStructure/.gitkeep",
+        "FolderStructure/Art/Animator/.gitkeep",
+        "FolderStructure/Art/Material/.gitkeep",
+        "FolderStructure/Art/Model/.gitkeep",
+        "FolderStructure/Art/Shader/.gitkeep",
+        "FolderStructure/Data/.gitkeep",
+        "FolderStructure/Prefab/.gitkeep",
+        "FolderStructure/Resources/.gitkeep",
+        "FolderStructure/Scenes/.gitkeep",
+        "FolderStructure/Script/Domains/.gitkeep",
+        "FolderStructure/Script/Flow/Game.Flow.asmdef",
+        "FolderStructure/Script/Presenter/Game.Presenter.asmdef",
+        "FolderStructure/Script/Utility/Game.Utility.asmdef",
+        "FolderStructure/Script/View/Behaviour/.gitkeep",
+        "FolderStructure/Script/View/Data/.gitkeep",
+        "FolderStructure/Script/View/Event/.gitkeep",
+        "FolderStructure/Script/View/Game.View.asmdef",
+        "FolderStructure/Script/View/UI/.gitkeep",
+        "FolderStructure/Script/View/ViewRepo/.gitkeep"
       ]
     }
   ]

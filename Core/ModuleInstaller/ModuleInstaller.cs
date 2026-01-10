@@ -15,12 +15,17 @@ namespace Rino.GameFramework.Core.ModuleInstaller
     public class ModuleInstaller : EditorWindow
     {
         private const string ManifestUrl = "https://raw.githubusercontent.com/rino3390/RinoGameFramework/main/ModuleTemplates/modules.json";
-        private const string InstallBasePath = "Assets/Script/Domains";
+        private const string FolderStructurePrefix = "FolderStructure/";
+        private const string ModuleTemplatesPrefix = "ModuleTemplates/";
+        private const string DomainsPath = "Script/Domains";
+        private const string ScriptPath = "Script";
 
         private ModuleManifest manifest;
         private List<ModuleRuntimeData> modules = new();
         private Vector2 scrollPosition;
         private bool isLoading;
+        private bool isDownloading;
+        private ModuleRuntimeData downloadingModule;
         private string errorMessage;
 
         [MenuItem("Tools/Module Installer", priority = 100)]
@@ -40,14 +45,13 @@ namespace Rino.GameFramework.Core.ModuleInstaller
         {
             if (isLoading)
             {
-                EditorGUILayout.HelpBox("載入中...", MessageType.Info);
+                EditorGUILayout.HelpBox("載入模組清單中...", MessageType.Info);
                 return;
             }
 
             if (!string.IsNullOrEmpty(errorMessage))
             {
                 EditorGUILayout.HelpBox(errorMessage, MessageType.Error);
-                return;
             }
 
             DrawModuleList();
@@ -110,7 +114,7 @@ namespace Rino.GameFramework.Core.ModuleInstaller
             if (module.Info.dependencies.Count > 0)
             {
                 EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.LabelField("依賴:", EditorStyles.miniLabel, GUILayout.Width(35));
+                EditorGUILayout.LabelField("依賴：", GUILayout.Width(40));
                 foreach (var dep in module.Info.dependencies)
                 {
                     var isSatisfied = !module.MissingDependencies.Contains(dep);
@@ -130,39 +134,48 @@ namespace Rino.GameFramework.Core.ModuleInstaller
             EditorGUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
-            GUI.enabled = !isLoading;
+            var isThisModuleDownloading = isDownloading && downloadingModule == module;
 
-            switch (module.Status)
+            if (isThisModuleDownloading)
             {
-                case ModuleInstallStatus.NotInstalled:
-                    GUI.enabled = !module.HasUnmetDependencies && !isLoading;
-                    if (GUILayout.Button("安裝", GUILayout.Width(80)))
-                    {
-                        InstallModule(module);
-                    }
-                    GUI.enabled = !isLoading;
-                    break;
-
-                case ModuleInstallStatus.Installed:
-                    if (GUILayout.Button("移除", GUILayout.Width(80)))
-                    {
-                        RemoveModule(module);
-                    }
-                    break;
-
-                case ModuleInstallStatus.PartiallyInstalled:
-                    if (GUILayout.Button("修復", GUILayout.Width(80)))
-                    {
-                        RepairModule(module);
-                    }
-                    if (GUILayout.Button("移除", GUILayout.Width(80)))
-                    {
-                        RemoveModule(module);
-                    }
-                    break;
+                GUILayout.Label("下載中...", EditorStyles.boldLabel);
             }
+            else
+            {
+                GUI.enabled = !isDownloading;
 
-            GUI.enabled = true;
+                switch (module.Status)
+                {
+                    case ModuleInstallStatus.NotInstalled:
+                        GUI.enabled = !module.HasUnmetDependencies && !isDownloading;
+                        if (GUILayout.Button("安裝", GUILayout.Width(80)))
+                        {
+                            InstallModule(module);
+                        }
+                        GUI.enabled = !isDownloading;
+                        break;
+
+                    case ModuleInstallStatus.Installed:
+                        if (GUILayout.Button("移除", GUILayout.Width(80)))
+                        {
+                            RemoveModule(module);
+                        }
+                        break;
+
+                    case ModuleInstallStatus.PartiallyInstalled:
+                        if (GUILayout.Button("修復", GUILayout.Width(80)))
+                        {
+                            RepairModule(module);
+                        }
+                        if (GUILayout.Button("移除", GUILayout.Width(80)))
+                        {
+                            RemoveModule(module);
+                        }
+                        break;
+                }
+
+                GUI.enabled = true;
+            }
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.EndVertical();
@@ -195,9 +208,9 @@ namespace Rino.GameFramework.Core.ModuleInstaller
         private void DrawDependencyStatus(string dependencyName, bool isSatisfied)
         {
             var originalColor = GUI.contentColor;
-            var symbol = isSatisfied ? "\u2713" : "\u2717";
-            GUI.contentColor = isSatisfied ? new Color(0.3f, 0.8f, 0.3f) : new Color(0.9f, 0.3f, 0.3f);
-            GUILayout.Label($"{symbol} {dependencyName}", EditorStyles.miniLabel);
+            var symbol = isSatisfied ? "✓" : "✗";
+            GUI.contentColor = isSatisfied ? new Color(0.3f, 0.8f, 0.3f) : new Color(1f, 0.4f, 0.4f);
+            GUILayout.Label($"{symbol} {dependencyName}", EditorStyles.label);
             GUI.contentColor = originalColor;
         }
 
@@ -277,6 +290,13 @@ namespace Rino.GameFramework.Core.ModuleInstaller
             module.MissingFiles.Clear();
             module.InstalledFiles.Clear();
 
+            // FolderStructure 特殊處理：檢查資料夾是否存在
+            if (IsBaseModule(module))
+            {
+                CheckFolderStructureStatus(module);
+                return;
+            }
+
             foreach (var file in module.Info.files)
             {
                 var localPath = GetLocalFilePath(file);
@@ -304,15 +324,76 @@ namespace Rino.GameFramework.Core.ModuleInstaller
             }
         }
 
+        private void CheckFolderStructureStatus(ModuleRuntimeData module)
+        {
+            // 檢查關鍵資料夾是否存在
+            var keyFolders = new[]
+            {
+                "Script/Domains",
+                "Script/Flow",
+                "Script/Presenter",
+                "Script/View",
+                "Art",
+                "Data",
+                "Prefab",
+                "Resources",
+                "Scenes"
+            };
+
+            var existingFolders = 0;
+            foreach (var folder in keyFolders)
+            {
+                var folderPath = Path.Combine(Application.dataPath, folder);
+                if (Directory.Exists(folderPath))
+                {
+                    existingFolders++;
+                    module.InstalledFiles.Add(folder);
+                }
+                else
+                {
+                    module.MissingFiles.Add(folder);
+                }
+            }
+
+            if (existingFolders == 0)
+            {
+                module.Status = ModuleInstallStatus.NotInstalled;
+            }
+            else if (existingFolders == keyFolders.Length)
+            {
+                module.Status = ModuleInstallStatus.Installed;
+            }
+            else
+            {
+                module.Status = ModuleInstallStatus.PartiallyInstalled;
+            }
+        }
+
         private string GetLocalFilePath(string relativePath)
         {
-            // 從 ModuleTemplates/ModuleName/file.cs 取得 ModuleName/file.cs
-            var parts = relativePath.Split('/');
-            if (parts.Length < 2) return Path.Combine(InstallBasePath, relativePath);
+            // FolderStructure 檔案：移除前綴，安裝到 Assets/
+            if (relativePath.StartsWith(FolderStructurePrefix))
+            {
+                var localPath = relativePath.Substring(FolderStructurePrefix.Length);
+                return Path.Combine(Application.dataPath, localPath).Replace("\\", "/");
+            }
 
-            var domainPath = string.Join("/", parts);
-            return Path.Combine(Application.dataPath, InstallBasePath.Replace("Assets/", ""), domainPath)
-                .Replace("\\", "/");
+            // ModuleTemplates 檔案：移除前綴，根據 FolderStructure 是否存在決定路徑
+            if (relativePath.StartsWith(ModuleTemplatesPrefix))
+            {
+                var modulePath = relativePath.Substring(ModuleTemplatesPrefix.Length);
+                var basePath = IsFolderStructureInstalled() ? DomainsPath : ScriptPath;
+                return Path.Combine(Application.dataPath, basePath, modulePath).Replace("\\", "/");
+            }
+
+            // 其他情況：直接安裝到 Assets/
+            return Path.Combine(Application.dataPath, relativePath).Replace("\\", "/");
+        }
+
+        private bool IsFolderStructureInstalled()
+        {
+            var domainsPath = Path.Combine(Application.dataPath, DomainsPath);
+            return Directory.Exists(domainsPath);
         }
 
         private string GetRemoteFileUrl(string relativePath)
@@ -330,7 +411,8 @@ namespace Rino.GameFramework.Core.ModuleInstaller
                 return;
             }
 
-            isLoading = true;
+            isDownloading = true;
+            downloadingModule = module;
             Repaint();
 
             DownloadModuleFiles(module, module.Info.files);
@@ -338,7 +420,8 @@ namespace Rino.GameFramework.Core.ModuleInstaller
 
         private void RepairModule(ModuleRuntimeData module)
         {
-            isLoading = true;
+            isDownloading = true;
+            downloadingModule = module;
             Repaint();
 
             DownloadModuleFiles(module, module.MissingFiles);
@@ -380,7 +463,9 @@ namespace Rino.GameFramework.Core.ModuleInstaller
                     }
                     else
                     {
-                        SaveFile(localPath, request.downloadHandler.data);
+                        // 空檔案（如 .gitkeep）也要建立
+                        var data = request.downloadHandler.data ?? Array.Empty<byte>();
+                        SaveFile(localPath, data);
                     }
 
                     DownloadNextFile();
@@ -398,7 +483,8 @@ namespace Rino.GameFramework.Core.ModuleInstaller
                     errorMessage = $"安裝 {module.Info.name} 時發生錯誤:\n{string.Join("\n", failedFiles)}";
                 }
 
-                isLoading = false;
+                isDownloading = false;
+                downloadingModule = null;
                 Repaint();
             }
         }
@@ -438,7 +524,7 @@ namespace Rino.GameFramework.Core.ModuleInstaller
                 message = $"⚠️ 警告：「{string.Join("」「", dependentModules)}」模組依賴此模組\n\n";
             }
 
-            message += $"確定要移除「{module.Info.name}」嗎？\n\n這將刪除以下檔案：\n• {string.Join("\n• ", module.InstalledFiles)}";
+            message += $"確定要移除「{module.Info.name}」嗎？\n\n這將刪除以下項目：\n• {string.Join("\n• ", module.InstalledFiles)}";
 
             // 確認對話框
             if (!EditorUtility.DisplayDialog("確認移除", message, "確定移除", "取消"))
@@ -446,28 +532,56 @@ namespace Rino.GameFramework.Core.ModuleInstaller
                 return;
             }
 
-            // 刪除檔案
-            foreach (var file in module.InstalledFiles)
+            // FolderStructure 特殊處理：刪除整個資料夾
+            if (isBaseModule)
             {
-                var localPath = GetLocalFilePath(file);
-                if (File.Exists(localPath))
+                RemoveFolderStructure();
+            }
+            else
+            {
+                // 刪除檔案
+                foreach (var file in module.InstalledFiles)
                 {
-                    File.Delete(localPath);
-                    var metaPath = localPath + ".meta";
+                    var localPath = GetLocalFilePath(file);
+                    if (File.Exists(localPath))
+                    {
+                        File.Delete(localPath);
+                        var metaPath = localPath + ".meta";
+                        if (File.Exists(metaPath))
+                        {
+                            File.Delete(metaPath);
+                        }
+                    }
+                }
+
+                // 刪除空目錄
+                CleanupEmptyDirectories(module);
+            }
+
+            AssetDatabase.Refresh();
+            CheckModuleStatus(module);
+            CheckAllModuleStatus();
+            Repaint();
+        }
+
+        private void RemoveFolderStructure()
+        {
+            // 刪除 FolderStructure 的根資料夾
+            var rootFolders = new[] { "Art", "Data", "Prefab", "Resources", "Scenes", "Script" };
+
+            foreach (var folder in rootFolders)
+            {
+                var folderPath = Path.Combine(Application.dataPath, folder);
+                if (Directory.Exists(folderPath))
+                {
+                    Directory.Delete(folderPath, true);
+                    var metaPath = folderPath + ".meta";
                     if (File.Exists(metaPath))
                     {
                         File.Delete(metaPath);
                     }
                 }
             }
-
-            // 刪除空目錄
-            CleanupEmptyDirectories(module);
-
-            AssetDatabase.Refresh();
-            CheckModuleStatus(module);
-            CheckAllModuleStatus();
-            Repaint();
         }
 
         private void CleanupEmptyDirectories(ModuleRuntimeData module)
