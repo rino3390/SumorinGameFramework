@@ -1,0 +1,30 @@
+{
+    "name": "Rino.AttributeSystem.Tests",
+    "rootNamespace": "Rino.GameFramework.Core.AttributeSystem.Tests",
+    "references": [
+        "GUID:d8fc630016373ef4c964cd9b6a3b1884",
+        "GUID:35bfa476343371c4190abb94641925a1",
+        "GUID:0b51a95f810fea0478c4a8985cd95ed2",
+        "GUID:780aab4a852571640b656fb69c25331e",
+        "GUID:54456da0e1718ae43b971433e36f18f1",
+        "GUID:770778e5fe21a2545955cc5a6fab61ef",
+        "GUID:560b04d1a97f54a4e82edc0cbbb69285",
+        "GUID:0d8beb7f090555447a6cf5ce9e54dbb4",
+        "GUID:0acc523941302664db1f4e527237feb3"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

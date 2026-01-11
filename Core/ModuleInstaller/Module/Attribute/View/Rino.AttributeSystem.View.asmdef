@@ -1,0 +1,16 @@
+{
+    "name": "Rino.AttributeSystem.View",
+    "rootNamespace": "Rino.GameFramework.Core.AttributeSystem.View",
+    "references": [
+        "Rino.AttributeSystem.Common"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

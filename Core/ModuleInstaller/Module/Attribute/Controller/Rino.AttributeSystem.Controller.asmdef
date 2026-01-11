@@ -1,0 +1,21 @@
+{
+    "name": "Rino.AttributeSystem.Controller",
+    "rootNamespace": "Rino.GameFramework.Core.AttributeSystem.Controller",
+    "references": [
+        "Rino.DDDCore",
+        "Rino.AttributeSystem.Common",
+        "Rino.AttributeSystem.Model",
+        "Rino.AttributeSystem.Repository",
+        "Rino.RinoUtility",
+        "UniRx"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

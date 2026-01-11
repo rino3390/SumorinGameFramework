@@ -1,0 +1,19 @@
+{
+    "name": "Rino.AttributeSystem.Installer",
+    "rootNamespace": "Rino.GameFramework.Core.AttributeSystem.Installer",
+    "references": [
+        "Rino.DDDCore",
+        "Rino.AttributeSystem.Controller",
+        "Rino.AttributeSystem.Repository",
+        "Zenject"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
