@@ -1,5 +1,6 @@
 using System;
 using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 namespace Rino.GameFramework.DDDCore
 {
@@ -20,11 +21,13 @@ namespace Rino.GameFramework.DDDCore
         /// </summary>
         /// <typeparam name="TEvent">事件類型，必須實作 IEvent</typeparam>
         /// <param name="evt">要發布的事件</param>
-        /// <exception cref="ArgumentNullException">evt 為 null 時拋出</exception>
         public void Publish<TEvent>(TEvent evt) where TEvent : IEvent
         {
             if (evt == null)
-                throw new ArgumentNullException(nameof(evt));
+            {
+                Debug.LogError($"Publisher.Publish<{typeof(TEvent).Name}>: evt 不可為 null");
+                return;
+            }
 
             eventBus.Publish(evt);
         }
@@ -35,11 +38,13 @@ namespace Rino.GameFramework.DDDCore
         /// <typeparam name="TEvent">事件類型，必須實作 IEvent</typeparam>
         /// <param name="evt">要發布的事件</param>
         /// <returns>非同步任務</returns>
-        /// <exception cref="ArgumentNullException">evt 為 null 時拋出</exception>
         public UniTask PublishAsync<TEvent>(TEvent evt) where TEvent : IEvent
         {
             if (evt == null)
-                throw new ArgumentNullException(nameof(evt));
+            {
+                Debug.LogError($"Publisher.PublishAsync<{typeof(TEvent).Name}>: evt 不可為 null");
+                return UniTask.CompletedTask;
+            }
 
             return eventBus.PublishAsync(evt);
         }

@@ -1,6 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using MessagePipe;
+using UnityEngine;
 
 namespace Rino.GameFramework.DDDCore
 {
@@ -23,7 +24,13 @@ namespace Rino.GameFramework.DDDCore
                 throw new ArgumentNullException(nameof(evt));
 
             var publisher = serviceProvider.GetService(typeof(IPublisher<TEvent>)) as IPublisher<TEvent>;
-            publisher?.Publish(evt);
+            if (publisher == null)
+            {
+                Debug.LogError($"IPublisher<{typeof(TEvent).Name}> 未註冊，請確認 MessagePipe 配置正確");
+                return;
+            }
+
+            publisher.Publish(evt);
         }
 
         /// <inheritdoc />
@@ -33,10 +40,13 @@ namespace Rino.GameFramework.DDDCore
                 throw new ArgumentNullException(nameof(evt));
 
             var publisher = serviceProvider.GetService(typeof(IAsyncPublisher<TEvent>)) as IAsyncPublisher<TEvent>;
-            if (publisher != null)
+            if (publisher == null)
             {
-                await publisher.PublishAsync(evt);
+                Debug.LogError($"IAsyncPublisher<{typeof(TEvent).Name}> 未註冊，請確認 MessagePipe 配置正確");
+                return;
             }
+
+            await publisher.PublishAsync(evt);
         }
 
         /// <inheritdoc />
@@ -44,7 +54,10 @@ namespace Rino.GameFramework.DDDCore
         {
             var subscriber = serviceProvider.GetService(typeof(ISubscriber<TEvent>)) as ISubscriber<TEvent>;
             if (subscriber == null)
+            {
+                Debug.LogError($"ISubscriber<{typeof(TEvent).Name}> 未註冊，請確認 MessagePipe 配置正確");
                 return new EmptyDisposable();
+            }
 
             if (filter != null)
             {
@@ -63,7 +76,10 @@ namespace Rino.GameFramework.DDDCore
         {
             var subscriber = serviceProvider.GetService(typeof(IAsyncSubscriber<TEvent>)) as IAsyncSubscriber<TEvent>;
             if (subscriber == null)
+            {
+                Debug.LogError($"IAsyncSubscriber<{typeof(TEvent).Name}> 未註冊，請確認 MessagePipe 配置正確");
                 return new EmptyDisposable();
+            }
 
             if (filter != null)
             {
