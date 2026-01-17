@@ -141,14 +141,13 @@ namespace Rino.GameFramework.DDDCore.Tests
         }
 
         [Test]
-        public void Publish_WithNullEvent_ThrowsArgumentNullException()
+        public void Publish_WithNullEvent_DoesNotThrow()
         {
             // Arrange
             var publisher = Container.Resolve<Publisher>();
 
-            // Act & Assert
-            Assert.That(() => publisher.Publish<TestEvent>(null),
-                Throws.ArgumentNullException.With.Property("ParamName").EqualTo("evt"));
+            // Act & Assert - Publisher 改為 Debug.LogError + return，不拋出例外
+            Assert.DoesNotThrow(() => publisher.Publish<TestEvent>(null));
         }
 
         [Test]
@@ -185,21 +184,13 @@ namespace Rino.GameFramework.DDDCore.Tests
         }
 
         [Test]
-        public async Task PublishAsync_WithNullEvent_ThrowsArgumentNullException()
+        public void PublishAsync_WithNullEvent_DoesNotThrow()
         {
             // Arrange
             var publisher = Container.Resolve<Publisher>();
 
-            // Act & Assert
-            try
-            {
-                await publisher.PublishAsync<TestEvent>(null);
-                Assert.Fail("Expected ArgumentNullException");
-            }
-            catch (ArgumentNullException ex)
-            {
-                Assert.That(ex.ParamName, Is.EqualTo("evt"));
-            }
+            // Act & Assert - Publisher 改為 Debug.LogError + return，不拋出例外
+            Assert.DoesNotThrow(() => publisher.PublishAsync<TestEvent>(null));
         }
 
         #endregion
