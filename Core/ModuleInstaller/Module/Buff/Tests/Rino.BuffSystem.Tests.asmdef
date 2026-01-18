@@ -5,6 +5,8 @@
         "Rino.DDDCore.CoreEvent",
         "Rino.DDDCore.Domain",
         "Rino.DDDCore.EventBus",
+        "Rino.DDDCore.Publisher",
+        "Rino.DDDCore.Subscriber",
         "Rino.DDDCore.Installer",
         "Rino.TestFramework",
         "Rino.BuffSystem.Common",

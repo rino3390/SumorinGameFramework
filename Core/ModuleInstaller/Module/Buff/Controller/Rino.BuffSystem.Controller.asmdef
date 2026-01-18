@@ -5,6 +5,7 @@
         "Rino.DDDCore.Domain",
         "Rino.DDDCore.CoreEvent",
         "Rino.DDDCore.EventBus",
+        "Rino.DDDCore.Publisher",
         "Rino.BuffSystem.Common",
         "Rino.BuffSystem.Model",
         "Rino.BuffSystem.Repository",

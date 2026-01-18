@@ -4,6 +4,7 @@
     "references": [
         "Rino.DDDCore.CoreEvent",
         "Rino.DDDCore.EventBus",
+        "Rino.DDDCore.Subscriber",
         "Rino.BuffSystem.Controller",
         "Rino.BuffSystem.Event",
         "Rino.BuffSystem.Model",
