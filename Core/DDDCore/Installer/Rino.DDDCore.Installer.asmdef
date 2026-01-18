@@ -2,15 +2,12 @@
     "name": "Rino.DDDCore.Installer",
     "rootNamespace": "Rino.GameFramework.DDDCore",
     "references": [
-        "Rino.DDDCore.CoreEvent",
-        "Rino.DDDCore.Domain",
         "Rino.DDDCore.EventBus",
         "Rino.DDDCore.Publisher",
         "Rino.DDDCore.Subscriber",
         "MessagePipe",
         "MessagePipe.Zenject",
-        "Zenject",
-        "UniTask"
+        "Zenject"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

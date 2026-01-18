@@ -23,8 +23,7 @@ namespace Rino.GameFramework.DDDCore
             if (evt == null)
                 throw new ArgumentNullException(nameof(evt));
 
-            var publisher = serviceProvider.GetService(typeof(IPublisher<TEvent>)) as IPublisher<TEvent>;
-            if (publisher == null)
+			if (serviceProvider.GetService(typeof(IPublisher<TEvent>)) is not IPublisher<TEvent> publisher)
             {
                 Debug.LogError($"IPublisher<{typeof(TEvent).Name}> 未註冊，請確認 MessagePipe 配置正確");
                 return;
@@ -39,8 +38,7 @@ namespace Rino.GameFramework.DDDCore
             if (evt == null)
                 throw new ArgumentNullException(nameof(evt));
 
-            var publisher = serviceProvider.GetService(typeof(IAsyncPublisher<TEvent>)) as IAsyncPublisher<TEvent>;
-            if (publisher == null)
+			if (serviceProvider.GetService(typeof(IAsyncPublisher<TEvent>)) is not IAsyncPublisher<TEvent> publisher)
             {
                 Debug.LogError($"IAsyncPublisher<{typeof(TEvent).Name}> 未註冊，請確認 MessagePipe 配置正確");
                 return;
@@ -52,8 +50,7 @@ namespace Rino.GameFramework.DDDCore
         /// <inheritdoc />
         public IDisposable Subscribe<TEvent>(Action<TEvent> handler, Predicate<TEvent> filter = null) where TEvent : IEvent
         {
-            var subscriber = serviceProvider.GetService(typeof(ISubscriber<TEvent>)) as ISubscriber<TEvent>;
-            if (subscriber == null)
+			if (serviceProvider.GetService(typeof(ISubscriber<TEvent>)) is not ISubscriber<TEvent> subscriber)
             {
                 Debug.LogError($"ISubscriber<{typeof(TEvent).Name}> 未註冊，請確認 MessagePipe 配置正確");
                 return new EmptyDisposable();
@@ -74,8 +71,7 @@ namespace Rino.GameFramework.DDDCore
         /// <inheritdoc />
         public IDisposable SubscribeAsync<TEvent>(Func<TEvent, UniTask> handler, Predicate<TEvent> filter = null) where TEvent : IEvent
         {
-            var subscriber = serviceProvider.GetService(typeof(IAsyncSubscriber<TEvent>)) as IAsyncSubscriber<TEvent>;
-            if (subscriber == null)
+			if (serviceProvider.GetService(typeof(IAsyncSubscriber<TEvent>)) is not IAsyncSubscriber<TEvent> subscriber)
             {
                 Debug.LogError($"IAsyncSubscriber<{typeof(TEvent).Name}> 未註冊，請確認 MessagePipe 配置正確");
                 return new EmptyDisposable();
