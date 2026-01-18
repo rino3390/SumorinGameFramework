@@ -1,0 +1,18 @@
+{
+    "name": "Rino.DDDCore.Subscriber",
+    "rootNamespace": "Rino.GameFramework.DDDCore",
+    "references": [
+        "GUID:198362be86ace8e44abb463d663cf36b",
+        "GUID:22cf3f3aba88f214780b29b568a45b36",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}
