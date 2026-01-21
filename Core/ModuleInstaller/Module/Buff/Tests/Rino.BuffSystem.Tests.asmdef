@@ -21,6 +21,7 @@
         "Rino.AttributeSystem.Controller",
         "Rino.AttributeSystem.Repository",
         "Rino.AttributeSystem.Installer",
+        "Rino.RinoUtility",
         "UniRx",
         "Zenject",
         "Zenject-TestFramework"
@@ -32,7 +33,8 @@
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
-        "nunit.framework.dll"
+        "nunit.framework.dll",
+        "FluentAssertions.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

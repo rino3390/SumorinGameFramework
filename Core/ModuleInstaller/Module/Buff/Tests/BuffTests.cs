@@ -1,475 +1,335 @@
+using System;
+using FluentAssertions;
 using NUnit.Framework;
 using UniRx;
 
 namespace Rino.GameFramework.BuffSystem.Tests
 {
-    [TestFixture]
-    public class BuffTests
-    {
-        #region Constructor Tests
-
-        [Test]
-        public void Constructor_WithValidParameters_SetsAllProperties()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", 5, 10f, 3);
-
-            Assert.AreEqual("buff-1", buff.Id);
-            Assert.AreEqual("Poison", buff.BuffName);
-            Assert.AreEqual("owner-1", buff.OwnerId);
-            Assert.AreEqual("source-1", buff.SourceId);
-            Assert.AreEqual(1, buff.StackCount);
-            Assert.AreEqual(5, buff.MaxStack);
-            Assert.AreEqual(10f, buff.RemainingDuration);
-            Assert.AreEqual(3, buff.RemainingTurns);
-            Assert.IsEmpty(buff.ModifierRecords);
-            Assert.IsFalse(buff.IsExpired);
-        }
-
-        [Test]
-        public void Constructor_WithNullMaxStack_SetsMaxStackToNull()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 10f, null);
-
-            Assert.IsNull(buff.MaxStack);
-        }
-
-        [Test]
-        public void Constructor_WithNullDuration_SetsDurationToNull()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
-
-            Assert.IsNull(buff.RemainingDuration);
-            Assert.IsNull(buff.RemainingTurns);
-        }
-
-        [Test]
-        public void Constructor_WithNullId_ThrowsArgumentNullException()
-        {
-            Assert.That(() => new Buff(null, "Poison", "owner-1", "source-1", null, null, null),
-                Throws.ArgumentNullException.With.Property("ParamName").EqualTo("id"));
-        }
-
-        [Test]
-        public void Constructor_WithEmptyId_ThrowsArgumentException()
-        {
-            Assert.That(() => new Buff("", "Poison", "owner-1", "source-1", null, null, null),
-                Throws.ArgumentException.With.Property("ParamName").EqualTo("id"));
-        }
-
-        [Test]
-        public void Constructor_WithNullBuffName_ThrowsArgumentException()
-        {
-            Assert.That(() => new Buff("buff-1", null, "owner-1", "source-1", null, null, null),
-                Throws.ArgumentException.With.Property("ParamName").EqualTo("buffName"));
-        }
-
-        [Test]
-        public void Constructor_WithEmptyBuffName_ThrowsArgumentException()
-        {
-            Assert.That(() => new Buff("buff-1", "", "owner-1", "source-1", null, null, null),
-                Throws.ArgumentException.With.Property("ParamName").EqualTo("buffName"));
-        }
-
-        [Test]
-        public void Constructor_WithNullOwnerId_ThrowsArgumentException()
-        {
-            Assert.That(() => new Buff("buff-1", "Poison", null, "source-1", null, null, null),
-                Throws.ArgumentException.With.Property("ParamName").EqualTo("ownerId"));
-        }
-
-        [Test]
-        public void Constructor_WithEmptyOwnerId_ThrowsArgumentException()
-        {
-            Assert.That(() => new Buff("buff-1", "Poison", "", "source-1", null, null, null),
-                Throws.ArgumentException.With.Property("ParamName").EqualTo("ownerId"));
-        }
-
-        [Test]
-        public void Constructor_WithNullSourceId_ThrowsArgumentException()
-        {
-            Assert.That(() => new Buff("buff-1", "Poison", "owner-1", null, null, null, null),
-                Throws.ArgumentException.With.Property("ParamName").EqualTo("sourceId"));
-        }
-
-        [Test]
-        public void Constructor_WithEmptySourceId_ThrowsArgumentException()
-        {
-            Assert.That(() => new Buff("buff-1", "Poison", "owner-1", "", null, null, null),
-                Throws.ArgumentException.With.Property("ParamName").EqualTo("sourceId"));
-        }
-
-        #endregion
-
-        #region CanAddStack Tests
-
-        [Test]
-        public void CanAddStack_WithNoMaxStack_ReturnsTrue()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
+	[TestFixture]
+	public class BuffTests
+	{
+	#region Constructor Tests
+		[Test]
+		public void Constructor_WithValidParameters_SetsAllProperties()
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", 5, 10f, 3);
+
+			Assert.AreEqual("buff-1", buff.Id);
+			Assert.AreEqual("Poison", buff.BuffName);
+			Assert.AreEqual("owner-1", buff.OwnerId);
+			Assert.AreEqual("source-1", buff.SourceId);
+			Assert.AreEqual(1, buff.StackCount);
+			Assert.AreEqual(5, buff.MaxStack);
+			Assert.AreEqual(10f, buff.RemainingDuration);
+			Assert.AreEqual(3, buff.RemainingTurns);
+			Assert.IsEmpty(buff.ModifierRecords);
+			Assert.IsFalse(buff.IsExpired);
+		}
+
+		[Test]
+		public void Constructor_WithNullMaxStack_SetsMaxStackToNull()
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 10f, null);
+
+			Assert.IsNull(buff.MaxStack);
+		}
+
+		[Test]
+		public void Constructor_WithNullDuration_SetsDurationToNull()
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
+
+			Assert.IsNull(buff.RemainingDuration);
+			Assert.IsNull(buff.RemainingTurns);
+		}
+
+		[TestCase(null, "Poison", "owner-1", "source-1", typeof(ArgumentNullException), "id", TestName = "Null id throws ArgumentNullException")]
+		[TestCase("", "Poison", "owner-1", "source-1", typeof(ArgumentException), "id", TestName = "Empty id throws ArgumentException")]
+		[TestCase("buff-1", null, "owner-1", "source-1", typeof(ArgumentException), "buffName", TestName = "Null buffName throws ArgumentException")]
+		[TestCase("buff-1", "", "owner-1", "source-1", typeof(ArgumentException), "buffName", TestName = "Empty buffName throws ArgumentException")]
+		[TestCase("buff-1", "Poison", null, "source-1", typeof(ArgumentException), "ownerId", TestName = "Null ownerId throws ArgumentException")]
+		[TestCase("buff-1", "Poison", "", "source-1", typeof(ArgumentException), "ownerId", TestName = "Empty ownerId throws ArgumentException")]
+		[TestCase("buff-1", "Poison", "owner-1", null, typeof(ArgumentException), "sourceId", TestName = "Null sourceId throws ArgumentException")]
+		[TestCase("buff-1", "Poison", "owner-1", "", typeof(ArgumentException), "sourceId", TestName = "Empty sourceId throws ArgumentException")]
+		public void Constructor_WithInvalidStringParameter_ThrowsException(string id, string buffName, string ownerId, string sourceId, Type exceptionType,
+																		   string paramName)
+		{
+			Assert.That(
+				() => new Buff(id, buffName, ownerId, sourceId, null, null, null), Throws.TypeOf(exceptionType).With.Property("ParamName").EqualTo(paramName)
+			);
+		}
+	#endregion
+
+	#region ChangeStack Tests
+		[TestCase(null, 1, 2, TestName = "Positive delta increases stack")]
+		[TestCase(null, 3, 4, TestName = "Positive delta increases stack by count")]
+		[TestCase(3, 5, 3, TestName = "Positive delta clamps to max stack")]
+		[TestCase(null, -1, 0, TestName = "Negative delta decreases stack")]
+		[TestCase(null, -5, 0, TestName = "Negative delta clamps to zero")]
+		public void ChangeStack_UpdatesStackCount(int? maxStack, int delta, int expected)
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", maxStack, null, null);
+
+			buff.ChangeStack(delta);
+
+			Assert.AreEqual(expected, buff.StackCount);
+		}
+
+		[TestCase(1, 1, 2, TestName = "Increase triggers event")]
+		[TestCase(-1, 2, 1, TestName = "Decrease triggers event")]
+		public void ChangeStack_TriggersOnStackChangedEvent(int delta, int expectedOld, int expectedNew)
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
+			if (expectedOld > 1) buff.ChangeStack(expectedOld - 1);
+			BuffStackChangedInfo? receivedInfo = null;
+			buff.OnStackChanged.Subscribe(info => receivedInfo = info);
+
+			buff.ChangeStack(delta);
+
+			receivedInfo.Should().NotBeNull();
+			receivedInfo!.Value.Should().BeEquivalentTo(new BuffStackChangedInfo("buff-1", "owner-1", "Poison", expectedOld, expectedNew));
+		}
+
+		[TestCase(1, 0, TestName = "At max stack with positive delta")]
+		[TestCase(null, 0, TestName = "Zero delta")]
+		public void ChangeStack_WithNoChange_DoesNotTriggerEvent(int? maxStack, int delta)
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", maxStack, null, null);
+			var eventTriggered = false;
+			buff.OnStackChanged.Subscribe(_ => eventTriggered = true);
+
+			buff.ChangeStack(delta);
+
+			Assert.IsFalse(eventTriggered);
+		}
+	#endregion
+
+	#region RefreshDuration Tests
+		[Test]
+		public void RefreshDuration_UpdatesDuration()
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 5f, null);
 
-            Assert.IsTrue(buff.CanAddStack());
-        }
+			buff.RefreshDuration(10f);
 
-        [Test]
-        public void CanAddStack_WithStackBelowMax_ReturnsTrue()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", 5, null, null);
+			Assert.AreEqual(10f, buff.RemainingDuration);
+		}
 
-            Assert.IsTrue(buff.CanAddStack());
-        }
+	#endregion
 
-        [Test]
-        public void CanAddStack_WithStackAtMax_ReturnsFalse()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", 1, null, null);
+	#region RefreshTurns Tests
+		[Test]
+		public void RefreshTurns_UpdatesTurns()
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, 3);
 
-            Assert.IsFalse(buff.CanAddStack());
-        }
+			buff.RefreshTurns(5);
 
-        #endregion
+			Assert.AreEqual(5, buff.RemainingTurns);
+		}
+	#endregion
 
-        #region AddStack Tests
+	#region AdjustDuration Tests
+		[TestCase(3f, 7f, TestName = "Positive delta decreases duration")]
+		[TestCase(-3f, 13f, TestName = "Negative delta increases duration")]
+		public void AdjustDuration_UpdatesDuration(float delta, float expected)
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 10f, null);
 
-        [Test]
-        public void AddStack_WithDefaultCount_IncreasesStackByOne()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
+			buff.AdjustDuration(delta);
 
-            buff.AddStack();
+			Assert.AreEqual(expected, buff.RemainingDuration);
+		}
 
-            Assert.AreEqual(2, buff.StackCount);
-        }
+		[Test]
+		public void AdjustDuration_WithNullDuration_DoesNothing()
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
 
-        [Test]
-        public void AddStack_WithSpecificCount_IncreasesStackByCount()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
+			buff.AdjustDuration(3f);
 
-            buff.AddStack(3);
+			Assert.IsNull(buff.RemainingDuration);
+		}
 
-            Assert.AreEqual(4, buff.StackCount);
-        }
-
-        [Test]
-        public void AddStack_WithMaxStack_ClampsToMaxStack()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", 3, null, null);
-
-            buff.AddStack(5);
-
-            Assert.AreEqual(3, buff.StackCount);
-        }
-
-        [Test]
-        public void AddStack_TriggersOnStackChangedEvent()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
-            BuffStackChangedInfo? receivedInfo = null;
-            buff.OnStackChanged.Subscribe(info => receivedInfo = info);
-
-            buff.AddStack();
-
-            Assert.IsNotNull(receivedInfo);
-            Assert.AreEqual("buff-1", receivedInfo.Value.BuffId);
-            Assert.AreEqual("owner-1", receivedInfo.Value.OwnerId);
-            Assert.AreEqual("Poison", receivedInfo.Value.BuffName);
-            Assert.AreEqual(1, receivedInfo.Value.OldStack);
-            Assert.AreEqual(2, receivedInfo.Value.NewStack);
-        }
-
-        [Test]
-        public void AddStack_WithNoChange_DoesNotTriggerEvent()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", 1, null, null);
-            var eventTriggered = false;
-            buff.OnStackChanged.Subscribe(_ => eventTriggered = true);
-
-            buff.AddStack();
-
-            Assert.IsFalse(eventTriggered);
-        }
-
-        #endregion
-
-        #region RemoveStack Tests
-
-        [Test]
-        public void RemoveStack_WithDefaultCount_DecreasesStackByOne()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
-            buff.AddStack(2);
-
-            buff.RemoveStack();
-
-            Assert.AreEqual(2, buff.StackCount);
-        }
-
-        [Test]
-        public void RemoveStack_WithSpecificCount_DecreasesStackByCount()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
-            buff.AddStack(4);
-
-            buff.RemoveStack(2);
-
-            Assert.AreEqual(3, buff.StackCount);
-        }
-
-        [Test]
-        public void RemoveStack_ClampsToZero()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
-
-            buff.RemoveStack(5);
-
-            Assert.AreEqual(0, buff.StackCount);
-        }
-
-        [Test]
-        public void RemoveStack_TriggersOnStackChangedEvent()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
-            buff.AddStack();
-            BuffStackChangedInfo? receivedInfo = null;
-            buff.OnStackChanged.Subscribe(info => receivedInfo = info);
-
-            buff.RemoveStack();
-
-            Assert.IsNotNull(receivedInfo);
-            Assert.AreEqual(2, receivedInfo.Value.OldStack);
-            Assert.AreEqual(1, receivedInfo.Value.NewStack);
-        }
-
-        #endregion
-
-        #region RefreshDuration Tests
-
-        [Test]
-        public void RefreshDuration_UpdatesDuration()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 5f, null);
-
-            buff.RefreshDuration(10f);
-
-            Assert.AreEqual(10f, buff.RemainingDuration);
-        }
-
-        [Test]
-        public void RefreshDuration_TriggersOnDurationRefreshedEvent()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 5f, null);
-            BuffDurationRefreshedInfo? receivedInfo = null;
-            buff.OnDurationRefreshed.Subscribe(info => receivedInfo = info);
-
-            buff.RefreshDuration(10f);
-
-            Assert.IsNotNull(receivedInfo);
-            Assert.AreEqual("buff-1", receivedInfo.Value.BuffId);
-            Assert.AreEqual("owner-1", receivedInfo.Value.OwnerId);
-            Assert.AreEqual("Poison", receivedInfo.Value.BuffName);
-        }
-
-        #endregion
-
-        #region RefreshTurns Tests
-
-        [Test]
-        public void RefreshTurns_UpdatesTurns()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, 3);
-
-            buff.RefreshTurns(5);
-
-            Assert.AreEqual(5, buff.RemainingTurns);
-        }
-
-        #endregion
-
-        #region TickTime Tests
-
-        [Test]
-        public void TickTime_WithDuration_DecreasesDuration()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 10f, null);
-
-            buff.TickTime(3f);
-
-            Assert.AreEqual(7f, buff.RemainingDuration);
-        }
-
-        [Test]
-        public void TickTime_WithNullDuration_DoesNothing()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
-
-            buff.TickTime(3f);
-
-            Assert.IsNull(buff.RemainingDuration);
-        }
-
-        #endregion
-
-        #region TickTurn Tests
-
-        [Test]
-        public void TickTurn_WithTurns_DecreasesTurns()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, 5);
-
-            buff.TickTurn();
-
-            Assert.AreEqual(4, buff.RemainingTurns);
-        }
-
-        [Test]
-        public void TickTurn_WithSpecificCount_DecreasesTurnsByCount()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, 5);
-
-            buff.TickTurn(2);
-
-            Assert.AreEqual(3, buff.RemainingTurns);
-        }
-
-        [Test]
-        public void TickTurn_WithNullTurns_DoesNothing()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
-
-            buff.TickTurn();
-
-            Assert.IsNull(buff.RemainingTurns);
-        }
-
-        #endregion
-
-        #region IsExpired Tests
-
-        [Test]
-        public void IsExpired_WithDurationZero_ReturnsTrue()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 0f, null);
-
-            Assert.IsTrue(buff.IsExpired);
-        }
-
-        [Test]
-        public void IsExpired_WithDurationNegative_ReturnsTrue()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, -1f, null);
-
-            Assert.IsTrue(buff.IsExpired);
-        }
-
-        [Test]
-        public void IsExpired_WithTurnsZero_ReturnsTrue()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, 0);
-
-            Assert.IsTrue(buff.IsExpired);
-        }
-
-        [Test]
-        public void IsExpired_WithTurnsNegative_ReturnsTrue()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, -1);
-
-            Assert.IsTrue(buff.IsExpired);
-        }
-
-        [Test]
-        public void IsExpired_WithValidDurationAndTurns_ReturnsFalse()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 10f, 5);
-
-            Assert.IsFalse(buff.IsExpired);
-        }
-
-        [Test]
-        public void IsExpired_WithNullDurationAndTurns_ReturnsFalse()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
-
-            Assert.IsFalse(buff.IsExpired);
-        }
-
-        #endregion
-
-        #region ModifierRecord Tests
-
-        [Test]
-        public void RecordModifier_AddsRecordToList()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
-
-            buff.RecordModifier("Health", "mod-1");
-
-            Assert.AreEqual(1, buff.ModifierRecords.Count);
-            Assert.AreEqual("Health", buff.ModifierRecords[0].AttributeName);
-            Assert.AreEqual("mod-1", buff.ModifierRecords[0].ModifierId);
-        }
-
-        [Test]
-        public void RemoveLastModifierRecord_RemovesAndReturnsLastRecord()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
-            buff.RecordModifier("Health", "mod-1");
-            buff.RecordModifier("Defense", "mod-2");
-
-            var removed = buff.RemoveLastModifierRecord();
-
-            Assert.AreEqual("Defense", removed.AttributeName);
-            Assert.AreEqual("mod-2", removed.ModifierId);
-            Assert.AreEqual(1, buff.ModifierRecords.Count);
-        }
-
-        [Test]
-        public void RemoveLastModifierRecord_WithEmptyList_ReturnsNull()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
-
-            var removed = buff.RemoveLastModifierRecord();
-
-            Assert.IsNull(removed);
-        }
-
-        #endregion
-
-        #region Edge Cases
-
-        [TestCase(int.MaxValue)]
-        [TestCase(int.MinValue)]
-        public void AddStack_WithExtremeValues_HandlesCorrectly(int count)
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
-
-            if (count > 0)
-            {
-                buff.AddStack(count);
-                Assert.AreEqual(1 + count, buff.StackCount);
-            }
-        }
-
-        [Test]
-        public void TickTime_WithLargeNegativeDelta_DoesNotCrash()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 10f, null);
-
-            buff.TickTime(float.MinValue);
-
-            Assert.IsTrue(buff.RemainingDuration > 0);
-        }
-
-        [Test]
-        public void TickTime_WithInfinity_SetsToNegativeInfinity()
-        {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 10f, null);
-
-            buff.TickTime(float.PositiveInfinity);
-
-            Assert.AreEqual(float.NegativeInfinity, buff.RemainingDuration);
-        }
-
-        #endregion
-    }
+		[Test]
+		public void AdjustDuration_WhenBecomesExpired_TriggersOnExpiredEvent()
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 5f, null);
+			BuffExpiredInfo? receivedInfo = null;
+			buff.OnExpired.Subscribe(info => receivedInfo = info);
+
+			buff.AdjustDuration(5f);
+
+			receivedInfo.Should().NotBeNull();
+			receivedInfo!.Value.Should().BeEquivalentTo(new BuffExpiredInfo("buff-1", "owner-1", "Poison"));
+		}
+
+		[Test]
+		public void AdjustDuration_WhenAlreadyExpired_DoesNotTriggerOnExpiredEvent()
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 0f, null);
+			var eventTriggered = false;
+			buff.OnExpired.Subscribe(_ => eventTriggered = true);
+
+			buff.AdjustDuration(1f);
+
+			Assert.IsFalse(eventTriggered);
+		}
+
+		[Test]
+		public void AdjustDuration_WhenNotExpired_DoesNotTriggerOnExpiredEvent()
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 10f, null);
+			var eventTriggered = false;
+			buff.OnExpired.Subscribe(_ => eventTriggered = true);
+
+			buff.AdjustDuration(3f);
+
+			Assert.IsFalse(eventTriggered);
+		}
+	#endregion
+
+	#region AdjustTurns Tests
+		[TestCase(1, 4, TestName = "Positive delta decreases turns")]
+		[TestCase(2, 3, TestName = "Positive delta decreases turns by count")]
+		[TestCase(-2, 7, TestName = "Negative delta increases turns")]
+		public void AdjustTurns_UpdatesTurns(int delta, int expected)
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, 5);
+
+			buff.AdjustTurns(delta);
+
+			Assert.AreEqual(expected, buff.RemainingTurns);
+		}
+
+		[Test]
+		public void AdjustTurns_WithNullTurns_DoesNothing()
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
+
+			buff.AdjustTurns(1);
+
+			Assert.IsNull(buff.RemainingTurns);
+		}
+
+		[Test]
+		public void AdjustTurns_WhenBecomesExpired_TriggersOnExpiredEvent()
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, 1);
+			BuffExpiredInfo? receivedInfo = null;
+			buff.OnExpired.Subscribe(info => receivedInfo = info);
+
+			buff.AdjustTurns(1);
+
+			receivedInfo.Should().NotBeNull();
+			receivedInfo!.Value.Should().BeEquivalentTo(new BuffExpiredInfo("buff-1", "owner-1", "Poison"));
+		}
+
+		[Test]
+		public void AdjustTurns_WhenAlreadyExpired_DoesNotTriggerOnExpiredEvent()
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, 0);
+			var eventTriggered = false;
+			buff.OnExpired.Subscribe(_ => eventTriggered = true);
+
+			buff.AdjustTurns(1);
+
+			Assert.IsFalse(eventTriggered);
+		}
+
+		[Test]
+		public void AdjustTurns_WhenNotExpired_DoesNotTriggerOnExpiredEvent()
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, 5);
+			var eventTriggered = false;
+			buff.OnExpired.Subscribe(_ => eventTriggered = true);
+
+			buff.AdjustTurns(1);
+
+			Assert.IsFalse(eventTriggered);
+		}
+	#endregion
+
+	#region IsExpired Tests
+		[TestCase(0f, null, true, TestName = "Duration zero returns true")]
+		[TestCase(-1f, null, true, TestName = "Duration negative returns true")]
+		[TestCase(null, 0, true, TestName = "Turns zero returns true")]
+		[TestCase(null, -1, true, TestName = "Turns negative returns true")]
+		[TestCase(10f, 5, false, TestName = "Valid duration and turns returns false")]
+		[TestCase(null, null, false, TestName = "Null duration and turns returns false")]
+		public void IsExpired_ReturnsExpectedResult(float? duration, int? turns, bool expected)
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, duration, turns);
+
+			Assert.AreEqual(expected, buff.IsExpired);
+		}
+
+		[Test]
+		public void IsExpired_WithStackCountZero_ReturnsTrue()
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
+
+			buff.ChangeStack(-1);
+
+			Assert.IsTrue(buff.IsExpired);
+		}
+	#endregion
+
+	#region ModifierRecord Tests
+		[Test]
+		public void RecordModifier_AddsRecordToList()
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
+
+			buff.RecordModifier("Health", "mod-1");
+
+			buff.ModifierRecords.Should().BeEquivalentTo(new[] { new ModifierRecord("Health", "mod-1") });
+		}
+
+		[Test]
+		public void RemoveLastModifierRecord_RemovesAndReturnsLastRecord()
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
+			buff.RecordModifier("Health", "mod-1");
+			buff.RecordModifier("Defense", "mod-2");
+
+			var removed = buff.RemoveLastModifierRecord();
+
+			removed.Should().BeEquivalentTo(new ModifierRecord("Defense", "mod-2"));
+			buff.ModifierRecords.Should().BeEquivalentTo(new[] { new ModifierRecord("Health", "mod-1") });
+		}
+
+		[Test]
+		public void RemoveLastModifierRecord_WithEmptyList_ReturnsNull()
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
+
+			var removed = buff.RemoveLastModifierRecord();
+
+			Assert.IsNull(removed);
+		}
+	#endregion
+
+	#region Edge Cases
+		[Test]
+		public void AdjustDuration_WithLargeNegativeDelta_IncreasesDuration()
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 10f, null);
+
+			buff.AdjustDuration(float.MinValue);
+
+			Assert.IsTrue(buff.RemainingDuration > 0);
+		}
+
+		[Test]
+		public void AdjustDuration_WithInfinity_SetsToNegativeInfinity()
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 10f, null);
+
+			buff.AdjustDuration(float.PositiveInfinity);
+
+			Assert.AreEqual(float.NegativeInfinity, buff.RemainingDuration);
+		}
+	#endregion
+	}
 }

@@ -169,7 +169,7 @@ namespace Rino.GameFramework.BuffSystem.Tests
         {
             var buffId = controller.AddBuff("owner-1", "Burn", "source-1");
             var buff = controller.GetBuff(buffId);
-            buff.TickTime(3f);
+            buff.AdjustDuration(3f);
 
             controller.AddBuff("owner-1", "Burn", "source-2");
 
