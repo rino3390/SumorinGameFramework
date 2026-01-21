@@ -1,0 +1,22 @@
+{
+    "name": "Rino.DDDCore.Domain.Tests",
+    "rootNamespace": "Rino.GameFramework.DDDCore.Tests",
+    "references": [
+        "Rino.DDDCore.Domain"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
