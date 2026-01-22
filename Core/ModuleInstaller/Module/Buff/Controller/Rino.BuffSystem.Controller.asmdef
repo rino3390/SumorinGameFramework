@@ -1,0 +1,29 @@
+{
+    "name": "Rino.BuffSystem.Controller",
+    "rootNamespace": "Rino.GameFramework.BuffSystem",
+    "references": [
+        "Rino.DDDCore.Domain",
+        "Rino.DDDCore.CoreEvent",
+        "Rino.DDDCore.EventBus",
+        "Rino.DDDCore.Publisher",
+        "Rino.BuffSystem.Common",
+        "Rino.BuffSystem.Model",
+        "Rino.BuffSystem.Repository",
+        "Rino.BuffSystem.Event",
+        "Rino.AttributeSystem.Common",
+        "Rino.AttributeSystem.Model",
+        "Rino.AttributeSystem.Controller",
+        "Rino.RinoUtility",
+        "UniRx",
+        "Zenject"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

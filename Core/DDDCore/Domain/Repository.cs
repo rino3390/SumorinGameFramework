@@ -62,5 +62,11 @@ namespace Rino.GameFramework.DDDCore
 		{
 			return predicate == null ? null : entities.Values.FirstOrDefault(predicate);
 		}
+
+		/// <inheritdoc />
+		public IEnumerable<TEntity> FindAll(Func<TEntity, bool> predicate)
+		{
+			return predicate == null ? Enumerable.Empty<TEntity>() : entities.Values.Where(predicate);
+		}
 	}
 }

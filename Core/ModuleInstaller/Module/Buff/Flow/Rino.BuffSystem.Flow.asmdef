@@ -1,0 +1,22 @@
+{
+    "name": "Rino.BuffSystem.Flow",
+    "rootNamespace": "Rino.GameFramework.BuffSystem",
+    "references": [
+        "Rino.DDDCore.CoreEvent",
+        "Rino.DDDCore.EventBus",
+        "Rino.DDDCore.Subscriber",
+        "Rino.BuffSystem.Controller",
+        "Rino.BuffSystem.Event",
+        "Rino.BuffSystem.Model",
+        "Zenject"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

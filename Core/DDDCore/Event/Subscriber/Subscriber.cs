@@ -7,7 +7,7 @@ namespace Rino.GameFramework.DDDCore
     /// <summary>
     /// 事件訂閱工具，提供簡化的事件訂閱 API
     /// </summary>
-    public class Subscriber
+    public class Subscriber : ISubscriber
     {
         private readonly IEventBus eventBus;
         private readonly Dictionary<object, IDisposable> subscriptions = new();

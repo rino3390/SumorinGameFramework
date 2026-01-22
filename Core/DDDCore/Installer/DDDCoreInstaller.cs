@@ -13,8 +13,8 @@ namespace Rino.GameFramework.DDDCore
             Container.BindMessagePipe();
 
             Container.Bind<IEventBus>().To<EventBus>().AsSingle();
-            Container.Bind<Publisher>().AsSingle();
-            Container.Bind<Subscriber>().AsSingle();
+            Container.Bind<IPublisher>().To<Publisher>().AsSingle();
+            Container.Bind<ISubscriber>().To<Subscriber>().AsSingle();
         }
     }
 }

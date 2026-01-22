@@ -1,0 +1,17 @@
+{
+    "name": "Rino.BuffSystem.Event",
+    "rootNamespace": "Rino.GameFramework.BuffSystem",
+    "references": [
+        "Rino.DDDCore.CoreEvent",
+        "Rino.BuffSystem.Model"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}

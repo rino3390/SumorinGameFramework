@@ -6,7 +6,7 @@ namespace Rino.GameFramework.DDDCore
     /// <summary>
     /// 事件發布工具，提供簡化的事件發布 API
     /// </summary>
-    public class Publisher
+    public class Publisher : IPublisher
     {
         private readonly IEventBus eventBus;
 
