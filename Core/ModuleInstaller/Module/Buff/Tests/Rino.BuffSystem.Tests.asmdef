@@ -2,6 +2,7 @@
     "name": "Rino.BuffSystem.Tests",
     "rootNamespace": "Rino.GameFramework.BuffSystem.Tests",
     "references": [
+        "UniTask",
         "Rino.DDDCore.CoreEvent",
         "Rino.DDDCore.Domain",
         "Rino.DDDCore.EventBus",
@@ -34,7 +35,8 @@
     "overrideReferences": true,
     "precompiledReferences": [
         "nunit.framework.dll",
-        "FluentAssertions.dll"
+        "FluentAssertions.dll",
+        "NSubstitute.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

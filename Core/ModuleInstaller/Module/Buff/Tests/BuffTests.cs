@@ -10,9 +10,9 @@ namespace Rino.GameFramework.BuffSystem.Tests
 	{
 	#region Constructor Tests
 		[Test]
-		public void Constructor_WithValidParameters_SetsAllProperties()
+		public void Constructor_WithTimeBased_SetsAllProperties()
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", 5, 10f, 3);
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", 5, LifetimeType.TimeBased, 10f);
 
 			Assert.AreEqual("buff-1", buff.Id);
 			Assert.AreEqual("Poison", buff.BuffName);
@@ -20,27 +20,37 @@ namespace Rino.GameFramework.BuffSystem.Tests
 			Assert.AreEqual("source-1", buff.SourceId);
 			Assert.AreEqual(1, buff.StackCount);
 			Assert.AreEqual(5, buff.MaxStack);
-			Assert.AreEqual(10f, buff.RemainingDuration);
-			Assert.AreEqual(3, buff.RemainingTurns);
+			Assert.AreEqual(LifetimeType.TimeBased, buff.LifetimeType);
+			Assert.AreEqual(10f, buff.RemainingLifetime);
 			Assert.IsEmpty(buff.ModifierRecords);
+			Assert.IsFalse(buff.IsExpired);
+		}
+
+		[Test]
+		public void Constructor_WithTurnBased_SetsAllProperties()
+		{
+			var buff = new Buff("buff-1", "Shield", "owner-1", "source-1", null, LifetimeType.TurnBased, 3f);
+
+			Assert.AreEqual(LifetimeType.TurnBased, buff.LifetimeType);
+			Assert.AreEqual(3f, buff.RemainingLifetime);
+			Assert.IsFalse(buff.IsExpired);
+		}
+
+		[Test]
+		public void Constructor_WithPermanent_SetsLifetimeTypeOnly()
+		{
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, LifetimeType.Permanent, 0f);
+
+			Assert.AreEqual(LifetimeType.Permanent, buff.LifetimeType);
 			Assert.IsFalse(buff.IsExpired);
 		}
 
 		[Test]
 		public void Constructor_WithNullMaxStack_SetsMaxStackToNull()
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 10f, null);
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, LifetimeType.TimeBased, 10f);
 
 			Assert.IsNull(buff.MaxStack);
-		}
-
-		[Test]
-		public void Constructor_WithNullDuration_SetsDurationToNull()
-		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
-
-			Assert.IsNull(buff.RemainingDuration);
-			Assert.IsNull(buff.RemainingTurns);
 		}
 
 		[TestCase(null, "Poison", "owner-1", "source-1", typeof(ArgumentNullException), "id", TestName = "Null id throws ArgumentNullException")]
@@ -55,7 +65,7 @@ namespace Rino.GameFramework.BuffSystem.Tests
 																		   string paramName)
 		{
 			Assert.That(
-				() => new Buff(id, buffName, ownerId, sourceId, null, null, null), Throws.TypeOf(exceptionType).With.Property("ParamName").EqualTo(paramName)
+				() => new Buff(id, buffName, ownerId, sourceId, null, LifetimeType.Permanent, 0f), Throws.TypeOf(exceptionType).With.Property("ParamName").EqualTo(paramName)
 			);
 		}
 	#endregion
@@ -68,7 +78,7 @@ namespace Rino.GameFramework.BuffSystem.Tests
 		[TestCase(null, -5, 0, TestName = "Negative delta clamps to zero")]
 		public void ChangeStack_UpdatesStackCount(int? maxStack, int delta, int expected)
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", maxStack, null, null);
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", maxStack, LifetimeType.Permanent, 0f);
 
 			buff.ChangeStack(delta);
 
@@ -79,7 +89,7 @@ namespace Rino.GameFramework.BuffSystem.Tests
 		[TestCase(-1, 2, 1, TestName = "Decrease triggers event")]
 		public void ChangeStack_TriggersOnStackChangedEvent(int delta, int expectedOld, int expectedNew)
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, LifetimeType.Permanent, 0f);
 			if (expectedOld > 1) buff.ChangeStack(expectedOld - 1);
 			BuffStackChangedInfo? receivedInfo = null;
 			buff.OnStackChanged.Subscribe(info => receivedInfo = info);
@@ -94,7 +104,7 @@ namespace Rino.GameFramework.BuffSystem.Tests
 		[TestCase(null, 0, TestName = "Zero delta")]
 		public void ChangeStack_WithNoChange_DoesNotTriggerEvent(int? maxStack, int delta)
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", maxStack, null, null);
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", maxStack, LifetimeType.Permanent, 0f);
 			var eventTriggered = false;
 			buff.OnStackChanged.Subscribe(_ => eventTriggered = true);
 
@@ -104,162 +114,73 @@ namespace Rino.GameFramework.BuffSystem.Tests
 		}
 	#endregion
 
-	#region RefreshDuration Tests
+	#region RefreshLifetime Tests
 		[Test]
-		public void RefreshDuration_UpdatesDuration()
+		public void RefreshLifetime_UpdatesRemainingLifetime()
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 5f, null);
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, LifetimeType.TimeBased, 5f);
 
-			buff.RefreshDuration(10f);
+			buff.RefreshLifetime(10f);
 
-			Assert.AreEqual(10f, buff.RemainingDuration);
+			Assert.AreEqual(10f, buff.RemainingLifetime);
 		}
 
-	#endregion
-
-	#region RefreshTurns Tests
 		[Test]
-		public void RefreshTurns_UpdatesTurns()
+		public void RefreshLifetime_WithPermanent_DoesNothing()
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, 3);
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, LifetimeType.Permanent, 0f);
 
-			buff.RefreshTurns(5);
+			buff.RefreshLifetime(10f);
 
-			Assert.AreEqual(5, buff.RemainingTurns);
+			Assert.AreEqual(0f, buff.RemainingLifetime);
 		}
 	#endregion
 
-	#region AdjustDuration Tests
-		[TestCase(3f, 7f, TestName = "Positive delta decreases duration")]
-		[TestCase(-3f, 13f, TestName = "Negative delta increases duration")]
-		public void AdjustDuration_UpdatesDuration(float delta, float expected)
+	#region AdjustLifetime Tests
+		[TestCase(3f, 13f, TestName = "Positive delta increases lifetime")]
+		[TestCase(-3f, 7f, TestName = "Negative delta decreases lifetime")]
+		public void AdjustLifetime_UpdatesRemainingLifetime(float delta, float expected)
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 10f, null);
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, LifetimeType.TimeBased, 10f);
 
-			buff.AdjustDuration(delta);
+			buff.AdjustLifetime(delta);
 
-			Assert.AreEqual(expected, buff.RemainingDuration);
+			Assert.AreEqual(expected, buff.RemainingLifetime);
 		}
 
 		[Test]
-		public void AdjustDuration_WithNullDuration_DoesNothing()
+		public void AdjustLifetime_WithPermanent_DoesNothing()
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, LifetimeType.Permanent, 0f);
 
-			buff.AdjustDuration(3f);
+			buff.AdjustLifetime(3f);
 
-			Assert.IsNull(buff.RemainingDuration);
+			Assert.AreEqual(0f, buff.RemainingLifetime);
 		}
 
 		[Test]
-		public void AdjustDuration_WhenBecomesExpired_TriggersOnExpiredEvent()
+		public void AdjustLifetime_WithTurnBased_UpdatesLifetime()
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 5f, null);
-			BuffExpiredInfo? receivedInfo = null;
-			buff.OnExpired.Subscribe(info => receivedInfo = info);
+			var buff = new Buff("buff-1", "Shield", "owner-1", "source-1", null, LifetimeType.TurnBased, 5f);
 
-			buff.AdjustDuration(5f);
+			buff.AdjustLifetime(-2f);
 
-			receivedInfo.Should().NotBeNull();
-			receivedInfo!.Value.Should().BeEquivalentTo(new BuffExpiredInfo("buff-1", "owner-1", "Poison"));
-		}
-
-		[Test]
-		public void AdjustDuration_WhenAlreadyExpired_DoesNotTriggerOnExpiredEvent()
-		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 0f, null);
-			var eventTriggered = false;
-			buff.OnExpired.Subscribe(_ => eventTriggered = true);
-
-			buff.AdjustDuration(1f);
-
-			Assert.IsFalse(eventTriggered);
-		}
-
-		[Test]
-		public void AdjustDuration_WhenNotExpired_DoesNotTriggerOnExpiredEvent()
-		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 10f, null);
-			var eventTriggered = false;
-			buff.OnExpired.Subscribe(_ => eventTriggered = true);
-
-			buff.AdjustDuration(3f);
-
-			Assert.IsFalse(eventTriggered);
-		}
-	#endregion
-
-	#region AdjustTurns Tests
-		[TestCase(1, 4, TestName = "Positive delta decreases turns")]
-		[TestCase(2, 3, TestName = "Positive delta decreases turns by count")]
-		[TestCase(-2, 7, TestName = "Negative delta increases turns")]
-		public void AdjustTurns_UpdatesTurns(int delta, int expected)
-		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, 5);
-
-			buff.AdjustTurns(delta);
-
-			Assert.AreEqual(expected, buff.RemainingTurns);
-		}
-
-		[Test]
-		public void AdjustTurns_WithNullTurns_DoesNothing()
-		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
-
-			buff.AdjustTurns(1);
-
-			Assert.IsNull(buff.RemainingTurns);
-		}
-
-		[Test]
-		public void AdjustTurns_WhenBecomesExpired_TriggersOnExpiredEvent()
-		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, 1);
-			BuffExpiredInfo? receivedInfo = null;
-			buff.OnExpired.Subscribe(info => receivedInfo = info);
-
-			buff.AdjustTurns(1);
-
-			receivedInfo.Should().NotBeNull();
-			receivedInfo!.Value.Should().BeEquivalentTo(new BuffExpiredInfo("buff-1", "owner-1", "Poison"));
-		}
-
-		[Test]
-		public void AdjustTurns_WhenAlreadyExpired_DoesNotTriggerOnExpiredEvent()
-		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, 0);
-			var eventTriggered = false;
-			buff.OnExpired.Subscribe(_ => eventTriggered = true);
-
-			buff.AdjustTurns(1);
-
-			Assert.IsFalse(eventTriggered);
-		}
-
-		[Test]
-		public void AdjustTurns_WhenNotExpired_DoesNotTriggerOnExpiredEvent()
-		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, 5);
-			var eventTriggered = false;
-			buff.OnExpired.Subscribe(_ => eventTriggered = true);
-
-			buff.AdjustTurns(1);
-
-			Assert.IsFalse(eventTriggered);
+			Assert.AreEqual(3f, buff.RemainingLifetime);
 		}
 	#endregion
 
 	#region IsExpired Tests
-		[TestCase(0f, null, true, TestName = "Duration zero returns true")]
-		[TestCase(-1f, null, true, TestName = "Duration negative returns true")]
-		[TestCase(null, 0, true, TestName = "Turns zero returns true")]
-		[TestCase(null, -1, true, TestName = "Turns negative returns true")]
-		[TestCase(10f, 5, false, TestName = "Valid duration and turns returns false")]
-		[TestCase(null, null, false, TestName = "Null duration and turns returns false")]
-		public void IsExpired_ReturnsExpectedResult(float? duration, int? turns, bool expected)
+		[TestCase(LifetimeType.TimeBased, 0f, true, TestName = "TimeBased zero returns true")]
+		[TestCase(LifetimeType.TimeBased, -1f, true, TestName = "TimeBased negative returns true")]
+		[TestCase(LifetimeType.TurnBased, 0f, true, TestName = "TurnBased zero returns true")]
+		[TestCase(LifetimeType.TurnBased, -1f, true, TestName = "TurnBased negative returns true")]
+		[TestCase(LifetimeType.TimeBased, 10f, false, TestName = "TimeBased positive returns false")]
+		[TestCase(LifetimeType.TurnBased, 5f, false, TestName = "TurnBased positive returns false")]
+		[TestCase(LifetimeType.Permanent, 0f, false, TestName = "Permanent with zero returns false")]
+		[TestCase(LifetimeType.Permanent, -1f, false, TestName = "Permanent with negative returns false")]
+		public void IsExpired_ReturnsExpectedResult(LifetimeType type, float lifetime, bool expected)
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, duration, turns);
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, type, lifetime);
 
 			Assert.AreEqual(expected, buff.IsExpired);
 		}
@@ -267,7 +188,7 @@ namespace Rino.GameFramework.BuffSystem.Tests
 		[Test]
 		public void IsExpired_WithStackCountZero_ReturnsTrue()
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, LifetimeType.Permanent, 0f);
 
 			buff.ChangeStack(-1);
 
@@ -279,7 +200,7 @@ namespace Rino.GameFramework.BuffSystem.Tests
 		[Test]
 		public void RecordModifier_AddsRecordToList()
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, LifetimeType.Permanent, 0f);
 
 			buff.RecordModifier("Health", "mod-1");
 
@@ -289,7 +210,7 @@ namespace Rino.GameFramework.BuffSystem.Tests
 		[Test]
 		public void RemoveLastModifierRecord_RemovesAndReturnsLastRecord()
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, LifetimeType.Permanent, 0f);
 			buff.RecordModifier("Health", "mod-1");
 			buff.RecordModifier("Defense", "mod-2");
 
@@ -302,7 +223,7 @@ namespace Rino.GameFramework.BuffSystem.Tests
 		[Test]
 		public void RemoveLastModifierRecord_WithEmptyList_ReturnsNull()
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, null, null);
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, LifetimeType.Permanent, 0f);
 
 			var removed = buff.RemoveLastModifierRecord();
 
@@ -312,23 +233,23 @@ namespace Rino.GameFramework.BuffSystem.Tests
 
 	#region Edge Cases
 		[Test]
-		public void AdjustDuration_WithLargeNegativeDelta_IncreasesDuration()
+		public void AdjustLifetime_WithLargePositiveDelta_IncreasesLifetime()
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 10f, null);
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, LifetimeType.TimeBased, 10f);
 
-			buff.AdjustDuration(float.MinValue);
+			buff.AdjustLifetime(float.MaxValue);
 
-			Assert.IsTrue(buff.RemainingDuration > 0);
+			Assert.IsTrue(buff.RemainingLifetime > 0);
 		}
 
 		[Test]
-		public void AdjustDuration_WithInfinity_SetsToNegativeInfinity()
+		public void AdjustLifetime_WithNegativeInfinity_SetsToNegativeInfinity()
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, 10f, null);
+			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, LifetimeType.TimeBased, 10f);
 
-			buff.AdjustDuration(float.PositiveInfinity);
+			buff.AdjustLifetime(float.NegativeInfinity);
 
-			Assert.AreEqual(float.NegativeInfinity, buff.RemainingDuration);
+			Assert.AreEqual(float.NegativeInfinity, buff.RemainingLifetime);
 		}
 	#endregion
 	}
