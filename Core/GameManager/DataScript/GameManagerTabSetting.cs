@@ -1,8 +1,7 @@
-using Rino.GameFramework.Core.GameManager.EditorStruct;
 using Sirenix.OdinInspector;
 using System.Collections.Generic;
 
-namespace Rino.GameFramework.Core.GameManager.DataScript
+namespace Rino.GameFramework.GameManager
 {
     /// <summary>
     /// GameManager 頁籤設定

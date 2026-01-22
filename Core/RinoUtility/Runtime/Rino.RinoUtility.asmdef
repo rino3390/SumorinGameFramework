@@ -1,7 +1,9 @@
 {
   "name": "Rino.RinoUtility",
-  "rootNamespace": "Rino.GameFramework.Core.RinoUtility",
-  "references": [],
+  "rootNamespace": "Rino.GameFramework.RinoUtility",
+  "references": [
+    "UniRx"
+  ],
   "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,

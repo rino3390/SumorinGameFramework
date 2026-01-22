@@ -1,6 +1,6 @@
 {
     "name": "Rino.GameManager",
-    "rootNamespace": "Rino.GameFramework.Core.GameManager",
+    "rootNamespace": "Rino.GameFramework.GameManager",
     "references": [
         "Rino.GameManager.Base",
         "Rino.SOBase",

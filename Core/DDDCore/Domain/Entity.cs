@@ -1,47 +1,26 @@
-using System.Collections.Generic;
-using Rino.GameFramework.Core.DDDCore.Event;
+using System;
 
-namespace Rino.GameFramework.Core.DDDCore.Domain
+namespace Rino.GameFramework.DDDCore
 {
     /// <summary>
-    /// Domain Entity 基礎類別，提供 DomainEvent 累積機制
+    /// Domain Entity 抽象基底類別，只提供 Id 屬性
     /// </summary>
-    public class Entity
+    public abstract class Entity
     {
-        private readonly List<IEvent> domainEvents = new();
-
         /// <summary>
         /// Entity 的唯一識別碼
         /// </summary>
         public string Id { get; }
 
-        /// <summary>
-        /// 累積的 Domain Events（唯讀）
-        /// </summary>
-        public IReadOnlyList<IEvent> DomainEvents => domainEvents;
-
         protected Entity(string id)
         {
+            if (id == null)
+                throw new ArgumentNullException(nameof(id));
+
+            if (id.Length == 0)
+                throw new ArgumentException("Id cannot be empty.", nameof(id));
+
             Id = id;
-        }
-
-        /// <summary>
-        /// 新增 Domain Event 到累積清單
-        /// </summary>
-        /// <param name="evt">要新增的事件</param>
-        public void AddDomainEvent(IEvent evt)
-        {
-            if (evt == null) return;
-
-            domainEvents.Add(evt);
-        }
-
-        /// <summary>
-        /// 清除所有累積的 Domain Events
-        /// </summary>
-        public void ClearDomainEvents()
-        {
-            domainEvents.Clear();
         }
     }
 }

@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace Rino.GameFramework.Core.ModuleInstaller
+namespace Rino.GameFramework.ModuleInstaller
 {
     /// <summary>
     /// 模組安裝器 Editor Window
@@ -15,6 +16,7 @@ namespace Rino.GameFramework.Core.ModuleInstaller
     public class ModuleInstaller : EditorWindow
     {
         private const string ManifestUrl = "https://raw.githubusercontent.com/rino3390/RinoGameFramework/main/ModuleTemplates/modules.json";
+        private const string GitHubApiBaseUrl = "https://api.github.com/repos/rino3390/RinoGameFramework/contents/";
         private const string FolderStructurePrefix = "FolderStructure/";
         private const string ModuleTemplatesPrefix = "ModuleTemplates/";
         private const string DomainsPath = "Script/Domains";
@@ -150,7 +152,7 @@ namespace Rino.GameFramework.Core.ModuleInstaller
                         GUI.enabled = !module.HasUnmetDependencies && !isDownloading;
                         if (GUILayout.Button("安裝", GUILayout.Width(80)))
                         {
-                            InstallModule(module);
+                            InstallModuleAsync(module).Forget();
                         }
                         GUI.enabled = !isDownloading;
                         break;
@@ -165,7 +167,7 @@ namespace Rino.GameFramework.Core.ModuleInstaller
                     case ModuleInstallStatus.PartiallyInstalled:
                         if (GUILayout.Button("修復", GUILayout.Width(80)))
                         {
-                            RepairModule(module);
+                            RepairModuleAsync(module).Forget();
                         }
                         if (GUILayout.Button("移除", GUILayout.Width(80)))
                         {
@@ -186,19 +188,27 @@ namespace Rino.GameFramework.Core.ModuleInstaller
         {
             var originalColor = GUI.backgroundColor;
 
-            switch (status)
+			var noHoverStyle = new GUIStyle(EditorStyles.miniButton)
+			{
+				hover =
+				{
+					background = null
+				}
+			};
+
+			switch (status)
             {
                 case ModuleInstallStatus.Installed:
                     GUI.backgroundColor = new Color(0.3f, 0.8f, 0.3f);
-                    GUILayout.Label("已安裝", EditorStyles.miniButton, GUILayout.Width(60));
+                    GUILayout.Label("已安裝", noHoverStyle, GUILayout.Width(60));
                     break;
                 case ModuleInstallStatus.PartiallyInstalled:
                     GUI.backgroundColor = new Color(0.9f, 0.7f, 0.2f);
-                    GUILayout.Label("部分安裝", EditorStyles.miniButton, GUILayout.Width(60));
+                    GUILayout.Label("部分安裝", noHoverStyle, GUILayout.Width(60));
                     break;
                 case ModuleInstallStatus.NotInstalled:
                     GUI.backgroundColor = new Color(0.6f, 0.6f, 0.6f);
-                    GUILayout.Label("未安裝", EditorStyles.miniButton, GUILayout.Width(60));
+                    GUILayout.Label("未安裝", noHoverStyle, GUILayout.Width(60));
                     break;
             }
 
@@ -218,41 +228,32 @@ namespace Rino.GameFramework.Core.ModuleInstaller
         {
             isLoading = true;
             errorMessage = null;
-            FetchManifest();
+            FetchManifestAsync().Forget();
         }
 
-        private void FetchManifest()
+        private async UniTaskVoid FetchManifestAsync()
         {
-            var request = UnityWebRequest.Get(ManifestUrl);
-            var operation = request.SendWebRequest();
-
-            EditorApplication.update += CheckFetchComplete;
-
-            void CheckFetchComplete()
+            try
             {
-                if (!operation.isDone) return;
-
-                EditorApplication.update -= CheckFetchComplete;
+                var request = UnityWebRequest.Get(ManifestUrl);
+                await request.SendWebRequest().ToUniTask();
 
                 if (request.result != UnityWebRequest.Result.Success)
                 {
                     errorMessage = $"無法載入模組清單: {request.error}";
-                    isLoading = false;
-                    Repaint();
                     return;
                 }
 
-                try
-                {
-                    manifest = JsonUtility.FromJson<ModuleManifest>(request.downloadHandler.text);
-                    modules = manifest.modules.Select(m => new ModuleRuntimeData(m)).ToList();
-                    CheckAllModuleStatus();
-                }
-                catch (Exception e)
-                {
-                    errorMessage = $"解析模組清單失敗: {e.Message}";
-                }
-
+                manifest = JsonUtility.FromJson<ModuleManifest>(request.downloadHandler.text);
+                modules = manifest.modules.Select(m => new ModuleRuntimeData(m)).ToList();
+                CheckAllModuleStatus();
+            }
+            catch (Exception e)
+            {
+                errorMessage = $"解析模組清單失敗: {e.Message}";
+            }
+            finally
+            {
                 isLoading = false;
                 Repaint();
             }
@@ -273,16 +274,14 @@ namespace Rino.GameFramework.Core.ModuleInstaller
 
             // 檢查依賴
             foreach (var module in modules)
-            {
-                module.MissingDependencies.Clear();
-                foreach (var dep in module.Info.dependencies)
-                {
-                    if (!installedModuleIds.Contains(dep))
-                    {
-                        module.MissingDependencies.Add(dep);
-                    }
-                }
-            }
+			{
+				module.MissingDependencies.Clear();
+
+				foreach(var dep in module.Info.dependencies.Where(dep => !installedModuleIds.Contains(dep)))
+				{
+					module.MissingDependencies.Add(dep);
+				}
+			}
         }
 
         private void CheckModuleStatus(ModuleRuntimeData module)
@@ -297,7 +296,9 @@ namespace Rino.GameFramework.Core.ModuleInstaller
                 return;
             }
 
-            foreach (var file in module.Info.files)
+            // 使用 GetAllFiles() 取得所有檔案（包含從 folders 展開的）
+            var allFiles = module.GetAllFiles();
+            foreach (var file in allFiles)
             {
                 var localPath = GetLocalFilePath(file);
                 if (File.Exists(localPath))
@@ -401,7 +402,7 @@ namespace Rino.GameFramework.Core.ModuleInstaller
             return manifest.baseUrl + relativePath;
         }
 
-        private void InstallModule(ModuleRuntimeData module)
+        private async UniTaskVoid InstallModuleAsync(ModuleRuntimeData module)
         {
             if (module.HasUnmetDependencies)
             {
@@ -415,47 +416,75 @@ namespace Rino.GameFramework.Core.ModuleInstaller
             downloadingModule = module;
             Repaint();
 
-            DownloadModuleFiles(module, module.Info.files);
+            try
+            {
+                // 如果有 folders 需要先解析
+                if (module.Info.folders.Count > 0 && !module.IsFoldersResolved)
+                {
+                    await ResolveFoldersAsync(module);
+                }
+
+                await DownloadModuleFilesAsync(module, module.GetAllFiles());
+            }
+            finally
+            {
+                isDownloading = false;
+                downloadingModule = null;
+                Repaint();
+            }
         }
 
-        private void RepairModule(ModuleRuntimeData module)
+        private async UniTaskVoid RepairModuleAsync(ModuleRuntimeData module)
         {
             isDownloading = true;
             downloadingModule = module;
             Repaint();
 
-            DownloadModuleFiles(module, module.MissingFiles);
-        }
-
-        private void DownloadModuleFiles(ModuleRuntimeData module, List<string> files)
-        {
-            var filesToDownload = new Queue<string>(files);
-            var failedFiles = new List<string>();
-
-            DownloadNextFile();
-
-            void DownloadNextFile()
+            try
             {
-                if (filesToDownload.Count == 0)
+                // 如果有 folders 但尚未解析，需要先解析
+                if (module.Info.folders.Count > 0 && !module.IsFoldersResolved)
                 {
-                    FinishDownload();
-                    return;
+                    await ResolveFoldersAsync(module);
+                    CheckModuleStatus(module);
                 }
 
-                var file = filesToDownload.Dequeue();
+                await DownloadModuleFilesAsync(module, module.MissingFiles);
+            }
+            finally
+            {
+                isDownloading = false;
+                downloadingModule = null;
+                Repaint();
+            }
+        }
+
+        private async UniTask ResolveFoldersAsync(ModuleRuntimeData module)
+        {
+            module.ResolvedFiles.Clear();
+
+            foreach (var folder in module.Info.folders)
+            {
+                var files = await FetchFolderContentsAsync(folder);
+                module.ResolvedFiles.AddRange(files);
+            }
+
+            module.IsFoldersResolved = true;
+        }
+
+        private async UniTask DownloadModuleFilesAsync(ModuleRuntimeData module, List<string> files)
+        {
+            var failedFiles = new List<string>();
+
+            foreach (var file in files)
+            {
                 var url = GetRemoteFileUrl(file);
                 var localPath = GetLocalFilePath(file);
 
-                var request = UnityWebRequest.Get(url);
-                var operation = request.SendWebRequest();
-
-                EditorApplication.update += CheckDownloadComplete;
-
-                void CheckDownloadComplete()
+                try
                 {
-                    if (!operation.isDone) return;
-
-                    EditorApplication.update -= CheckDownloadComplete;
+                    var request = UnityWebRequest.Get(url);
+                    await request.SendWebRequest().ToUniTask();
 
                     if (request.result != UnityWebRequest.Result.Success)
                     {
@@ -467,26 +496,55 @@ namespace Rino.GameFramework.Core.ModuleInstaller
                         var data = request.downloadHandler.data ?? Array.Empty<byte>();
                         SaveFile(localPath, data);
                     }
-
-                    DownloadNextFile();
                 }
-            }
-
-            void FinishDownload()
-            {
-                AssetDatabase.Refresh();
-                CheckModuleStatus(module);
-                CheckAllModuleStatus();
-
-                if (failedFiles.Count > 0)
+                catch (Exception e)
                 {
-                    errorMessage = $"安裝 {module.Info.name} 時發生錯誤:\n{string.Join("\n", failedFiles)}";
+                    failedFiles.Add($"{file}: {e.Message}");
                 }
-
-                isDownloading = false;
-                downloadingModule = null;
-                Repaint();
             }
+
+            AssetDatabase.Refresh();
+            CheckModuleStatus(module);
+            CheckAllModuleStatus();
+
+            if (failedFiles.Count > 0)
+            {
+                errorMessage = $"安裝 {module.Info.name} 時發生錯誤:\n{string.Join("\n", failedFiles)}";
+            }
+        }
+
+        private async UniTask<List<string>> FetchFolderContentsAsync(string folderPath)
+        {
+            var url = GitHubApiBaseUrl + folderPath + "?ref=main";
+            var request = UnityWebRequest.Get(url);
+            request.SetRequestHeader("User-Agent", "Unity-ModuleInstaller");
+
+            await request.SendWebRequest().ToUniTask();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                throw new Exception($"解析資料夾 {folderPath} 失敗: {request.error}");
+            }
+
+            var json = request.downloadHandler.text;
+            var items = ParseGitHubContentsResponse(json);
+            var files = new List<string>();
+
+            foreach (var item in items)
+            {
+                if (item.type == "file" && !item.name.EndsWith(".meta"))
+                {
+                    files.Add(item.path);
+                }
+                else if (item.type == "dir")
+                {
+                    // 遞迴處理子資料夾
+                    var subFiles = await FetchFolderContentsAsync(item.path);
+                    files.AddRange(subFiles);
+                }
+            }
+
+            return files;
         }
 
         private void SaveFile(string path, byte[] data)
@@ -516,7 +574,7 @@ namespace Rino.GameFramework.Core.ModuleInstaller
             if (isBaseModule)
             {
                 // FolderStructure 特殊警告
-                message = "⚠️ 警告：這會刪除所有資料夾結構，其他模組將無法運作\n\n";
+                message = "⚠️ 警告：這會刪除所有資料夾結構，包含資料夾內的檔案，可能導致專案毀損\n\n";
             }
             else if (dependentModules.Count > 0)
             {
@@ -587,7 +645,7 @@ namespace Rino.GameFramework.Core.ModuleInstaller
         private void CleanupEmptyDirectories(ModuleRuntimeData module)
         {
             // 找出模組的根目錄（Domain 資料夾）
-            var directories = module.Info.files
+            var directories = module.GetAllFiles()
                 .Select(f => Path.GetDirectoryName(GetLocalFilePath(f)))
                 .Where(d => !string.IsNullOrEmpty(d))
                 .Distinct()
@@ -606,6 +664,24 @@ namespace Rino.GameFramework.Core.ModuleInstaller
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// 解析 GitHub Contents API 的 JSON 陣列回應
+        /// </summary>
+        private List<GitHubContentItem> ParseGitHubContentsResponse(string json)
+        {
+            // GitHub API 回傳 JSON 陣列，JsonUtility 不支援直接解析陣列
+            // 包裝成物件來解析
+            var wrappedJson = "{\"items\":" + json + "}";
+            var wrapper = JsonUtility.FromJson<GitHubContentsWrapper>(wrappedJson);
+            return wrapper.items;
+        }
+
+        [Serializable]
+        private class GitHubContentsWrapper
+        {
+            public List<GitHubContentItem> items;
         }
     }
 }

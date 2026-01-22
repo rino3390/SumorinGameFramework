@@ -1,13 +1,12 @@
-using Rino.GameFramework.Core.GameManager.DataScript;
-using Rino.GameFramework.Core.GameManagerBase.EditorBase;
-using Rino.GameFramework.Core.RinoUtility.Editor;
+using Rino.GameFramework.GameManagerBase;
+using Rino.GameFramework.RinoUtility.Editor;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
 using UnityEditor;
 using UnityEngine;
 
-namespace Rino.GameFramework.Core.GameManager
+namespace Rino.GameFramework.GameManager
 {
     /// <summary>
     /// 遊戲管理主視窗

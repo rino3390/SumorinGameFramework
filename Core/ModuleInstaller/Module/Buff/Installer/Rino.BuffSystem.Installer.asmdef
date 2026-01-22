@@ -1,0 +1,20 @@
+{
+    "name": "Rino.BuffSystem.Installer",
+    "rootNamespace": "Rino.GameFramework.BuffSystem",
+    "references": [
+        "Rino.DDDCore.Domain",
+        "Rino.BuffSystem.Controller",
+        "Rino.BuffSystem.Repository",
+        "Rino.BuffSystem.Flow",
+        "Zenject"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

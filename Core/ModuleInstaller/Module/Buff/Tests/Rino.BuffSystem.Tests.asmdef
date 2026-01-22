@@ -1,0 +1,47 @@
+{
+    "name": "Rino.BuffSystem.Tests",
+    "rootNamespace": "Rino.GameFramework.BuffSystem.Tests",
+    "references": [
+        "UniTask",
+        "Rino.DDDCore.CoreEvent",
+        "Rino.DDDCore.Domain",
+        "Rino.DDDCore.EventBus",
+        "Rino.DDDCore.Publisher",
+        "Rino.DDDCore.Subscriber",
+        "Rino.DDDCore.Installer",
+        "Rino.TestFramework",
+        "Rino.BuffSystem.Common",
+        "Rino.BuffSystem.Model",
+        "Rino.BuffSystem.Event",
+        "Rino.BuffSystem.Repository",
+        "Rino.BuffSystem.Controller",
+        "Rino.BuffSystem.Flow",
+        "Rino.BuffSystem.Installer",
+        "Rino.AttributeSystem.Common",
+        "Rino.AttributeSystem.Model",
+        "Rino.AttributeSystem.Controller",
+        "Rino.AttributeSystem.Repository",
+        "Rino.AttributeSystem.Installer",
+        "Rino.RinoUtility",
+        "UniRx",
+        "Zenject",
+        "Zenject-TestFramework"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll",
+        "FluentAssertions.dll",
+        "NSubstitute.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

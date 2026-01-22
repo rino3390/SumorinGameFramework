@@ -1,11 +1,10 @@
-using Rino.GameFramework.Core.GameManagerBase.SOBase;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace Rino.GameFramework.Core.GameManagerBase.EditorBase.PopUp
+namespace Rino.GameFramework.GameManagerBase
 {
     /// <summary>
     /// 刪除資料確認彈出視窗

@@ -1,14 +1,13 @@
 #if ODIN_INSPECTOR
-using Rino.GameFramework.Core.RinoUtility.Attribute;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.OdinInspector.Editor.Validation;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-[assembly: RegisterValidator(typeof(Rino.GameFramework.Core.RinoUtility.Editor.Validate.UniqueListValidator<>))]
+[assembly: RegisterValidator(typeof(Rino.GameFramework.RinoUtility.Editor.UniqueListValidator<>))]
 
-namespace Rino.GameFramework.Core.RinoUtility.Editor.Validate
+namespace Rino.GameFramework.RinoUtility.Editor
 {
     /// <summary>
     /// UniqueListAttribute 的 Odin Inspector 驗證器

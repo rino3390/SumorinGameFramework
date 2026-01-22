@@ -1,4 +1,4 @@
-namespace Rino.GameFramework.Core.RinoUtility.Attribute
+namespace Rino.GameFramework.RinoUtility
 {
     /// <summary>
     /// 標記清單項目必須唯一的屬性，用於驗證清單中不可有重複值

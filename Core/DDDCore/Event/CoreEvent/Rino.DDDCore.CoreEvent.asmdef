@@ -1,0 +1,14 @@
+{
+    "name": "Rino.DDDCore.CoreEvent",
+    "rootNamespace": "Rino.GameFramework.DDDCore",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}

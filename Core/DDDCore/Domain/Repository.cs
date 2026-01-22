@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Rino.GameFramework.Core.DDDCore.Domain
+namespace Rino.GameFramework.DDDCore
 {
 	/// <summary>
 	///     Repository 實作，提供 Entity 的記憶體儲存
@@ -61,6 +61,12 @@ namespace Rino.GameFramework.Core.DDDCore.Domain
 		public TEntity Find(Func<TEntity, bool> predicate)
 		{
 			return predicate == null ? null : entities.Values.FirstOrDefault(predicate);
+		}
+
+		/// <inheritdoc />
+		public IEnumerable<TEntity> FindAll(Func<TEntity, bool> predicate)
+		{
+			return predicate == null ? Enumerable.Empty<TEntity>() : entities.Values.Where(predicate);
 		}
 	}
 }

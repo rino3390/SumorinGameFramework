@@ -1,14 +1,12 @@
-using Rino.GameFramework.Core.GameManagerBase.EditorBase.Extension;
-using Rino.GameFramework.Core.GameManagerBase.SOBase;
-using Rino.GameFramework.Core.RinoUtility.Editor;
-using Rino.GameFramework.Core.RinoUtility.Misc;
+using Rino.GameFramework.RinoUtility;
+using Rino.GameFramework.RinoUtility.Editor;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities.Editor;
 using System.Linq;
 using UnityEngine;
 
-namespace Rino.GameFramework.Core.GameManagerBase.EditorBase
+namespace Rino.GameFramework.GameManagerBase
 {
     /// <summary>
     /// 建立新資料的 Editor 視窗基底類別

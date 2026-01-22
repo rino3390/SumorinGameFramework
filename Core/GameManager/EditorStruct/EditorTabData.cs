@@ -1,10 +1,10 @@
-using Rino.GameFramework.Core.GameManagerBase.EditorBase;
+using Rino.GameFramework.GameManagerBase;
 using Sirenix.OdinInspector;
 using System;
 using System.Collections;
 using System.Linq;
 
-namespace Rino.GameFramework.Core.GameManager.EditorStruct
+namespace Rino.GameFramework.GameManager
 {
     /// <summary>
     /// Editor 頁籤資料

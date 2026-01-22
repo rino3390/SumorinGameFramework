@@ -1,11 +1,9 @@
-using Rino.GameFramework.Core.GameManagerBase.EditorBase.PopUp;
-using Rino.GameFramework.Core.GameManagerBase.SOBase;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
 using UnityEngine;
 
-namespace Rino.GameFramework.Core.GameManagerBase.EditorBase.Extension
+namespace Rino.GameFramework.GameManagerBase
 {
     /// <summary>
     /// OdinMenuTree 擴充方法

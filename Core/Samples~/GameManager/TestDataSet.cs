@@ -1,4 +1,4 @@
-using Rino.GameFramework.Core.GameManagerBase.SOBase;
+using Rino.GameFramework.GameManagerBase;
 
 namespace Rino.GameFramework.Sample.GameManager
 {

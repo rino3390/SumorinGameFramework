@@ -1,6 +1,6 @@
 {
     "name": "Rino.GameManager.Base",
-    "rootNamespace": "Rino.GameFramework.Core.GameManagerBase.EditorBase",
+    "rootNamespace": "Rino.GameFramework.GameManagerBase",
     "references": [
         "Rino.SOBase",
         "Rino.RinoUtility",

@@ -1,4 +1,4 @@
-using Rino.GameFramework.Core.GameManagerBase.EditorBase;
+using Rino.GameFramework.GameManagerBase;
 
 namespace Rino.GameFramework.Sample.GameManager.Editor
 {

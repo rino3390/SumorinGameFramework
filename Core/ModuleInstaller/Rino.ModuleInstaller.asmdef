@@ -1,7 +1,8 @@
 {
     "name": "Rino.ModuleInstaller",
-    "rootNamespace": "Rino.GameFramework.Core.ModuleInstaller",
+    "rootNamespace": "Rino.GameFramework.ModuleInstaller",
     "references": [
+        "UniTask",
         "Rino.RinoUtility.Editor"
     ],
     "includePlatforms": [

@@ -1,7 +1,7 @@
 using Sirenix.OdinInspector;
 using UnityEngine.Localization;
 
-namespace Rino.GameFramework.Core.GameManagerBase.SOBase
+namespace Rino.GameFramework.GameManagerBase
 {
     /// <summary>
     /// 包含顯示名稱的資料基底類別

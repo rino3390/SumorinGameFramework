@@ -8,6 +8,7 @@
       "description": "專案資料夾結構模板，提供標準的 Unity 專案目錄配置",
       "version": "1.0.0",
       "dependencies": [],
+      "folders": [],
       "files": [
         "FolderStructure/.gitkeep",
         "FolderStructure/Art/Animator/.gitkeep",
@@ -29,6 +30,24 @@
         "FolderStructure/Script/View/UI/.gitkeep",
         "FolderStructure/Script/View/ViewRepo/.gitkeep"
       ]
+    },
+    {
+      "id": "attribute-system",
+      "name": "AttributeSystem",
+      "description": "屬性系統模組，提供角色屬性（如生命值、攻擊力）的管理與修飾器功能",
+      "version": "1.0.0",
+      "dependencies": [],
+      "folders": ["Core/ModuleInstaller/Module/Attribute"],
+      "files": []
+    },
+    {
+      "id": "buff-system",
+      "name": "BuffSystem",
+      "description": "Buff 系統模組，提供 Buff 的生命週期管理、堆疊行為、互斥群組與屬性效果應用",
+      "version": "1.0.0",
+      "dependencies": ["attribute-system"],
+      "folders": ["Core/ModuleInstaller/Module/Buff"],
+      "files": []
     }
   ]
 }

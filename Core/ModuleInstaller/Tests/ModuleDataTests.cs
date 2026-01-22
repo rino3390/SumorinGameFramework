@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 
-namespace Rino.GameFramework.Core.ModuleInstaller.Tests
+namespace Rino.GameFramework.ModuleInstaller.Tests
 {
     [TestFixture]
     public class ModuleDataTests

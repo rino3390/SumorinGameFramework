@@ -1,5 +1,5 @@
 #if UNITY_EDITOR
-using Rino.GameFramework.Core.GameManagerBase.EditorBase;
+using Rino.GameFramework.GameManagerBase;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 

@@ -1,6 +1,6 @@
 using System;
 
-namespace Rino.GameFramework.Core.RinoUtility.Misc
+namespace Rino.GameFramework.RinoUtility
 {
     /// <summary>
     /// GUID 產生器工具類別

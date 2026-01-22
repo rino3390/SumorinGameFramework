@@ -1,6 +1,6 @@
 {
     "name": "Rino.ModuleInstaller.Tests",
-    "rootNamespace": "Rino.GameFramework.Core.ModuleInstaller.Tests",
+    "rootNamespace": "Rino.GameFramework.ModuleInstaller.Tests",
     "references": [
         "Rino.ModuleInstaller"
     ],

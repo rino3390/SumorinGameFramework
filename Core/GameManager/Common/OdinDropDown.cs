@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace Rino.GameFramework.Core.GameManager.Common
+namespace Rino.GameFramework.GameManager
 {
     /// <summary>
     /// Odin 下拉選單工具

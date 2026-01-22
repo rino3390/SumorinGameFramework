@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace Rino.GameFramework.Core.RinoUtility.Misc
+namespace Rino.GameFramework.RinoUtility
 {
     /// <summary>
     /// 正規表達式驗證工具類別

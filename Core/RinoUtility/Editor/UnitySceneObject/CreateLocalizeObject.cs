@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Localization.Components;
 using UnityEngine.SceneManagement;
 
-namespace Rino.GameFramework.Core.RinoUtility.Editor.UnitySceneObject
+namespace Rino.GameFramework.RinoUtility.Editor
 {
     /// <summary>
     /// 在 Unity 場景中建立本地化物件的工具類別

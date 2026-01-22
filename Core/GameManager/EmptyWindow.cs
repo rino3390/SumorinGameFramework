@@ -1,6 +1,6 @@
 using Sirenix.OdinInspector.Editor;
 
-namespace Rino.GameFramework.Core.GameManager
+namespace Rino.GameFramework.GameManager
 {
     /// <summary>
     /// 空白視窗佔位符

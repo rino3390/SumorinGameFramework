@@ -1,5 +1,5 @@
 #if UNITY_EDITOR
-using Rino.GameFramework.Core.RinoUtility.Editor;
+using Rino.GameFramework.RinoUtility.Editor;
 using Sirenix.Utilities.Editor;
 #endif
 using Sirenix.OdinInspector;
@@ -10,7 +10,7 @@ using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace Rino.GameFramework.Core.GameManagerBase.SOBase
+namespace Rino.GameFramework.GameManagerBase
 {
     /// <summary>
     /// 資料集合基底類別，管理 SODataBase 衍生類別的清單

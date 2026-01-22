@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Rino.GameFramework.Core.DDDCore.Domain
+namespace Rino.GameFramework.DDDCore
 {
     /// <summary>
     /// Repository 介面，定義 Entity 儲存庫的基本操作
@@ -55,5 +55,12 @@ namespace Rino.GameFramework.Core.DDDCore.Domain
         /// <param name="predicate">篩選條件</param>
         /// <returns>符合條件的 Entity，若無則回傳 null</returns>
         TEntity Find(Func<TEntity, bool> predicate);
+
+        /// <summary>
+        /// 根據條件尋找所有符合的 Entity
+        /// </summary>
+        /// <param name="predicate">篩選條件</param>
+        /// <returns>符合條件的 Entity 集合</returns>
+        IEnumerable<TEntity> FindAll(Func<TEntity, bool> predicate);
     }
 }

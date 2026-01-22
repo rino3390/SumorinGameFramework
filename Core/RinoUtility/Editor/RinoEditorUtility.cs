@@ -6,7 +6,7 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Rino.GameFramework.Core.RinoUtility.Editor
+namespace Rino.GameFramework.RinoUtility.Editor
 {
     /// <summary>
     /// Unity Editor 工具類別，提供資產搜尋、建立等常用功能

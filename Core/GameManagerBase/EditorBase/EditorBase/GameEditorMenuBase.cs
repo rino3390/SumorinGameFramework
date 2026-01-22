@@ -1,6 +1,6 @@
 using Sirenix.OdinInspector.Editor;
 
-namespace Rino.GameFramework.Core.GameManagerBase.EditorBase
+namespace Rino.GameFramework.GameManagerBase
 {
     /// <summary>
     /// GameManager 選單模組的基底類別
