@@ -26,19 +26,19 @@ namespace Rino.GameFramework.BuffSystem
 		public string SourceId { get; }
 
 		/// <summary>
-		/// 剩餘持續時間（秒），null 表示永久
+		/// 生命週期類型
 		/// </summary>
-		public float? RemainingDuration { get; private set; }
+		public LifetimeType LifetimeType { get; }
 
 		/// <summary>
-		/// 剩餘回合數，null 表示永久
+		/// 剩餘生命週期（秒或回合數）
 		/// </summary>
-		public int? RemainingTurns { get; private set; }
+		public float RemainingLifetime { get; private set; }
 
 		/// <summary>
 		/// 是否已過期
 		/// </summary>
-		public bool IsExpired => RemainingDuration is <= 0 || RemainingTurns is <= 0 || StackCount <= 0;
+		public bool IsExpired => LifetimeType != LifetimeType.Permanent && RemainingLifetime <= 0 || StackCount <= 0;
 
 		/// <summary>
 		/// 最大堆疊數，null 表示無上限
@@ -60,26 +60,21 @@ namespace Rino.GameFramework.BuffSystem
 		/// </summary>
 		public ReactiveEvent<BuffStackChangedInfo> OnStackChanged { get; } = new();
 
-		/// <summary>
-		/// 過期事件（當 Buff 剛好變成過期時觸發）
-		/// </summary>
-		public ReactiveEvent<BuffExpiredInfo> OnExpired { get; } = new();
-
-		public Buff(string id, string buffName, string ownerId, string sourceId, int? maxStack, float? duration, int? turns): base(id)
+		public Buff(string id, string buffName, string ownerId, string sourceId, int? maxStack, LifetimeType lifetimeType, float lifetime): base(id)
 		{
-			if(string.IsNullOrEmpty(buffName)) throw new ArgumentException("BuffName cannot be null or empty.", nameof(buffName));
+			if (string.IsNullOrEmpty(buffName)) throw new ArgumentException("BuffName cannot be null or empty.", nameof(buffName));
 
-			if(string.IsNullOrEmpty(ownerId)) throw new ArgumentException("OwnerId cannot be null or empty.", nameof(ownerId));
+			if (string.IsNullOrEmpty(ownerId)) throw new ArgumentException("OwnerId cannot be null or empty.", nameof(ownerId));
 
-			if(string.IsNullOrEmpty(sourceId)) throw new ArgumentException("SourceId cannot be null or empty.", nameof(sourceId));
+			if (string.IsNullOrEmpty(sourceId)) throw new ArgumentException("SourceId cannot be null or empty.", nameof(sourceId));
 
 			BuffName = buffName;
 			OwnerId = ownerId;
 			SourceId = sourceId;
 			StackCount = 1;
 			MaxStack = maxStack;
-			RemainingDuration = duration;
-			RemainingTurns = turns;
+			LifetimeType = lifetimeType;
+			RemainingLifetime = lifetime;
 			ModifierRecords = new List<ModifierRecord>();
 		}
 
@@ -105,49 +100,25 @@ namespace Rino.GameFramework.BuffSystem
 		}
 
 		/// <summary>
-		/// 刷新持續時間
+		/// 刷新生命週期
 		/// </summary>
-		/// <param name="duration">新的持續時間</param>
-		public void RefreshDuration(float? duration)
+		/// <param name="lifetime">新的生命週期值</param>
+		public void RefreshLifetime(float lifetime)
 		{
-			RemainingDuration = duration;
+			if (LifetimeType == LifetimeType.Permanent) return;
+
+			RemainingLifetime = lifetime;
 		}
 
 		/// <summary>
-		/// 刷新回合數
+		/// 調整生命週期
 		/// </summary>
-		/// <param name="turns">新的回合數</param>
-		public void RefreshTurns(int? turns)
+		/// <param name="delta">變更量（正數增加，負數減少）</param>
+		public void AdjustLifetime(float delta)
 		{
-			RemainingTurns = turns;
-		}
+			if (LifetimeType == LifetimeType.Permanent) return;
 
-		/// <summary>
-		/// 調整持續時間
-		/// </summary>
-		/// <param name="delta">變更量（正數減少，負數增加）</param>
-		public void AdjustDuration(float delta)
-		{
-			if (!RemainingDuration.HasValue) return;
-
-			var wasExpired = IsExpired;
-			RemainingDuration -= delta;
-
-			if (!wasExpired && IsExpired) OnExpired.Invoke(new BuffExpiredInfo(Id, OwnerId, BuffName));
-		}
-
-		/// <summary>
-		/// 調整回合數
-		/// </summary>
-		/// <param name="delta">變更量（正數減少，負數增加）</param>
-		public void AdjustTurns(int delta)
-		{
-			if (!RemainingTurns.HasValue) return;
-
-			var wasExpired = IsExpired;
-			RemainingTurns -= delta;
-
-			if (!wasExpired && IsExpired) OnExpired.Invoke(new BuffExpiredInfo(Id, OwnerId, BuffName));
+			RemainingLifetime += delta;
 		}
 
 		/// <summary>
@@ -166,7 +137,7 @@ namespace Rino.GameFramework.BuffSystem
 		/// <returns>被移除的記錄，若無記錄則回傳 null</returns>
 		public ModifierRecord RemoveLastModifierRecord()
 		{
-			if(ModifierRecords.Count == 0) return null;
+			if (ModifierRecords.Count == 0) return null;
 
 			var last = ModifierRecords[^1];
 			ModifierRecords.RemoveAt(ModifierRecords.Count - 1);
