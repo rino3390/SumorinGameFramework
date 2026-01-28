@@ -63,7 +63,7 @@ namespace Rino.GameFramework.GameManager
             if (menu != null)
             {
                 DrawWindowTab();
-                MenuWidth = menu.MenuWidth;
+                MenuWidth = menu.HasMenuTree ? menu.MenuWidth : 0;
 
                 if (needsMenuRebuild)
                 {

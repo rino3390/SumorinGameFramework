@@ -3,7 +3,6 @@ using Rino.GameFramework.RinoUtility.Editor;
 using Sirenix.OdinInspector;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -22,11 +21,14 @@ namespace Rino.GameFramework.GameManager
 		public SdfIconType TabIcon;
 
 		/// <summary>
-		/// 是否有左側選單
+		/// 對應的 Editor 視窗類型
 		/// </summary>
 		[FoldoutGroup("Editor 設定", true)]
-		[LabelText("是否有左側菜單")]
-		public bool HasMenuTree;
+		[ValueDropdown("GetWindowTypeList")]
+		[LabelText("繪製視窗")]
+		[Required]
+		[OnValueChanged("OnWindowTypeChanged")]
+		public Type CorrespondingWindowType;
 
 		/// <summary>
 		/// 是否繪製圖示
@@ -42,14 +44,22 @@ namespace Rino.GameFramework.GameManager
 		[ShowIf("@HasMenuTree && HasIcon"), LabelText("Icon 大小")]
 		public float IconSize = 28;
 
-		/// <summary>
-		/// 對應的 Editor 視窗類型
-		/// </summary>
-		[FoldoutGroup("Editor 設定")]
-		[ValueDropdown("GetWindowTypeList")]
-		[LabelText("繪製視窗")]
-		[Required]
-		public Type CorrespondingWindowType;
+		[NonSerialized]
+		private GameEditorMenuBase cachedMenu;
+
+		private bool HasMenuTree => GetCachedMenu()?.HasMenuTree ?? false;
+
+		private GameEditorMenuBase GetCachedMenu()
+		{
+			if (CorrespondingWindowType == null) return null;
+
+			if(cachedMenu != null && cachedMenu.GetType() == CorrespondingWindowType) return cachedMenu;
+
+			cachedMenu = Activator.CreateInstance(CorrespondingWindowType) as GameEditorMenuBase;
+			cachedMenu?.EnsureInitialized();
+
+			return cachedMenu;
+		}
 
 		private static IEnumerable GetWindowTypeList()
 		{
@@ -69,6 +79,11 @@ namespace Rino.GameFramework.GameManager
 				});
 
 			return dataEditorTypes.Concat(otherEditorTypes).ToList();
+		}
+
+		private void OnWindowTypeChanged()
+		{
+			cachedMenu = null;
 		}
 	}
 }

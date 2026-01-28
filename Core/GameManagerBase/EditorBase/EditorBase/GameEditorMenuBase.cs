@@ -1,4 +1,6 @@
+using System.Linq;
 using Sirenix.OdinInspector.Editor;
+using System;
 
 namespace Rino.GameFramework.GameManagerBase
 {
@@ -15,6 +17,14 @@ namespace Rino.GameFramework.GameManagerBase
 		/// 選單寬度
 		/// </summary>
 		public float MenuWidth { get; protected set; } = 220f;
+
+		/// <summary>
+		/// 是否需要顯示左側選單樹
+		/// </summary>
+		/// <remarks>
+		/// 當選單項目數量大於 1 時才需要顯示左側選單
+		/// </remarks>
+		public bool HasMenuTree => (MenuTree?.EnumerateTree() ?? Array.Empty<OdinMenuItem>()).Any();
 
 		/// <summary>
 		/// 選單樹
