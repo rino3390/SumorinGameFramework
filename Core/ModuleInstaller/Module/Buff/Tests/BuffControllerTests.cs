@@ -46,7 +46,7 @@ namespace Rino.GameFramework.BuffSystem.Tests
 					LifetimeType = LifetimeType.TimeBased,
 					Lifetime = 5f,
 					StackBehavior = StackBehavior.RefreshDuration,
-					MaxStack = null,
+					MaxStack = -1,
 					MutualExclusionGroup = null,
 					Priority = 0,
 					Effects = new List<BuffEffectConfig>
@@ -61,7 +61,7 @@ namespace Rino.GameFramework.BuffSystem.Tests
 					LifetimeType = LifetimeType.TimeBased,
 					Lifetime = 8f,
 					StackBehavior = StackBehavior.RefreshDuration,
-					MaxStack = null,
+					MaxStack = -1,
 					MutualExclusionGroup = "Movement",
 					Priority = 1,
 					Effects = new List<BuffEffectConfig>
@@ -76,7 +76,7 @@ namespace Rino.GameFramework.BuffSystem.Tests
 					LifetimeType = LifetimeType.TimeBased,
 					Lifetime = 8f,
 					StackBehavior = StackBehavior.RefreshDuration,
-					MaxStack = null,
+					MaxStack = -1,
 					MutualExclusionGroup = "Movement",
 					Priority = 1,
 					Effects = new List<BuffEffectConfig>
@@ -91,7 +91,7 @@ namespace Rino.GameFramework.BuffSystem.Tests
 					LifetimeType = LifetimeType.TurnBased,
 					Lifetime = 2f,
 					StackBehavior = StackBehavior.Replace,
-					MaxStack = null,
+					MaxStack = -1,
 					MutualExclusionGroup = null,
 					Priority = 0,
 					Effects = new List<BuffEffectConfig>
@@ -106,7 +106,7 @@ namespace Rino.GameFramework.BuffSystem.Tests
 					LifetimeType = LifetimeType.TimeBased,
 					Lifetime = 5f,
 					StackBehavior = StackBehavior.Independent,
-					MaxStack = null,
+					MaxStack = -1,
 					MutualExclusionGroup = null,
 					Priority = 0,
 					Effects = new List<BuffEffectConfig>(),
@@ -118,7 +118,7 @@ namespace Rino.GameFramework.BuffSystem.Tests
 					LifetimeType = LifetimeType.Permanent,
 					Lifetime = 0f,
 					StackBehavior = StackBehavior.RefreshDuration,
-					MaxStack = null,
+					MaxStack = -1,
 					MutualExclusionGroup = null,
 					Priority = 0,
 					Effects = new List<BuffEffectConfig>(),

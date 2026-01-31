@@ -3,7 +3,8 @@
     "rootNamespace": "Rino.GameFramework.BuffSystem",
     "references": [
         "Rino.BuffSystem.Common",
-        "Rino.AttributeSystem.Common"
+        "Rino.AttributeSystem.Common",
+        "Rino.SOBase"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

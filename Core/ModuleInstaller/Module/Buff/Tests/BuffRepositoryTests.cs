@@ -19,7 +19,7 @@ namespace Rino.GameFramework.BuffSystem.Tests
         [Test]
         public void Save_WithValidBuff_StoresInRepository()
         {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, LifetimeType.Permanent, 0f);
+            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.Permanent, 0f);
 
             repository.Save(buff);
 
@@ -29,8 +29,8 @@ namespace Rino.GameFramework.BuffSystem.Tests
         [Test]
         public void Save_WithSameId_OverwritesExisting()
         {
-            var buff1 = new Buff("buff-1", "Poison", "owner-1", "source-1", null, LifetimeType.Permanent, 0f);
-            var buff2 = new Buff("buff-1", "Burn", "owner-2", "source-2", null, LifetimeType.Permanent, 0f);
+            var buff1 = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.Permanent, 0f);
+            var buff2 = new Buff("buff-1", "Burn", "owner-2", "source-2", -1, LifetimeType.Permanent, 0f);
 
             repository.Save(buff1);
             repository.Save(buff2);
@@ -45,7 +45,7 @@ namespace Rino.GameFramework.BuffSystem.Tests
         [Test]
         public void Get_WithExistingId_ReturnsBuff()
         {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, LifetimeType.Permanent, 0f);
+            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.Permanent, 0f);
             repository.Save(buff);
 
             var result = repository.Get("buff-1");
@@ -68,9 +68,9 @@ namespace Rino.GameFramework.BuffSystem.Tests
         [Test]
         public void GetByOwner_WithExistingOwner_ReturnsOwnerBuffs()
         {
-            var buff1 = new Buff("buff-1", "Poison", "owner-1", "source-1", null, LifetimeType.Permanent, 0f);
-            var buff2 = new Buff("buff-2", "Burn", "owner-1", "source-1", null, LifetimeType.Permanent, 0f);
-            var buff3 = new Buff("buff-3", "Freeze", "owner-2", "source-1", null, LifetimeType.Permanent, 0f);
+            var buff1 = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.Permanent, 0f);
+            var buff2 = new Buff("buff-2", "Burn", "owner-1", "source-1", -1, LifetimeType.Permanent, 0f);
+            var buff3 = new Buff("buff-3", "Freeze", "owner-2", "source-1", -1, LifetimeType.Permanent, 0f);
             repository.Save(buff1);
             repository.Save(buff2);
             repository.Save(buff3);
@@ -97,8 +97,8 @@ namespace Rino.GameFramework.BuffSystem.Tests
         [Test]
         public void Values_WithMultipleBuffs_ReturnsAllBuffs()
         {
-            var buff1 = new Buff("buff-1", "Poison", "owner-1", "source-1", null, LifetimeType.Permanent, 0f);
-            var buff2 = new Buff("buff-2", "Burn", "owner-2", "source-1", null, LifetimeType.Permanent, 0f);
+            var buff1 = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.Permanent, 0f);
+            var buff2 = new Buff("buff-2", "Burn", "owner-2", "source-1", -1, LifetimeType.Permanent, 0f);
             repository.Save(buff1);
             repository.Save(buff2);
 
@@ -122,7 +122,7 @@ namespace Rino.GameFramework.BuffSystem.Tests
         [Test]
         public void DeleteById_WithExistingId_RemovesBuff()
         {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", null, LifetimeType.Permanent, 0f);
+            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.Permanent, 0f);
             repository.Save(buff);
 
             repository.DeleteById("buff-1");

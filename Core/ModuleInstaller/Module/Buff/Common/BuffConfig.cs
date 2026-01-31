@@ -28,9 +28,9 @@ namespace Rino.GameFramework.BuffSystem
 		public StackBehavior StackBehavior;
 
 		/// <summary>
-		/// 最大堆疊數，null 表示無上限
+		/// 最大堆疊數，-1 表示無上限
 		/// </summary>
-		public int? MaxStack;
+		public int MaxStack;
 
 		/// <summary>
 		/// 互斥群組名稱

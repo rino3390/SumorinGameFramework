@@ -3,6 +3,7 @@
   "rootNamespace": "Rino.GameFramework.RinoUtility.Editor",
   "references": [
     "Rino.RinoUtility",
+    "Sirenix.OdinInspector.Attributes",
     "Unity.Localization",
     "Unity.TextMeshPro"
   ],

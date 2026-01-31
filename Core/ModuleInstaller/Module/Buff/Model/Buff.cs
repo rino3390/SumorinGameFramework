@@ -41,9 +41,9 @@ namespace Rino.GameFramework.BuffSystem
 		public bool IsExpired => LifetimeType != LifetimeType.Permanent && RemainingLifetime <= 0 || StackCount <= 0;
 
 		/// <summary>
-		/// 最大堆疊數，null 表示無上限
+		/// 最大堆疊數，-1 表示無上限
 		/// </summary>
-		public int? MaxStack { get; }
+		public int MaxStack { get; }
 
 		/// <summary>
 		/// 當前堆疊數
@@ -60,7 +60,7 @@ namespace Rino.GameFramework.BuffSystem
 		/// </summary>
 		public ReactiveEvent<BuffStackChangedInfo> OnStackChanged { get; } = new();
 
-		public Buff(string id, string buffName, string ownerId, string sourceId, int? maxStack, LifetimeType lifetimeType, float lifetime): base(id)
+		public Buff(string id, string buffName, string ownerId, string sourceId, int maxStack, LifetimeType lifetimeType, float lifetime): base(id)
 		{
 			if (string.IsNullOrEmpty(buffName)) throw new ArgumentException("BuffName cannot be null or empty.", nameof(buffName));
 
@@ -86,9 +86,9 @@ namespace Rino.GameFramework.BuffSystem
 		{
 			var oldStack = StackCount;
 			StackCount += delta;
-			if (MaxStack.HasValue)
+			if (MaxStack >= 0)
 			{
-				StackCount = Math.Min(StackCount, MaxStack.Value);
+				StackCount = Math.Min(StackCount, MaxStack);
 			}
 
 			StackCount = Math.Max(0, StackCount);

@@ -1,13 +1,16 @@
 {
-    "name": "Rino.AttributeSystem.View",
-    "rootNamespace": "Rino.GameFramework.AttributeSystem",
+    "name": "Rino.GameSetting.Editor",
+    "rootNamespace": "Rino.GameFramework.GameSetting",
     "references": [
-        "Rino.AttributeSystem.Common",
+        "Rino.GameManager.Base",
+        "Rino.RinoUtility.Editor",
         "Sirenix.Serialization.Config",
         "Sirenix.Serialization",
         "Sirenix.Utilities"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
