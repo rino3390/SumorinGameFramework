@@ -2,6 +2,7 @@
     "name": "Rino.AttributeSystem.View.Editor",
     "rootNamespace": "Rino.GameFramework.AttributeSystem",
     "references": [
+        "Rino.AttributeSystem.Common",
         "Rino.AttributeSystem.View",
         "Rino.GameManager.Base",
         "Rino.RinoUtility.Editor"

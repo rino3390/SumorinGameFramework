@@ -27,39 +27,21 @@ namespace Rino.GameFramework.GameManager
 		[ValueDropdown("GetWindowTypeList")]
 		[LabelText("繪製視窗")]
 		[Required]
-		[OnValueChanged("OnWindowTypeChanged")]
 		public Type CorrespondingWindowType;
 
 		/// <summary>
 		/// 是否繪製圖示
 		/// </summary>
 		[FoldoutGroup("Editor 設定")]
-		[ShowIf("HasMenuTree"), LabelText("左列繪製 Icon")]
+		[LabelText("左列繪製 Icon")]
 		public bool HasIcon;
 
 		/// <summary>
 		/// 圖示大小
 		/// </summary>
 		[FoldoutGroup("Editor 設定")]
-		[ShowIf("@HasMenuTree && HasIcon"), LabelText("Icon 大小")]
+		[ShowIf("HasIcon"), LabelText("Icon 大小")]
 		public float IconSize = 28;
-
-		[NonSerialized]
-		private GameEditorMenuBase cachedMenu;
-
-		private bool HasMenuTree => GetCachedMenu()?.HasMenuTree ?? false;
-
-		private GameEditorMenuBase GetCachedMenu()
-		{
-			if (CorrespondingWindowType == null) return null;
-
-			if(cachedMenu != null && cachedMenu.GetType() == CorrespondingWindowType) return cachedMenu;
-
-			cachedMenu = Activator.CreateInstance(CorrespondingWindowType) as GameEditorMenuBase;
-			cachedMenu?.EnsureInitialized();
-
-			return cachedMenu;
-		}
 
 		private static IEnumerable GetWindowTypeList()
 		{
@@ -79,11 +61,6 @@ namespace Rino.GameFramework.GameManager
 				});
 
 			return dataEditorTypes.Concat(otherEditorTypes).ToList();
-		}
-
-		private void OnWindowTypeChanged()
-		{
-			cachedMenu = null;
 		}
 	}
 }

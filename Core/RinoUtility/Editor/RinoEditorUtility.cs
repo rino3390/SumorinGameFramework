@@ -152,35 +152,5 @@ namespace Rino.GameFramework.RinoUtility.Editor
 
 			return false;
 		}
-
-		/// <summary>
-		/// 將類型清單轉換為 Odin ValueDropdownItem 清單
-		/// </summary>
-		/// <typeparam name="T">實例類型</typeparam>
-		/// <param name="types">類型清單</param>
-		/// <param name="labelSelector">標籤選擇器，從實例取得顯示名稱</param>
-		/// <returns>ValueDropdownItem 清單</returns>
-		public static IEnumerable<ValueDropdownItem> ToDropdownTypeItems<T>(IEnumerable<Type> types, Func<T, string> labelSelector) where T: class
-		{
-			return types.Select(type =>
-			{
-				var instance = Activator.CreateInstance(type) as T;
-				var label = instance != null ? labelSelector(instance) : type.Name;
-				return new ValueDropdownItem(label, instance);
-			});
-		}
-
-		/// <summary>
-		/// 將類型清單轉換為 Odin ValueDropdownItem 清單（自訂實例工廠）
-		/// </summary>
-		/// <typeparam name="T">實例類型</typeparam>
-		/// <param name="types">類型清單</param>
-		/// <param name="instanceFactory">實例工廠，從 Type 建立實例</param>
-		/// <param name="labelSelector">標籤選擇器，從 Type 取得顯示名稱</param>
-		/// <returns>ValueDropdownItem 清單</returns>
-		public static IEnumerable<ValueDropdownItem> ToDropdownTypeItems<T>(IEnumerable<Type> types, Func<Type, T> instanceFactory, Func<Type, string> labelSelector) where T: class
-		{
-			return types.Select(type => new ValueDropdownItem(labelSelector(type), instanceFactory(type)));
-		}
 	}
 }
