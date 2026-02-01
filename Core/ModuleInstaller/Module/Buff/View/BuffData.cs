@@ -3,6 +3,7 @@ using System.Linq;
 using Rino.GameFramework.GameManagerBase;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Localization;
 
 namespace Rino.GameFramework.BuffSystem
 {
@@ -13,7 +14,7 @@ namespace Rino.GameFramework.BuffSystem
 	public class BuffData : SODataBase
 	{
 		[LabelText("Buff 名稱")]
-		public string BuffName;
+		public LocalizedString BuffName;
 
 		[HorizontalGroup("LifetimeType")]
 		[LabelText("生命週期")]
@@ -55,7 +56,7 @@ namespace Rino.GameFramework.BuffSystem
 		{
 			return new BuffConfig
 			{
-				BuffName = BuffName,
+				BuffName = BuffName.GetLocalizedString(),
 				LifetimeType = LifetimeType,
 				Lifetime = Lifetime,
 				StackBehavior = StackBehavior,
@@ -73,7 +74,7 @@ namespace Rino.GameFramework.BuffSystem
 		/// <returns>資料是否合法</returns>
 		public override bool IsDataLegal()
 		{
-			return base.IsDataLegal() && !string.IsNullOrEmpty(BuffName);
+			return base.IsDataLegal() && !BuffName.IsEmpty;
 		}
 #endif
 	}

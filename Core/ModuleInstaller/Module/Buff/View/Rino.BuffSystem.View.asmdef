@@ -4,7 +4,8 @@
     "references": [
         "Rino.BuffSystem.Common",
         "Rino.AttributeSystem.Common",
-        "Rino.SOBase"
+        "Rino.SOBase",
+        "Unity.Localization"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
