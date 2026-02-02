@@ -104,8 +104,6 @@ namespace Rino.GameFramework.Localization.Editor
             }
 
             SelectSharedEntry(newSharedEntry);
-
-            Debug.Log($"Duplicated entry '{originalKey}' as '{newKey}'");
         }
 
         /// <summary>
@@ -284,15 +282,29 @@ namespace Rino.GameFramework.Localization.Editor
             return -1;
         }
 
-        private string GenerateUniqueKey(string baseKey)
+        private string GenerateUniqueKey(string originalKey)
         {
-            var newKey = $"{baseKey}_Copy";
+            // 檢查是否已經以「空格+數字」結尾
+            var baseKey = originalKey;
             var counter = 1;
+
+            var lastSpaceIndex = originalKey.LastIndexOf(' ');
+            if (lastSpaceIndex > 0 && lastSpaceIndex < originalKey.Length - 1)
+            {
+                var suffix = originalKey.Substring(lastSpaceIndex + 1);
+                if (int.TryParse(suffix, out var existingNumber))
+                {
+                    baseKey = originalKey.Substring(0, lastSpaceIndex);
+                    counter = existingNumber + 1;
+                }
+            }
+
+            var newKey = $"{baseKey} {counter}";
 
             while (Collection.SharedData.Contains(newKey))
             {
                 counter++;
-                newKey = $"{baseKey}_Copy{counter}";
+                newKey = $"{baseKey} {counter}";
             }
 
             return newKey;
