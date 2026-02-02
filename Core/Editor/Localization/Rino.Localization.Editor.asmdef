@@ -1,0 +1,27 @@
+{
+    "name": "Rino.Localization.Editor",
+    "rootNamespace": "Rino.GameFramework.Localization.Editor",
+    "references": [
+        "GUID:3656feb4b010c5941972fb7b3b9eec3e",
+        "Unity.Localization",
+        "Unity.Localization.Editor",
+        "Sirenix.OdinInspector.Editor",
+        "Sirenix.Utilities.Editor",
+        "Sirenix.Utilities"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [
+        "Sirenix.OdinInspector.Editor.dll",
+        "Sirenix.Utilities.Editor.dll",
+        "Sirenix.Utilities.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

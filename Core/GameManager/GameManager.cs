@@ -2,7 +2,7 @@ using Rino.GameFramework.GameManagerBase;
 using Rino.GameFramework.RinoUtility.Editor;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
-using Sirenix.OdinInspector.Modules.Localization.Editor;
+using Rino.GameFramework.Localization.Editor;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
 using System;
@@ -87,7 +87,7 @@ namespace Rino.GameFramework.GameManager
 
             if (RinoEditorUtility.ToolbarButtonWithIcon("多語系設定", SdfIconType.Translate))
             {
-                OdinLocalizationEditorWindow.OpenFromMenu();
+                RinoLocalizationEditorWindow.OpenFromMenu();
             }
 
             EditorGUILayout.EndHorizontal();

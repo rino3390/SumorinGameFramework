@@ -5,6 +5,7 @@
         "Rino.GameManager.Base",
         "Rino.SOBase",
         "Rino.RinoUtility.Editor",
+        "Rino.Localization.Editor",
         "Sirenix.OdinInspector.Modules.UnityLocalization.Editor",
         "Unity.Localization",
         "Unity.Localization.Editor"
