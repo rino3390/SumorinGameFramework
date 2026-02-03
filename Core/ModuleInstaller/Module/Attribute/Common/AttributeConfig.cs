@@ -14,6 +14,7 @@ namespace Rino.GameFramework.AttributeSystem
 		/// 屬性識別碼
 		/// </summary>
 		[LabelText("識別碼")]
+		[Required]
 		public string Id;
 
 		/// <summary>

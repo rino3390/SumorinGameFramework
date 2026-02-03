@@ -3,9 +3,7 @@
     "rootNamespace": "Rino.GameFramework.AttributeSystem",
     "references": [
         "Rino.AttributeSystem.Common",
-        "Sirenix.Serialization.Config",
-        "Sirenix.Serialization",
-        "Sirenix.Utilities"
+        "Rino.RinoUtility"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -10,8 +10,19 @@ namespace Rino.GameFramework.RinoUtility
         /// </summary>
         public string ErrorMessage { get; }
 
-        public UniqueListAttribute(string errorMessage = "清單值重複")
+        /// <summary>
+        /// 要檢查唯一性的欄位或屬性名稱，若為 null 則比對整個物件
+        /// </summary>
+        public string PropertyName { get; }
+
+        /// <summary>
+        /// 建立唯一性驗證屬性
+        /// </summary>
+        /// <param name="propertyName">要檢查的欄位名稱，null 表示比對整個物件</param>
+        /// <param name="errorMessage">重複時的錯誤訊息</param>
+        public UniqueListAttribute(string propertyName = null, string errorMessage = "清單值重複")
         {
+            PropertyName = propertyName;
             ErrorMessage = errorMessage;
         }
     }

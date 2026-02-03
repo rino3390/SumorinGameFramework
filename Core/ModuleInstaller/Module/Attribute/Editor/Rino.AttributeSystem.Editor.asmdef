@@ -1,5 +1,5 @@
 {
-    "name": "Rino.AttributeSystem.View.Editor",
+    "name": "Rino.AttributeSystem.Editor",
     "rootNamespace": "Rino.GameFramework.AttributeSystem",
     "references": [
         "Rino.AttributeSystem.Common",
