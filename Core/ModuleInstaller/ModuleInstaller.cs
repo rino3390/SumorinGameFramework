@@ -30,7 +30,7 @@ namespace Sumorin.GameFramework.ModuleInstaller
         private ModuleRuntimeData downloadingModule;
         private string errorMessage;
 
-        [MenuItem("Tools/Module Installer", priority = 100)]
+        [MenuItem("Tools/Sumorin/Module Installer", priority = 10_100)]
         public static void OpenWindow()
         {
             var window = GetWindow<ModuleInstaller>("Module Installer");
