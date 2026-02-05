@@ -42,11 +42,11 @@ Unity MVP 架構共用框架，提供 DDD 核心、遊戲資料管理、模組�
 ]
 ```
 
-![image-20260203204628877](img\2.png)
+![image-20260203204628877](https://github.com/rino3390/SumorinGameFramework/blob/main/img/2.png)
 
 ### 透過 Git URL
 
-![image-20260203204301557](img\1.png)
+![image-20260203204301557](https://github.com/rino3390/SumorinGameFramework/blob/main/img/1.png)
 
 在 Unity Package Manager 中選擇 `from git URL`，輸入：
 
@@ -158,7 +158,7 @@ subscription = eventBus.Subscribe<PlayerLevelUpEvent>(evt =>
 
 首次開啟會自動於`Data/GameManager`新增`Tab`的ScriptableObject，可用於自訂要顯示於管理視窗的頁籤。
 
-![](img\4.png)
+![](https://github.com/rino3390/SumorinGameFramework/blob/main/img/4.png)
 
 ### 建立資料類別
 
@@ -252,4 +252,4 @@ public class SettingsEditor : GameEditorMenuBase
 
 將頁籤新增至`GameManager > Tab`中，開啟會自動生成`GameManager > GameSettingConfig`，可自行配置「遊戲設定」頁籤中要顯示的子頁籤。
 
-![](img\3.png)
+![](https://github.com/rino3390/SumorinGameFramework/blob/main/img/3.png)
