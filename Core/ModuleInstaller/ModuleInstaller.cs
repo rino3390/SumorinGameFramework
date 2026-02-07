@@ -341,13 +341,13 @@ namespace Sumorin.GameFramework.ModuleInstaller
                 "Scenes"
             };
 
-            var existingFolders = 0;
+            var existingCount = 0;
             foreach (var folder in keyFolders)
             {
                 var folderPath = Path.Combine(Application.dataPath, folder);
                 if (Directory.Exists(folderPath))
                 {
-                    existingFolders++;
+                    existingCount++;
                     module.InstalledFiles.Add(folder);
                 }
                 else
@@ -356,11 +356,11 @@ namespace Sumorin.GameFramework.ModuleInstaller
                 }
             }
 
-            if (existingFolders == 0)
+            if (existingCount == 0)
             {
                 module.Status = ModuleInstallStatus.NotInstalled;
             }
-            else if (existingFolders == keyFolders.Length)
+            else if (existingCount == keyFolders.Length)
             {
                 module.Status = ModuleInstallStatus.Installed;
             }
@@ -418,6 +418,16 @@ namespace Sumorin.GameFramework.ModuleInstaller
 
             try
             {
+                // FolderStructure 特殊處理：直接生成資料夾結構
+                if (IsBaseModule(module))
+                {
+                    InstallFolderStructure();
+                    AssetDatabase.Refresh();
+                    CheckModuleStatus(module);
+                    CheckAllModuleStatus();
+                    return;
+                }
+
                 // 如果有 folders 需要先解析
                 if (module.Info.folders.Count > 0 && !module.IsFoldersResolved)
                 {
@@ -442,6 +452,16 @@ namespace Sumorin.GameFramework.ModuleInstaller
 
             try
             {
+                // FolderStructure 特殊處理：直接生成資料夾結構
+                if (IsBaseModule(module))
+                {
+                    InstallFolderStructure();
+                    AssetDatabase.Refresh();
+                    CheckModuleStatus(module);
+                    CheckAllModuleStatus();
+                    return;
+                }
+
                 // 如果有 folders 但尚未解析，需要先解析
                 if (module.Info.folders.Count > 0 && !module.IsFoldersResolved)
                 {
@@ -620,6 +640,79 @@ namespace Sumorin.GameFramework.ModuleInstaller
             CheckModuleStatus(module);
             CheckAllModuleStatus();
             Repaint();
+        }
+
+        private void InstallFolderStructure()
+        {
+            // 定義資料夾結構
+            var folders = new[]
+            {
+                "Art/Animator",
+                "Art/Material",
+                "Art/Model",
+                "Art/Shader",
+                "Data",
+                "Prefab",
+                "Resources",
+                "Scenes",
+                "Script/Domains",
+                "Script/Flow",
+                "Script/Presenter",
+                "Script/Utility",
+                "Script/View/Behaviour",
+                "Script/View/Data",
+                "Script/View/Event",
+                "Script/View/UI",
+                "Script/View/ViewRepo"
+            };
+
+            // 建立資料夾
+            foreach (var folder in folders)
+            {
+                var folderPath = Path.Combine(Application.dataPath, folder);
+                if (!Directory.Exists(folderPath))
+                {
+                    Directory.CreateDirectory(folderPath);
+                }
+            }
+
+            // 生成 asmdef 檔案
+            CreateAsmdef("Script/Flow/Game.Flow.asmdef", "Game.Flow", new[] { "Sumorin.GameFramework" });
+            CreateAsmdef("Script/Presenter/Game.Presenter.asmdef", "Game.Presenter", new[] { "Sumorin.GameFramework", "Game.Flow", "Game.View" });
+            CreateAsmdef("Script/Utility/Game.Utility.asmdef", "Game.Utility", Array.Empty<string>());
+            CreateAsmdef("Script/View/Game.View.asmdef", "Game.View", new[] { "Sumorin.GameFramework" });
+        }
+
+        private void CreateAsmdef(string relativePath, string asmdefName, string[] references)
+        {
+            var fullPath = Path.Combine(Application.dataPath, relativePath);
+
+            // 如果檔案已存在則跳過
+            if (File.Exists(fullPath))
+                return;
+
+            var referencesJson = references.Length > 0
+                ? string.Join(",\n        ", references.Select(r => $"\"{r}\""))
+                : "";
+
+            var content = $@"{{
+    ""name"": ""{asmdefName}"",
+    ""rootNamespace"": """",
+    ""references"": [
+        {referencesJson}
+    ],
+    ""includePlatforms"": [],
+    ""excludePlatforms"": [],
+    ""allowUnsafeCode"": false,
+    ""overrideReferences"": false,
+    ""precompiledReferences"": [],
+    ""autoReferenced"": true,
+    ""defineConstraints"": [],
+    ""versionDefines"": [],
+    ""noEngineReferences"": false
+}}";
+
+            File.WriteAllText(fullPath, content);
         }
 
         private void RemoveFolderStructure()
