@@ -23,12 +23,12 @@ namespace Sumorin.GameFramework.BuffSystem
         public int Value;
 
         /// <summary>
-        /// 轉換為 BuffEffectConfig
+        /// 轉換為 ModifyEffectInfo
         /// </summary>
-        /// <returns>Buff 效果配置</returns>
-        public BuffEffectConfig ToConfig()
+        /// <returns>修改效果資訊</returns>
+        public ModifyEffectInfo ToConfig()
         {
-            return new BuffEffectConfig
+            return new ModifyEffectInfo
             {
                 AttributeName = AttributeName,
                 ModifyType = ModifyType,

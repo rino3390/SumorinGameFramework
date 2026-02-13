@@ -5,7 +5,6 @@
         "Sumorin.DDDCore.Domain",
         "Sumorin.BuffSystem.Controller",
         "Sumorin.BuffSystem.Repository",
-        "Sumorin.BuffSystem.Flow",
         "Zenject"
     ],
     "includePlatforms": [],

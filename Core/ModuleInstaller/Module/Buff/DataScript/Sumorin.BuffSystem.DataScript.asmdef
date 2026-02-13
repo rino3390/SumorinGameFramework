@@ -1,19 +1,19 @@
 ﻿{
-    "name": "Sumorin.BuffSystem.View",
-    "rootNamespace": "Sumorin.GameFramework.BuffSystem",
-    "references": [
-        "Sumorin.BuffSystem.Common",
-        "Sumorin.AttributeSystem.Common",
-        "Sumorin.SOBase",
-        "Unity.Localization"
-    ],
-    "includePlatforms": [],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "Sumorin.BuffSystem.DataScript",
+  "rootNamespace": "Sumorin.GameFramework.BuffSystem",
+  "references": [
+    "Sumorin.BuffSystem.Common",
+    "Sumorin.AttributeSystem.Common",
+    "Sumorin.SOBase",
+    "Unity.Localization"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
 }

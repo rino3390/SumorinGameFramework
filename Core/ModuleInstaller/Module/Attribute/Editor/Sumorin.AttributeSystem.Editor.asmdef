@@ -1,21 +1,21 @@
 ﻿{
-    "name": "Sumorin.AttributeSystem.Editor",
-    "rootNamespace": "Sumorin.GameFramework.AttributeSystem",
-    "references": [
-        "Sumorin.AttributeSystem.Common",
-        "Sumorin.AttributeSystem.View",
-        "Sumorin.GameManager.Base",
-        "Sumorin.SumorinUtility.Editor"
-    ],
-    "includePlatforms": [
-        "Editor"
-    ],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "Sumorin.AttributeSystem.Editor",
+  "rootNamespace": "Sumorin.GameFramework.AttributeSystem",
+  "references": [
+    "Sumorin.AttributeSystem.Common",
+    "Sumorin.AttributeSystem.DataScript",
+    "Sumorin.GameManager.Base",
+    "Sumorin.SumorinUtility.Editor"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
 }

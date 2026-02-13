@@ -1,17 +1,17 @@
 ﻿{
-    "name": "Sumorin.AttributeSystem.View",
-    "rootNamespace": "Sumorin.GameFramework.AttributeSystem",
-    "references": [
-        "Sumorin.AttributeSystem.Common",
-        "Sumorin.SumorinUtility"
-    ],
-    "includePlatforms": [],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "Sumorin.AttributeSystem.DataScript",
+  "rootNamespace": "Sumorin.GameFramework.AttributeSystem",
+  "references": [
+    "Sumorin.AttributeSystem.Common",
+    "Sumorin.SumorinUtility"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
 }

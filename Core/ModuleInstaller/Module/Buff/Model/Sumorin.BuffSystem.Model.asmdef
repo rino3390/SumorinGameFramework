@@ -4,7 +4,9 @@
     "references": [
         "Sumorin.DDDCore.Domain",
         "Sumorin.BuffSystem.Common",
-        "Sumorin.SumorinUtility"
+        "Sumorin.SumorinUtility",
+        "Sumorin.AttributeSystem.Common",
+        "UniRx"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
