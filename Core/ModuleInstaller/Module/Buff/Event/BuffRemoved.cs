@@ -24,21 +24,21 @@ namespace Sumorin.GameFramework.BuffSystem
         public string BuffName { get; }
 
         /// <summary>
-        /// Modifier 記錄列表
+        /// Stack 記錄列表
         /// </summary>
-        public List<ModifierRecord> ModifierRecords { get; }
+        public List<StackRecord> StackRecords { get; }
 
         /// <summary>
         /// 移除原因
         /// </summary>
         public string Reason { get; }
 
-        public BuffRemoved(string buffId, string ownerId, string buffName, List<ModifierRecord> modifierRecords, string reason)
+        public BuffRemoved(string buffId, string ownerId, string buffName, List<StackRecord> stackRecords, string reason)
         {
             BuffId = buffId;
             OwnerId = ownerId;
             BuffName = buffName;
-            ModifierRecords = modifierRecords;
+            StackRecords = stackRecords;
             Reason = reason;
         }
     }
