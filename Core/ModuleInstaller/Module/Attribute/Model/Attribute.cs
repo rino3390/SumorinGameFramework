@@ -136,6 +136,23 @@ namespace Sumorin.GameFramework.AttributeSystem
             NotifyIfChanged(oldValue);
         }
 
+		/// <summary>
+        /// 移除第一個符合條件的修改器（用於 Buff Stack 移除）
+        /// </summary>
+        /// <param name="modifyType">修改類型</param>
+        /// <param name="value">修改數值</param>
+        /// <param name="sourceId">來源識別碼</param>
+        public void RemoveFirstModifier(ModifyType modifyType, int value, string sourceId)
+        {
+            var oldValue = Value;
+            var index = modifiers.FindIndex(m => m.ModifyType == modifyType && m.Value == value && m.SourceId == sourceId);
+            if (index >= 0)
+            {
+                modifiers.RemoveAt(index);
+                NotifyIfChanged(oldValue);
+            }
+        }
+
 		private int CalculateValue()
         {
             var flat = BaseValue;

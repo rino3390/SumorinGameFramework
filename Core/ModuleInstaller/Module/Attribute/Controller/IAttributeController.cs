@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Sumorin.GameFramework.AttributeSystem
 {
@@ -54,13 +55,25 @@ namespace Sumorin.GameFramework.AttributeSystem
         /// <param name="value">新的最大值</param>
         void SetMaxValue(string ownerId, string attributeName, int value);
 
-        /// <summary>
-        /// 新增修改器到屬性
+		/// <summary>
+        /// 根據效果資訊新增修改器
         /// </summary>
         /// <param name="ownerId">擁有者識別碼</param>
-        /// <param name="attributeName">屬性名稱</param>
-        /// <param name="modifier">修改器</param>
-        void AddModifier(string ownerId, string attributeName, Modifier modifier);
+        /// <param name="effect">修改效果資訊</param>
+        /// <param name="sourceId">來源識別碼</param>
+        /// <param name="description">描述（選填）</param>
+        /// <returns>建立的修改器識別碼</returns>
+        string AddModifier(string ownerId, ModifyEffectInfo effect, string sourceId, string description = "");
+
+        /// <summary>
+        /// 批次新增修改器
+        /// </summary>
+        /// <param name="ownerId">擁有者識別碼</param>
+        /// <param name="effects">修改效果資訊列表</param>
+        /// <param name="sourceId">來源識別碼</param>
+        /// <param name="description">描述（選填）</param>
+        /// <returns>屬性名稱與修改器識別碼的對應列表</returns>
+        List<(string attributeName, string modifierId)> AddModifiers(string ownerId, List<ModifyEffectInfo> effects, string sourceId, string description = "");
 
         /// <summary>
         /// 透過 Id 移除特定修改器
@@ -77,6 +90,21 @@ namespace Sumorin.GameFramework.AttributeSystem
         /// <param name="attributeName">屬性名稱</param>
         /// <param name="sourceId">來源識別碼</param>
         void RemoveModifiersBySource(string ownerId, string attributeName, string sourceId);
+
+        /// <summary>
+        /// 移除第一個符合效果資訊的修改器
+        /// </summary>
+        /// <param name="ownerId">擁有者識別碼</param>
+        /// <param name="effect">修改效果資訊</param>
+        /// <param name="sourceId">來源識別碼</param>
+        void RemoveModifier(string ownerId, ModifyEffectInfo effect, string sourceId);
+
+        /// <summary>
+        /// 移除指定來源在所有屬性中的修改器
+        /// </summary>
+        /// <param name="ownerId">擁有者識別碼</param>
+        /// <param name="sourceId">來源識別碼</param>
+        void RemoveAllModifiersBySource(string ownerId, string sourceId);
 
         /// <summary>
         /// 建立屬性
