@@ -14,12 +14,6 @@ namespace Sumorin.GameFramework.BuffSystem
 
             // Controller
             Container.BindInterfacesAndSelfTo<BuffController>().AsSingle();
-            Container.Bind<BuffEffectController>().AsSingle();
-
-            // Flow
-            Container.BindInterfacesTo<BuffAppliedFlow>().AsSingle();
-            Container.BindInterfacesTo<BuffRemovedFlow>().AsSingle();
-            Container.BindInterfacesTo<BuffStackChangedFlow>().AsSingle();
         }
     }
 }

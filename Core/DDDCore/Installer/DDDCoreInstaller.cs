@@ -1,5 +1,4 @@
-﻿using MessagePipe;
-using Zenject;
+﻿using Zenject;
 
 namespace Sumorin.GameFramework.DDDCore
 {
@@ -10,11 +9,8 @@ namespace Sumorin.GameFramework.DDDCore
     {
         public override void InstallBindings()
         {
-            Container.BindMessagePipe();
-
-            Container.Bind<IEventBus>().To<EventBus>().AsSingle();
-            Container.Bind<IPublisher>().To<Publisher>().AsSingle();
-            Container.Bind<ISubscriber>().To<Subscriber>().AsSingle();
+            Container.Bind(typeof(IEventBus), typeof(IPublisher), typeof(ISubscriber))
+                .To<EventBus>().AsSingle();
         }
     }
 }

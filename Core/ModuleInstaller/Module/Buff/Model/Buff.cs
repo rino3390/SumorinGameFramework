@@ -1,7 +1,8 @@
-﻿using Sumorin.GameFramework.DDDCore;
-using Sumorin.GameFramework.SumorinUtility;
 using System;
 using System.Collections.Generic;
+using Sumorin.GameFramework.DDDCore;
+using System.Linq;
+using UniRx;
 
 namespace Sumorin.GameFramework.BuffSystem
 {
@@ -11,9 +12,24 @@ namespace Sumorin.GameFramework.BuffSystem
 	public class Buff: Entity
 	{
 		/// <summary>
-		/// Buff 名稱
+		/// 是否已過期
 		/// </summary>
-		public string BuffName { get; }
+		public bool IsExpired => Config.LifetimeType != LifetimeType.Permanent && RemainingLifetime <= 0 || StackCount <= 0;
+
+		/// <summary>
+		/// Buff 配置
+		/// </summary>
+		public BuffConfig Config { get; }
+
+		/// <summary>
+		/// 剩餘生命週期（秒或回合數）
+		/// </summary>
+		public float RemainingLifetime { get; private set; }
+
+		/// <summary>
+		/// 當前堆疊數
+		/// </summary>
+		public int StackCount => StackRecords.Count;
 
 		/// <summary>
 		/// 擁有者識別碼
@@ -26,88 +42,75 @@ namespace Sumorin.GameFramework.BuffSystem
 		public string SourceId { get; }
 
 		/// <summary>
-		/// 生命週期類型
+		/// Stack 記錄列表
 		/// </summary>
-		public LifetimeType LifetimeType { get; }
+		public ReactiveCollection<StackRecord> StackRecords { get; } = new();
 
 		/// <summary>
-		/// 剩餘生命週期（秒或回合數）
+		/// 當 Buff 過期時觸發
 		/// </summary>
-		public float RemainingLifetime { get; private set; }
+		public event Action OnExpired;
 
 		/// <summary>
-		/// 是否已過期
+		/// 當 Buff 狀態變更時觸發
 		/// </summary>
-		public bool IsExpired => LifetimeType != LifetimeType.Permanent && RemainingLifetime <= 0 || StackCount <= 0;
+		public event Action OnChanged;
 
 		/// <summary>
-		/// 最大堆疊數，-1 表示無上限
+		/// 建立 Buff
 		/// </summary>
-		public int MaxStack { get; }
-
-		/// <summary>
-		/// 當前堆疊數
-		/// </summary>
-		public int StackCount { get; private set; }
-
-		/// <summary>
-		/// Modifier 記錄列表
-		/// </summary>
-		public List<ModifierRecord> ModifierRecords { get; }
-
-		/// <summary>
-		/// 堆疊變化事件
-		/// </summary>
-		public ReactiveEvent<BuffStackChangedInfo> OnStackChanged { get; } = new();
-
-		public Buff(string id, string buffName, string ownerId, string sourceId, int maxStack, LifetimeType lifetimeType, float lifetime): base(id)
+		/// <param name="id">唯一識別碼</param>
+		/// <param name="config">Buff 配置</param>
+		/// <param name="ownerId">擁有者識別碼</param>
+		/// <param name="sourceId">來源識別碼</param>
+		public Buff(string id, BuffConfig config, string ownerId, string sourceId): base(id)
 		{
-			if (string.IsNullOrEmpty(buffName)) throw new ArgumentException("BuffName cannot be null or empty.", nameof(buffName));
+			if(string.IsNullOrEmpty(ownerId)) throw new ArgumentException("OwnerId cannot be null or empty.", nameof(ownerId));
 
-			if (string.IsNullOrEmpty(ownerId)) throw new ArgumentException("OwnerId cannot be null or empty.", nameof(ownerId));
+			if(string.IsNullOrEmpty(sourceId)) throw new ArgumentException("SourceId cannot be null or empty.", nameof(sourceId));
 
-			if (string.IsNullOrEmpty(sourceId)) throw new ArgumentException("SourceId cannot be null or empty.", nameof(sourceId));
-
-			BuffName = buffName;
+			Config = config;
 			OwnerId = ownerId;
 			SourceId = sourceId;
-			StackCount = 1;
-			MaxStack = maxStack;
-			LifetimeType = lifetimeType;
-			RemainingLifetime = lifetime;
-			ModifierRecords = new List<ModifierRecord>();
-		}
 
-		/// <summary>
-		/// 變更疊層數
-		/// </summary>
-		/// <param name="delta">變更量（正數增加，負數減少）</param>
-		public void ChangeStack(int delta)
-		{
-			var oldStack = StackCount;
-			StackCount += delta;
-			if (MaxStack >= 0)
-			{
-				StackCount = Math.Min(StackCount, MaxStack);
-			}
+			RemainingLifetime = config.LifetimeType == LifetimeType.Permanent ? config.Lifetime : MathF.Max(1, config.Lifetime);
 
-			StackCount = Math.Max(0, StackCount);
-
-			if (StackCount != oldStack)
-			{
-				OnStackChanged.Invoke(new BuffStackChangedInfo(Id, OwnerId, BuffName, oldStack, StackCount));
-			}
+			StackRecords.Add(new StackRecord(config.Effects ?? new List<AttributeSystem.ModifyEffectInfo>()));
 		}
 
 		/// <summary>
 		/// 刷新生命週期
 		/// </summary>
-		/// <param name="lifetime">新的生命週期值</param>
-		public void RefreshLifetime(float lifetime)
+		public void RefreshLifetime()
 		{
-			if (LifetimeType == LifetimeType.Permanent) return;
+			if(Config.LifetimeType == LifetimeType.Permanent) return;
+			if(IsExpired) return;
+
+			RemainingLifetime = Config.Lifetime;
+			OnChanged?.Invoke();
+		}
+
+		/// <summary>
+		/// 設定生命週期
+		/// </summary>
+		/// <param name="lifetime">新的生命週期值</param>
+		public void SetLifetime(float lifetime)
+		{
+			if(Config.LifetimeType == LifetimeType.Permanent) return;
+			if(IsExpired) return;
+
+			if(Config.LifetimeType == LifetimeType.TurnBased)
+			{
+				lifetime = (int)lifetime;
+			}
 
 			RemainingLifetime = lifetime;
+			OnChanged?.Invoke();
+
+			if(RemainingLifetime <= 0)
+			{
+				HandleLifetimeExpired();
+			}
 		}
 
 		/// <summary>
@@ -116,32 +119,93 @@ namespace Sumorin.GameFramework.BuffSystem
 		/// <param name="delta">變更量（正數增加，負數減少）</param>
 		public void AdjustLifetime(float delta)
 		{
-			if (LifetimeType == LifetimeType.Permanent) return;
+			if(Config.LifetimeType == LifetimeType.Permanent) return;
+			if(IsExpired) return;
+
+			if(Config.LifetimeType == LifetimeType.TurnBased)
+			{
+				delta = (int)delta;
+			}
+
+			if(delta == 0) return;
 
 			RemainingLifetime += delta;
+			OnChanged?.Invoke();
+
+			if(RemainingLifetime <= 0)
+			{
+				HandleLifetimeExpired();
+			}
 		}
 
 		/// <summary>
-		/// 記錄 Modifier
+		/// 調整堆疊數
 		/// </summary>
-		/// <param name="attributeName">屬性名稱</param>
-		/// <param name="modifierId">Modifier 識別碼</param>
-		public void RecordModifier(string attributeName, string modifierId)
+		/// <param name="delta">變更量（正數增加，負數減少）</param>
+		public void AdjustStack(int delta)
 		{
-			ModifierRecords.Add(new ModifierRecord(attributeName, modifierId));
+			if(IsExpired) return;
+
+			var oldCount = StackCount;
+
+			if(delta > 0)
+			{
+				AddStackRecord(delta);
+			}
+			else if(delta < 0)
+			{
+				RemoveStackRecord(Math.Abs(delta));
+			}
+
+			if(oldCount != StackCount)
+			{
+				OnChanged?.Invoke();
+			}
 		}
 
 		/// <summary>
-		/// 移除最後一筆 Modifier 記錄（用於堆疊減少時，以 LIFO 順序移除對應的 Modifier）
+		/// 清空所有堆疊（用於明確移除，不觸發 OnExpired）
 		/// </summary>
-		/// <returns>被移除的記錄，若無記錄則回傳 null</returns>
-		public ModifierRecord RemoveLastModifierRecord()
+		public void ClearStacks()
 		{
-			if (ModifierRecords.Count == 0) return null;
+			StackRecords.Clear();
+		}
 
-			var last = ModifierRecords[^1];
-			ModifierRecords.RemoveAt(ModifierRecords.Count - 1);
-			return last;
+		private void AddStackRecord(int count = 1)
+		{
+			var maxStack = Config.MaxStack < 0 ? int.MaxValue : Config.MaxStack;
+
+			for(var i = 0; i < count && StackCount < maxStack; i++)
+			{
+				var record = new StackRecord(Config.Effects ?? new List<AttributeSystem.ModifyEffectInfo>());
+				StackRecords.Add(record);
+			}
+		}
+
+		private void RemoveStackRecord(int count = 1)
+		{
+			for(var i = 0; i < count && StackRecords.Count > 0; i++)
+			{
+				StackRecords.RemoveAt(StackRecords.Count - 1);
+			}
+
+			if(StackCount <= 0)
+			{
+				OnExpired?.Invoke();
+			}
+		}
+
+		private void HandleLifetimeExpired()
+		{
+			if(Config.RemoveAllOnExpire || StackCount <= 1)
+			{
+				OnExpired?.Invoke();
+			}
+			else
+			{
+				RemoveStackRecord();
+				RemainingLifetime = Config.Lifetime;
+			}
 		}
 	}
 }

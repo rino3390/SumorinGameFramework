@@ -66,22 +66,8 @@ namespace Sumorin.GameFramework.BuffSystem
 		/// 回合流逝處理（僅影響 TurnBased 類型的 Buff）
 		/// </summary>
 		/// <param name="ownerId">擁有者識別碼</param>
-		void TickTurn(string ownerId);
-
-		/// <summary>
-		/// 記錄 Modifier
-		/// </summary>
-		/// <param name="buffId">Buff 識別碼</param>
-		/// <param name="attributeName">屬性名稱</param>
-		/// <param name="modifierId">Modifier 識別碼</param>
-		void RecordModifier(string buffId, string attributeName, string modifierId);
-
-		/// <summary>
-		/// 移除最後一筆 Modifier 記錄
-		/// </summary>
-		/// <param name="buffId">Buff 識別碼</param>
-		/// <returns>被移除的記錄，若無記錄則回傳 null</returns>
-		ModifierRecord RemoveLastModifierRecord(string buffId);
+		/// <param name="turns">經過的回合數（預設為 1）</param>
+		void TickTurn(string ownerId, int turns = 1);
 
 		/// <summary>
 		/// 取得 Buff
@@ -103,5 +89,31 @@ namespace Sumorin.GameFramework.BuffSystem
 		/// <param name="buffId">Buff 識別碼</param>
 		/// <param name="delta">變更量（正數延長，負數縮短；單位依 LifetimeType 決定為秒或回合）</param>
 		void AdjustBuffLifetime(string buffId, float delta);
+
+		/// <summary>
+		/// 設定 Buff 剩餘時效
+		/// </summary>
+		/// <param name="buffId">Buff 識別碼</param>
+		/// <param name="lifetime">新的時效值（單位依 LifetimeType 決定為秒或回合）</param>
+		void SetBuffLifetime(string buffId, float lifetime);
+
+		/// <summary>
+		/// 新增一層堆疊
+		/// </summary>
+		/// <param name="buffId">Buff 識別碼</param>
+		void AddStack(string buffId);
+
+		/// <summary>
+		/// 移除一層堆疊
+		/// </summary>
+		/// <param name="buffId">Buff 識別碼</param>
+		void RemoveStack(string buffId);
+
+		/// <summary>
+		/// 調整 Buff 堆疊數
+		/// </summary>
+		/// <param name="buffId">Buff 識別碼</param>
+		/// <param name="delta">變更量（正數增加，負數減少）</param>
+		void AdjustStack(string buffId, int delta);
 	}
 }

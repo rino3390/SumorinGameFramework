@@ -1,0 +1,26 @@
+{
+    "name": "Sumorin.AttributeSystem",
+    "rootNamespace": "Sumorin.GameFramework.AttributeSystem",
+    "references": [
+        "Sumorin.DDDCore",
+        "Sumorin.SumorinUtility",
+        "UniRx",
+        "Unity.Localization",
+        "Zenject"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.svermeulen.extenject",
+            "expression": "",
+            "define": "ZENJECT"
+        }
+    ],
+    "noEngineReferences": false
+}

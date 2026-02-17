@@ -1,0 +1,28 @@
+{
+    "name": "Sumorin.BuffSystem",
+    "rootNamespace": "Sumorin.GameFramework.BuffSystem",
+    "references": [
+        "Sumorin.AttributeSystem",
+        "Sumorin.DDDCore",
+        "Sumorin.SOBase",
+        "Sumorin.SumorinUtility",
+        "UniRx",
+        "Unity.Localization",
+        "Zenject"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.svermeulen.extenject",
+            "expression": "",
+            "define": "ZENJECT"
+        }
+    ],
+    "noEngineReferences": false
+}

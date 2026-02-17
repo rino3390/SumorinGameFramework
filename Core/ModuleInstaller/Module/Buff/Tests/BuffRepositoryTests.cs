@@ -8,6 +8,17 @@ namespace Sumorin.GameFramework.BuffSystem.Tests
     {
         private BuffRepository repository;
 
+        private static BuffConfig CreateConfig(string buffName = "Poison")
+        {
+            return new BuffConfig
+            {
+                BuffName = buffName,
+                LifetimeType = LifetimeType.Permanent,
+                Lifetime = 0f,
+                MaxStack = -1
+            };
+        }
+
         [SetUp]
         public void SetUp()
         {
@@ -19,7 +30,7 @@ namespace Sumorin.GameFramework.BuffSystem.Tests
         [Test]
         public void Save_WithValidBuff_StoresInRepository()
         {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.Permanent, 0f);
+            var buff = new Buff("buff-1", CreateConfig("Poison"), "owner-1", "source-1");
 
             repository.Save(buff);
 
@@ -29,13 +40,13 @@ namespace Sumorin.GameFramework.BuffSystem.Tests
         [Test]
         public void Save_WithSameId_OverwritesExisting()
         {
-            var buff1 = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.Permanent, 0f);
-            var buff2 = new Buff("buff-1", "Burn", "owner-2", "source-2", -1, LifetimeType.Permanent, 0f);
+            var buff1 = new Buff("buff-1", CreateConfig("Poison"), "owner-1", "source-1");
+            var buff2 = new Buff("buff-1", CreateConfig("Burn"), "owner-2", "source-2");
 
             repository.Save(buff1);
             repository.Save(buff2);
 
-            Assert.AreEqual("Burn", repository.Get("buff-1").BuffName);
+            Assert.AreEqual("Burn", repository.Get("buff-1").Config.BuffName);
         }
 
         #endregion
@@ -45,7 +56,7 @@ namespace Sumorin.GameFramework.BuffSystem.Tests
         [Test]
         public void Get_WithExistingId_ReturnsBuff()
         {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.Permanent, 0f);
+            var buff = new Buff("buff-1", CreateConfig("Poison"), "owner-1", "source-1");
             repository.Save(buff);
 
             var result = repository.Get("buff-1");
@@ -68,9 +79,9 @@ namespace Sumorin.GameFramework.BuffSystem.Tests
         [Test]
         public void GetByOwner_WithExistingOwner_ReturnsOwnerBuffs()
         {
-            var buff1 = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.Permanent, 0f);
-            var buff2 = new Buff("buff-2", "Burn", "owner-1", "source-1", -1, LifetimeType.Permanent, 0f);
-            var buff3 = new Buff("buff-3", "Freeze", "owner-2", "source-1", -1, LifetimeType.Permanent, 0f);
+            var buff1 = new Buff("buff-1", CreateConfig("Poison"), "owner-1", "source-1");
+            var buff2 = new Buff("buff-2", CreateConfig("Burn"), "owner-1", "source-1");
+            var buff3 = new Buff("buff-3", CreateConfig("Freeze"), "owner-2", "source-1");
             repository.Save(buff1);
             repository.Save(buff2);
             repository.Save(buff3);
@@ -97,8 +108,8 @@ namespace Sumorin.GameFramework.BuffSystem.Tests
         [Test]
         public void Values_WithMultipleBuffs_ReturnsAllBuffs()
         {
-            var buff1 = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.Permanent, 0f);
-            var buff2 = new Buff("buff-2", "Burn", "owner-2", "source-1", -1, LifetimeType.Permanent, 0f);
+            var buff1 = new Buff("buff-1", CreateConfig("Poison"), "owner-1", "source-1");
+            var buff2 = new Buff("buff-2", CreateConfig("Burn"), "owner-2", "source-1");
             repository.Save(buff1);
             repository.Save(buff2);
 
@@ -122,7 +133,7 @@ namespace Sumorin.GameFramework.BuffSystem.Tests
         [Test]
         public void DeleteById_WithExistingId_RemovesBuff()
         {
-            var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.Permanent, 0f);
+            var buff = new Buff("buff-1", CreateConfig("Poison"), "owner-1", "source-1");
             repository.Save(buff);
 
             repository.DeleteById("buff-1");

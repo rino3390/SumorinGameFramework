@@ -1,6 +1,9 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using FluentAssertions;
+using NSubstitute;
 using NUnit.Framework;
+using Sumorin.GameFramework.AttributeSystem;
 using UniRx;
 
 namespace Sumorin.GameFramework.BuffSystem.Tests
@@ -8,226 +11,532 @@ namespace Sumorin.GameFramework.BuffSystem.Tests
 	[TestFixture]
 	public class BuffTests
 	{
-	#region Constructor Tests
-		[Test]
-		public void Constructor_WithTimeBased_SetsAllProperties()
+		private static readonly List<ModifyEffectInfo> DefaultEffects = new()
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", 5, LifetimeType.TimeBased, 10f);
+			new ModifyEffectInfo { AttributeName = "Health", ModifyType = ModifyType.Flat, Value = 10 }
+		};
+
+		private static BuffConfig CreateConfig(string buffName = "Poison", LifetimeType lifetimeType = LifetimeType.TimeBased, float lifetime = 10f,
+											   int maxStack = -1, bool removeAllOnExpire = true, List<ModifyEffectInfo> effects = null)
+		{
+			return new BuffConfig
+			{
+				BuffName = buffName,
+				LifetimeType = lifetimeType,
+				Lifetime = lifetime,
+				MaxStack = maxStack,
+				RemoveAllOnExpire = removeAllOnExpire,
+				Effects = effects ?? DefaultEffects
+			};
+		}
+
+	#region Constructor Tests
+		[TestCase(LifetimeType.TimeBased, 10f, TestName = "TimeBased sets all properties")]
+		[TestCase(LifetimeType.TurnBased, 3f, TestName = "TurnBased sets all properties")]
+		[TestCase(LifetimeType.Permanent, 0f, TestName = "Permanent sets all properties")]
+		public void Constructor_SetsAllProperties(LifetimeType lifetimeType, float lifetime)
+		{
+			var config = CreateConfig(lifetimeType: lifetimeType, lifetime: lifetime, maxStack: 5);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
 
 			Assert.AreEqual("buff-1", buff.Id);
-			Assert.AreEqual("Poison", buff.BuffName);
+			Assert.AreEqual("Poison", buff.Config.BuffName);
 			Assert.AreEqual("owner-1", buff.OwnerId);
 			Assert.AreEqual("source-1", buff.SourceId);
 			Assert.AreEqual(1, buff.StackCount);
-			Assert.AreEqual(5, buff.MaxStack);
-			Assert.AreEqual(LifetimeType.TimeBased, buff.LifetimeType);
-			Assert.AreEqual(10f, buff.RemainingLifetime);
-			Assert.IsEmpty(buff.ModifierRecords);
+			Assert.AreEqual(lifetimeType, buff.Config.LifetimeType);
+			Assert.AreEqual(lifetime, buff.RemainingLifetime);
+			Assert.IsFalse(buff.IsExpired);
+			buff.StackRecords.Should().HaveCount(1);
+		}
+
+		[Test]
+		public void Constructor_InitializesStackRecordWithEffects()
+		{
+			var effects = new List<ModifyEffectInfo>
+			{
+				new() { AttributeName = "Health", ModifyType = ModifyType.Flat, Value = 10 },
+				new() { AttributeName = "Attack", ModifyType = ModifyType.Percent, Value = 20 }
+			};
+			var config = CreateConfig(effects: effects);
+
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+
+			buff.StackRecords.Should().HaveCount(1);
+			buff.StackRecords[0].Effects.Should().HaveCount(2);
+			buff.StackRecords[0].Effects[0].AttributeName.Should().Be("Health");
+			buff.StackRecords[0].Effects[1].AttributeName.Should().Be("Attack");
+		}
+
+		private static IEnumerable<TestCaseData> InvalidParameterCases()
+		{
+			var config = CreateConfig(lifetimeType: LifetimeType.Permanent, lifetime: 0f);
+			yield return new TestCaseData(null, config, "owner-1", "source-1", typeof(ArgumentNullException), "id").SetName("Null id throws");
+			yield return new TestCaseData("", config, "owner-1", "source-1", typeof(ArgumentException), "id").SetName("Empty id throws");
+			yield return new TestCaseData("buff-1", config, null, "source-1", typeof(ArgumentException), "ownerId").SetName("Null ownerId throws");
+			yield return new TestCaseData("buff-1", config, "", "source-1", typeof(ArgumentException), "ownerId").SetName("Empty ownerId throws");
+			yield return new TestCaseData("buff-1", config, "owner-1", null, typeof(ArgumentException), "sourceId").SetName("Null sourceId throws");
+			yield return new TestCaseData("buff-1", config, "owner-1", "", typeof(ArgumentException), "sourceId").SetName("Empty sourceId throws");
+		}
+
+		[TestCaseSource(nameof(InvalidParameterCases))]
+		public void Constructor_WithInvalidParameter_ThrowsException(string id, BuffConfig config, string ownerId, string sourceId, Type exceptionType,
+																	 string paramName)
+		{
+			Assert.That(() => new Buff(id, config, ownerId, sourceId), Throws.TypeOf(exceptionType).With.Property("ParamName").EqualTo(paramName));
+		}
+
+		[TestCase(LifetimeType.TimeBased, 0f, TestName = "TimeBased with zero corrects to 1")]
+		[TestCase(LifetimeType.TimeBased, -1f, TestName = "TimeBased with negative corrects to 1")]
+		[TestCase(LifetimeType.TurnBased, 0f, TestName = "TurnBased with zero corrects to 1")]
+		[TestCase(LifetimeType.TurnBased, -5f, TestName = "TurnBased with negative corrects to 1")]
+		public void Constructor_WithInvalidLifetime_CorrectsToMinimum(LifetimeType lifetimeType, float invalidLifetime)
+		{
+			var config = CreateConfig(lifetimeType: lifetimeType, lifetime: invalidLifetime);
+
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+
+			Assert.AreEqual(1f, buff.RemainingLifetime);
 			Assert.IsFalse(buff.IsExpired);
 		}
 
 		[Test]
-		public void Constructor_WithTurnBased_SetsAllProperties()
+		public void Constructor_WithPermanentAndZeroLifetime_KeepsZero()
 		{
-			var buff = new Buff("buff-1", "Shield", "owner-1", "source-1", -1, LifetimeType.TurnBased, 3f);
+			var config = CreateConfig(lifetimeType: LifetimeType.Permanent, lifetime: 0f);
 
-			Assert.AreEqual(LifetimeType.TurnBased, buff.LifetimeType);
-			Assert.AreEqual(3f, buff.RemainingLifetime);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+
+			Assert.AreEqual(0f, buff.RemainingLifetime);
 			Assert.IsFalse(buff.IsExpired);
-		}
-
-		[Test]
-		public void Constructor_WithPermanent_SetsLifetimeTypeOnly()
-		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.Permanent, 0f);
-
-			Assert.AreEqual(LifetimeType.Permanent, buff.LifetimeType);
-			Assert.IsFalse(buff.IsExpired);
-		}
-
-		[Test]
-		public void Constructor_WithNegativeOneMaxStack_MeansUnlimited()
-		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.TimeBased, 10f);
-
-			Assert.AreEqual(-1, buff.MaxStack);
-		}
-
-		[TestCase(null, "Poison", "owner-1", "source-1", typeof(ArgumentNullException), "id", TestName = "Null id throws ArgumentNullException")]
-		[TestCase("", "Poison", "owner-1", "source-1", typeof(ArgumentException), "id", TestName = "Empty id throws ArgumentException")]
-		[TestCase("buff-1", null, "owner-1", "source-1", typeof(ArgumentException), "buffName", TestName = "Null buffName throws ArgumentException")]
-		[TestCase("buff-1", "", "owner-1", "source-1", typeof(ArgumentException), "buffName", TestName = "Empty buffName throws ArgumentException")]
-		[TestCase("buff-1", "Poison", null, "source-1", typeof(ArgumentException), "ownerId", TestName = "Null ownerId throws ArgumentException")]
-		[TestCase("buff-1", "Poison", "", "source-1", typeof(ArgumentException), "ownerId", TestName = "Empty ownerId throws ArgumentException")]
-		[TestCase("buff-1", "Poison", "owner-1", null, typeof(ArgumentException), "sourceId", TestName = "Null sourceId throws ArgumentException")]
-		[TestCase("buff-1", "Poison", "owner-1", "", typeof(ArgumentException), "sourceId", TestName = "Empty sourceId throws ArgumentException")]
-		public void Constructor_WithInvalidStringParameter_ThrowsException(string id, string buffName, string ownerId, string sourceId, Type exceptionType,
-																		   string paramName)
-		{
-			Assert.That(
-				() => new Buff(id, buffName, ownerId, sourceId, -1, LifetimeType.Permanent, 0f), Throws.TypeOf(exceptionType).With.Property("ParamName").EqualTo(paramName)
-			);
-		}
-	#endregion
-
-	#region ChangeStack Tests
-		[TestCase(-1, 1, 2, TestName = "Positive delta increases stack")]
-		[TestCase(-1, 3, 4, TestName = "Positive delta increases stack by count")]
-		[TestCase(3, 5, 3, TestName = "Positive delta clamps to max stack")]
-		[TestCase(-1, -1, 0, TestName = "Negative delta decreases stack")]
-		[TestCase(-1, -5, 0, TestName = "Negative delta clamps to zero")]
-		public void ChangeStack_UpdatesStackCount(int maxStack, int delta, int expected)
-		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", maxStack, LifetimeType.Permanent, 0f);
-
-			buff.ChangeStack(delta);
-
-			Assert.AreEqual(expected, buff.StackCount);
-		}
-
-		[TestCase(1, 1, 2, TestName = "Increase triggers event")]
-		[TestCase(-1, 2, 1, TestName = "Decrease triggers event")]
-		public void ChangeStack_TriggersOnStackChangedEvent(int delta, int expectedOld, int expectedNew)
-		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.Permanent, 0f);
-			if (expectedOld > 1) buff.ChangeStack(expectedOld - 1);
-			BuffStackChangedInfo? receivedInfo = null;
-			buff.OnStackChanged.Subscribe(info => receivedInfo = info);
-
-			buff.ChangeStack(delta);
-
-			receivedInfo.Should().NotBeNull();
-			receivedInfo!.Value.Should().BeEquivalentTo(new BuffStackChangedInfo("buff-1", "owner-1", "Poison", expectedOld, expectedNew));
-		}
-
-		[TestCase(1, 0, TestName = "At max stack with positive delta")]
-		[TestCase(-1, 0, TestName = "Zero delta")]
-		public void ChangeStack_WithNoChange_DoesNotTriggerEvent(int maxStack, int delta)
-		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", maxStack, LifetimeType.Permanent, 0f);
-			var eventTriggered = false;
-			buff.OnStackChanged.Subscribe(_ => eventTriggered = true);
-
-			buff.ChangeStack(delta);
-
-			Assert.IsFalse(eventTriggered);
 		}
 	#endregion
 
 	#region RefreshLifetime Tests
 		[Test]
-		public void RefreshLifetime_UpdatesRemainingLifetime()
+		public void RefreshLifetime_UpdatesRemainingLifetimeAndTriggersOnChanged()
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.TimeBased, 5f);
+			var config = CreateConfig(lifetime: 10f);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			buff.AdjustLifetime(-5f); // 剩餘 5
+			var onChanged = Substitute.For<Action>();
+			buff.OnChanged += onChanged;
 
-			buff.RefreshLifetime(10f);
+			buff.RefreshLifetime();
 
 			Assert.AreEqual(10f, buff.RemainingLifetime);
+			onChanged.Received(1).Invoke();
 		}
 
 		[Test]
 		public void RefreshLifetime_WithPermanent_DoesNothing()
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.Permanent, 0f);
+			var config = CreateConfig(lifetimeType: LifetimeType.Permanent, lifetime: 0f);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			var onChanged = Substitute.For<Action>();
+			buff.OnChanged += onChanged;
 
-			buff.RefreshLifetime(10f);
+			buff.RefreshLifetime();
 
 			Assert.AreEqual(0f, buff.RemainingLifetime);
+			onChanged.DidNotReceive().Invoke();
+		}
+
+		[Test]
+		public void RefreshLifetime_WhenExpired_DoesNothing()
+		{
+			var config = CreateConfig(lifetime: 5f);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			buff.AdjustLifetime(-10f); // 過期
+			var onChanged = Substitute.For<Action>();
+			buff.OnChanged += onChanged;
+
+			buff.RefreshLifetime();
+
+			Assert.IsTrue(buff.IsExpired);
+			onChanged.DidNotReceive().Invoke();
+		}
+	#endregion
+
+	#region SetLifetime Tests
+		[Test]
+		public void SetLifetime_UpdatesRemainingLifetimeAndTriggersOnChanged()
+		{
+			var config = CreateConfig(lifetime: 10f);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			var onChanged = Substitute.For<Action>();
+			buff.OnChanged += onChanged;
+
+			buff.SetLifetime(5f);
+
+			Assert.AreEqual(5f, buff.RemainingLifetime);
+			onChanged.Received(1).Invoke();
+		}
+
+		[Test]
+		public void SetLifetime_WithPermanent_DoesNothing()
+		{
+			var config = CreateConfig(lifetimeType: LifetimeType.Permanent, lifetime: 0f);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			var onChanged = Substitute.For<Action>();
+			buff.OnChanged += onChanged;
+
+			buff.SetLifetime(10f);
+
+			Assert.AreEqual(0f, buff.RemainingLifetime);
+			onChanged.DidNotReceive().Invoke();
+		}
+
+		[Test]
+		public void SetLifetime_WithTurnBased_TruncatesToIntegerAndTriggersOnChanged()
+		{
+			var config = CreateConfig(lifetimeType: LifetimeType.TurnBased, lifetime: 5f);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			var onChanged = Substitute.For<Action>();
+			buff.OnChanged += onChanged;
+
+			buff.SetLifetime(3.7f);
+
+			Assert.AreEqual(3f, buff.RemainingLifetime);
+			onChanged.Received(1).Invoke();
+		}
+
+		[Test]
+		public void SetLifetime_WhenExpired_DoesNothing()
+		{
+			var config = CreateConfig(lifetime: 5f);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			buff.AdjustLifetime(-10f); // 過期
+			var onChanged = Substitute.For<Action>();
+			buff.OnChanged += onChanged;
+
+			buff.SetLifetime(10f);
+
+			Assert.IsTrue(buff.IsExpired);
+			onChanged.DidNotReceive().Invoke();
+		}
+
+		[Test]
+		public void SetLifetime_ToZeroOrNegative_TriggersOnExpired()
+		{
+			var config = CreateConfig(lifetime: 10f);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			var onExpired = Substitute.For<Action>();
+			buff.OnExpired += onExpired;
+
+			buff.SetLifetime(-1f);
+
+			onExpired.Received(1).Invoke();
 		}
 	#endregion
 
 	#region AdjustLifetime Tests
-		[TestCase(3f, 13f, TestName = "Positive delta increases lifetime")]
-		[TestCase(-3f, 7f, TestName = "Negative delta decreases lifetime")]
-		public void AdjustLifetime_UpdatesRemainingLifetime(float delta, float expected)
+		[Test]
+		public void AdjustLifetime_UpdatesRemainingLifetimeAndTriggersOnChanged()
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.TimeBased, 10f);
+			var config = CreateConfig(lifetime: 10f);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			var onChanged = Substitute.For<Action>();
+			buff.OnChanged += onChanged;
 
-			buff.AdjustLifetime(delta);
+			buff.AdjustLifetime(3f);
 
-			Assert.AreEqual(expected, buff.RemainingLifetime);
+			Assert.AreEqual(13f, buff.RemainingLifetime);
+			onChanged.Received(1).Invoke();
 		}
 
 		[Test]
 		public void AdjustLifetime_WithPermanent_DoesNothing()
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.Permanent, 0f);
+			var config = CreateConfig(lifetimeType: LifetimeType.Permanent, lifetime: 0f);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			var onChanged = Substitute.For<Action>();
+			buff.OnChanged += onChanged;
 
 			buff.AdjustLifetime(3f);
 
 			Assert.AreEqual(0f, buff.RemainingLifetime);
+			onChanged.DidNotReceive().Invoke();
 		}
 
 		[Test]
-		public void AdjustLifetime_WithTurnBased_UpdatesLifetime()
+		public void AdjustLifetime_WithZeroDelta_DoesNothing()
 		{
-			var buff = new Buff("buff-1", "Shield", "owner-1", "source-1", -1, LifetimeType.TurnBased, 5f);
+			var config = CreateConfig(lifetime: 10f);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			var onChanged = Substitute.For<Action>();
+			buff.OnChanged += onChanged;
 
-			buff.AdjustLifetime(-2f);
+			buff.AdjustLifetime(0f);
+
+			Assert.AreEqual(10f, buff.RemainingLifetime);
+			onChanged.DidNotReceive().Invoke();
+		}
+
+		[Test]
+		public void AdjustLifetime_WhenExpired_DoesNothing()
+		{
+			var config = CreateConfig(lifetime: 5f);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			buff.AdjustLifetime(-10f); // 過期
+			var onChanged = Substitute.For<Action>();
+			buff.OnChanged += onChanged;
+
+			buff.AdjustLifetime(5f);
+
+			Assert.IsTrue(buff.IsExpired);
+			onChanged.DidNotReceive().Invoke();
+		}
+
+		[Test]
+		public void AdjustLifetime_WithTurnBased_TruncatesToIntegerAndTriggersOnChanged()
+		{
+			var config = CreateConfig(lifetimeType: LifetimeType.TurnBased, lifetime: 5f);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			var onChanged = Substitute.For<Action>();
+			buff.OnChanged += onChanged;
+
+			buff.AdjustLifetime(-2.7f);
 
 			Assert.AreEqual(3f, buff.RemainingLifetime);
+			onChanged.Received(1).Invoke();
+		}
+	#endregion
+
+	#region OnExpired Event Tests
+		[TestCase(LifetimeType.TimeBased, 10f, -15f, TestName = "TimeBased triggers when lifetime depleted")]
+		[TestCase(LifetimeType.TurnBased, 3f, -5f, TestName = "TurnBased triggers when lifetime depleted")]
+		public void AdjustLifetime_WhenBecomesExpired_TriggersOnExpired(LifetimeType type, float initialLifetime, float delta)
+		{
+			var config = CreateConfig(lifetimeType: type, lifetime: initialLifetime);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			var onExpired = Substitute.For<Action>();
+			buff.OnExpired += onExpired;
+
+			buff.AdjustLifetime(delta);
+
+			onExpired.Received(1).Invoke();
+		}
+
+		[TestCase(LifetimeType.TimeBased, 10f, -5f, TestName = "TimeBased does not trigger when still valid")]
+		[TestCase(LifetimeType.TurnBased, 5f, -2f, TestName = "TurnBased does not trigger when still valid")]
+		[TestCase(LifetimeType.Permanent, 0f, -10f, TestName = "Permanent never triggers")]
+		public void AdjustLifetime_WhenNotExpired_DoesNotTriggerOnExpired(LifetimeType type, float initialLifetime, float delta)
+		{
+			var config = CreateConfig(lifetimeType: type, lifetime: initialLifetime);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			var onExpired = Substitute.For<Action>();
+			buff.OnExpired += onExpired;
+
+			buff.AdjustLifetime(delta);
+
+			onExpired.DidNotReceive().Invoke();
+		}
+
+		[Test]
+		public void AdjustLifetime_WhenAlreadyExpired_DoesNotTriggerAgain()
+		{
+			var config = CreateConfig(lifetime: 5f);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			var onExpired = Substitute.For<Action>();
+			buff.OnExpired += onExpired;
+
+			buff.AdjustLifetime(-10f);
+			buff.AdjustLifetime(-5f);
+
+			onExpired.Received(1).Invoke();
+		}
+
+		[Test]
+		public void AdjustLifetime_WhenExpired_WithRemoveAllOnExpireFalse_AndMultipleStacks_RemovesOneStackAndRefreshes()
+		{
+			var config = CreateConfig(lifetime: 5f, removeAllOnExpire: false);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			buff.AdjustStack(1); // stack = 2
+			StackRecord removedRecord = null;
+			buff.StackRecords.ObserveRemove().Subscribe(e => removedRecord = e.Value);
+			var onExpired = Substitute.For<Action>();
+			buff.OnExpired += onExpired;
+
+			buff.AdjustLifetime(-10f);
+
+			Assert.AreEqual(1, buff.StackCount);
+			Assert.AreEqual(5f, buff.RemainingLifetime);
+			Assert.IsNotNull(removedRecord);
+			Assert.IsFalse(buff.IsExpired);
+			onExpired.DidNotReceive().Invoke();
+		}
+
+		[Test]
+		public void AdjustLifetime_WhenExpired_WithRemoveAllOnExpireTrue_TriggersOnExpired()
+		{
+			var config = CreateConfig(lifetime: 5f, removeAllOnExpire: true);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			buff.AdjustStack(1); // stack = 2
+			var onExpired = Substitute.For<Action>();
+			buff.OnExpired += onExpired;
+
+			buff.AdjustLifetime(-10f);
+
+			onExpired.Received(1).Invoke();
+		}
+
+		[Test]
+		public void AdjustLifetime_WhenExpired_WithRemoveAllOnExpireFalse_AndSingleStack_TriggersOnExpired()
+		{
+			var config = CreateConfig(lifetime: 5f, removeAllOnExpire: false);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			var onExpired = Substitute.For<Action>();
+			buff.OnExpired += onExpired;
+
+			buff.AdjustLifetime(-10f);
+
+			onExpired.Received(1).Invoke();
 		}
 	#endregion
 
 	#region IsExpired Tests
-		[TestCase(LifetimeType.TimeBased, 0f, true, TestName = "TimeBased zero returns true")]
-		[TestCase(LifetimeType.TimeBased, -1f, true, TestName = "TimeBased negative returns true")]
-		[TestCase(LifetimeType.TurnBased, 0f, true, TestName = "TurnBased zero returns true")]
-		[TestCase(LifetimeType.TurnBased, -1f, true, TestName = "TurnBased negative returns true")]
-		[TestCase(LifetimeType.TimeBased, 10f, false, TestName = "TimeBased positive returns false")]
-		[TestCase(LifetimeType.TurnBased, 5f, false, TestName = "TurnBased positive returns false")]
-		[TestCase(LifetimeType.Permanent, 0f, false, TestName = "Permanent with zero returns false")]
-		[TestCase(LifetimeType.Permanent, -1f, false, TestName = "Permanent with negative returns false")]
-		public void IsExpired_ReturnsExpectedResult(LifetimeType type, float lifetime, bool expected)
+		[TestCase(LifetimeType.TimeBased, -1f, TestName = "TimeBased negative corrected to 1")]
+		[TestCase(LifetimeType.TurnBased, -1f, TestName = "TurnBased negative corrected to 1")]
+		public void IsExpired_WithNegativeLifetime_CorrectedToOneAndNotExpired(LifetimeType type, float lifetime)
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, type, lifetime);
+			var config = CreateConfig(lifetimeType: type, lifetime: lifetime);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
 
-			Assert.AreEqual(expected, buff.IsExpired);
+			Assert.AreEqual(1f, buff.RemainingLifetime);
+			Assert.IsFalse(buff.IsExpired);
+		}
+
+		[TestCase(LifetimeType.Permanent, 0f, TestName = "Permanent with zero")]
+		[TestCase(LifetimeType.Permanent, -1f, TestName = "Permanent with negative")]
+		public void IsExpired_WithPermanentLifetime_NeverExpires(LifetimeType type, float lifetime)
+		{
+			var config = CreateConfig(lifetimeType: type, lifetime: lifetime);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+
+			Assert.IsFalse(buff.IsExpired);
 		}
 
 		[Test]
-		public void IsExpired_WithStackCountZero_ReturnsTrue()
+		public void IsExpired_WhenStackDepleted_ReturnsTrueAndTriggersOnExpired()
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.Permanent, 0f);
+			var config = CreateConfig(lifetimeType: LifetimeType.Permanent, lifetime: 0f);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			var onExpired = Substitute.For<Action>();
+			buff.OnExpired += onExpired;
 
-			buff.ChangeStack(-1);
+			buff.AdjustStack(-1);
 
 			Assert.IsTrue(buff.IsExpired);
+			onExpired.Received(1).Invoke();
 		}
 	#endregion
 
-	#region ModifierRecord Tests
+	#region StackRecord Tests
 		[Test]
-		public void RecordModifier_AddsRecordToList()
+		public void AddStackRecord_AddsRecordAndTriggersOnChanged()
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.Permanent, 0f);
+			var config = CreateConfig(lifetimeType: LifetimeType.Permanent, lifetime: 0f);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			var onAdd = Substitute.For<Action>();
+			buff.StackRecords.ObserveAdd().Subscribe(_ => onAdd());
+			var onChanged = Substitute.For<Action>();
+			buff.OnChanged += onChanged;
 
-			buff.RecordModifier("Health", "mod-1");
+			buff.AdjustStack(1);
 
-			buff.ModifierRecords.Should().BeEquivalentTo(new[] { new ModifierRecord("Health", "mod-1") });
+			onAdd.Received(1).Invoke();
+			buff.StackRecords.Should().HaveCount(2);
+			buff.StackRecords[1].Effects.Should().BeEquivalentTo(config.Effects);
+			onChanged.Received(1).Invoke();
 		}
 
 		[Test]
-		public void RemoveLastModifierRecord_RemovesAndReturnsLastRecord()
+		public void AddStackRecord_WhenAtMaxStack_DoesNotAddAndNoOnChanged()
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.Permanent, 0f);
-			buff.RecordModifier("Health", "mod-1");
-			buff.RecordModifier("Defense", "mod-2");
+			var config = CreateConfig(lifetimeType: LifetimeType.Permanent, lifetime: 0f, maxStack: 2);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			buff.AdjustStack(1); // stack = 2
+			var onAdd = Substitute.For<Action>();
+			buff.StackRecords.ObserveAdd().Subscribe(_ => onAdd());
+			var onChanged = Substitute.For<Action>();
+			buff.OnChanged += onChanged;
 
-			var removed = buff.RemoveLastModifierRecord();
+			buff.AdjustStack(1); // 嘗試第三層
 
-			removed.Should().BeEquivalentTo(new ModifierRecord("Defense", "mod-2"));
-			buff.ModifierRecords.Should().BeEquivalentTo(new[] { new ModifierRecord("Health", "mod-1") });
+			onAdd.DidNotReceive().Invoke();
+			buff.StackRecords.Should().HaveCount(2);
+			onChanged.DidNotReceive().Invoke();
 		}
 
 		[Test]
-		public void RemoveLastModifierRecord_WithEmptyList_ReturnsNull()
+		public void RemoveLastStackRecord_RemovesRecordAndTriggersOnChanged()
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.Permanent, 0f);
+			var config = CreateConfig(lifetimeType: LifetimeType.Permanent, lifetime: 0f);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			buff.AdjustStack(1); // stack = 2
+			var onRemove = Substitute.For<Action>();
+			buff.StackRecords.ObserveRemove().Subscribe(_ => onRemove());
+			var onChanged = Substitute.For<Action>();
+			buff.OnChanged += onChanged;
 
-			var removed = buff.RemoveLastModifierRecord();
+			buff.AdjustStack(-1);
 
-			Assert.IsNull(removed);
+			onRemove.Received(1).Invoke();
+			buff.StackRecords.Should().HaveCount(1);
+			buff.StackRecords[0].Effects.Should().BeEquivalentTo(config.Effects);
+			onChanged.Received(1).Invoke();
+		}
+
+		[Test]
+		public void RemoveLastStackRecord_WithCount_RemovesMultipleRecordsAndTriggersOnChanged()
+		{
+			var config = CreateConfig(lifetimeType: LifetimeType.Permanent, lifetime: 0f);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			buff.AdjustStack(1);
+			buff.AdjustStack(1);
+			var onRemove = Substitute.For<Action>();
+			buff.StackRecords.ObserveRemove().Subscribe(_ => onRemove());
+			var onChanged = Substitute.For<Action>();
+			buff.OnChanged += onChanged;
+
+			buff.AdjustStack(-2);
+
+			onRemove.Received(2).Invoke();
+			Assert.AreEqual(1, buff.StackCount);
+			onChanged.Received(1).Invoke();
+		}
+
+		[Test]
+		public void RemoveLastStackRecord_WhenOnlyOneStack_BecomesEmptyAndTriggersOnExpired()
+		{
+			var config = CreateConfig(lifetimeType: LifetimeType.Permanent, lifetime: 0f);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			var onExpired = Substitute.For<Action>();
+			buff.OnExpired += onExpired;
+
+			buff.AdjustStack(-1);
+
+			Assert.AreEqual(0, buff.StackCount);
+			onExpired.Received(1).Invoke();
+		}
+
+		[Test]
+		public void ClearStacks_ClearsAllStacksAndTriggersObserveReset_WithoutTriggeringOnExpired()
+		{
+			var config = CreateConfig(lifetimeType: LifetimeType.Permanent, lifetime: 0f);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			buff.AdjustStack(2);
+			var onExpired = Substitute.For<Action>();
+			var onReset = Substitute.For<Action>();
+			buff.OnExpired += onExpired;
+			buff.StackRecords.ObserveReset().Subscribe(_ => onReset());
+
+			buff.ClearStacks();
+
+			Assert.AreEqual(0, buff.StackCount);
+			onReset.Received(1).Invoke();
+			onExpired.DidNotReceive().Invoke();
 		}
 	#endregion
 
@@ -235,7 +544,8 @@ namespace Sumorin.GameFramework.BuffSystem.Tests
 		[Test]
 		public void AdjustLifetime_WithLargePositiveDelta_IncreasesLifetime()
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.TimeBased, 10f);
+			var config = CreateConfig(lifetime: 10f);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
 
 			buff.AdjustLifetime(float.MaxValue);
 
@@ -243,13 +553,16 @@ namespace Sumorin.GameFramework.BuffSystem.Tests
 		}
 
 		[Test]
-		public void AdjustLifetime_WithNegativeInfinity_SetsToNegativeInfinity()
+		public void AdjustLifetime_WithNegativeInfinity_TriggersExpired()
 		{
-			var buff = new Buff("buff-1", "Poison", "owner-1", "source-1", -1, LifetimeType.TimeBased, 10f);
+			var config = CreateConfig(lifetime: 10f);
+			var buff = new Buff("buff-1", config, "owner-1", "source-1");
+			var onExpired = Substitute.For<Action>();
+			buff.OnExpired += onExpired;
 
 			buff.AdjustLifetime(float.NegativeInfinity);
 
-			Assert.AreEqual(float.NegativeInfinity, buff.RemainingLifetime);
+			onExpired.Received(1).Invoke();
 		}
 	#endregion
 	}

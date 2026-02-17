@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Sumorin.GameFramework.AttributeSystem;
 
 namespace Sumorin.GameFramework.BuffSystem
 {
@@ -45,7 +46,12 @@ namespace Sumorin.GameFramework.BuffSystem
 		/// <summary>
 		/// 效果列表
 		/// </summary>
-		public List<BuffEffectConfig> Effects;
+		public List<ModifyEffectInfo> Effects;
+
+		/// <summary>
+		/// 時間到期時是否移除全部堆疊，false 表示只移除一層並重置時間
+		/// </summary>
+		public bool RemoveAllOnExpire;
 
 		/// <summary>
 		/// 標籤列表（用於分類，如 "Poison", "Debuff", "DoT"）

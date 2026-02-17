@@ -95,12 +95,21 @@ namespace Sumorin.GameFramework.AttributeSystem
         }
 
 		/// <inheritdoc />
-        public void AddModifier(string ownerId, string attributeName, Modifier modifier)
+        public string AddModifier(string ownerId, ModifyEffectInfo effect, string sourceId, string description = "")
         {
-            var attribute = repository.Get(ownerId, attributeName) ?? CreateAttribute(ownerId, attributeName, 0);
+            var attribute = repository.Get(ownerId, effect.AttributeName) ?? CreateAttribute(ownerId, effect.AttributeName, 0);
 
+			var modifierId = GUID.NewGuid();
+            var modifier = new Modifier(modifierId, effect.ModifyType, effect.Value, sourceId, description);
             attribute.AddModifier(modifier);
+            return modifierId;
         }
+
+		/// <inheritdoc />
+        public List<(string attributeName, string modifierId)> AddModifiers(string ownerId, List<ModifyEffectInfo> effects, string sourceId, string description = "")
+		{
+			return (from effect in effects let modifierId = AddModifier(ownerId, effect, sourceId, description) select (effect.AttributeName, modifierId)).ToList();
+		}
 
 		/// <inheritdoc />
         public void RemoveModifierById(string ownerId, string attributeName, string modifierId)
@@ -116,6 +125,24 @@ namespace Sumorin.GameFramework.AttributeSystem
             var attribute = repository.Get(ownerId, attributeName);
 
 			attribute?.RemoveModifiersBySource(sourceId);
+        }
+
+		/// <inheritdoc />
+        public void RemoveModifier(string ownerId, ModifyEffectInfo effect, string sourceId)
+        {
+            var attribute = repository.Get(ownerId, effect.AttributeName);
+
+			attribute?.RemoveFirstModifier(effect.ModifyType, effect.Value, sourceId);
+        }
+
+		/// <inheritdoc />
+        public void RemoveAllModifiersBySource(string ownerId, string sourceId)
+        {
+            var attributes = repository.GetByOwnerId(ownerId);
+            foreach(var attribute in attributes)
+            {
+                attribute.RemoveModifiersBySource(sourceId);
+            }
         }
 
 		/// <inheritdoc />
