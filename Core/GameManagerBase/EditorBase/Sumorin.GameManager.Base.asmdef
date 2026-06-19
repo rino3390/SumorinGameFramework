@@ -4,7 +4,9 @@
     "references": [
         "Sumorin.SOBase",
         "Sumorin.SumorinUtility",
-        "Sumorin.SumorinUtility.Editor"
+        "Sumorin.SumorinUtility.Editor",
+        "Unity.Localization",
+        "Unity.Localization.Editor"
     ],
     "includePlatforms": [
         "Editor"

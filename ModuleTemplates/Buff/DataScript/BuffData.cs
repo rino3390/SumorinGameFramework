@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
 using Sumorin.GameFramework.AttributeSystem;
 using Sumorin.GameFramework.GameManagerBase;
-using Sumorin.GameFramework.SumorinUtility;
 using Sirenix.OdinInspector;
 using UnityEngine;
-using UnityEngine.Localization;
 
 namespace Sumorin.GameFramework.BuffSystem
 {
@@ -14,10 +12,6 @@ namespace Sumorin.GameFramework.BuffSystem
 	[DataEditorConfig("Buff 資料", "Data/Buff", "Buff")]
 	public class BuffData: SODataBase
 	{
-		[LabelText("Buff 名稱")]
-		[ValidateInput(nameof(IsBuffNameLegal), "Buff 名稱尚未設定")]
-		public LocalizedString BuffName;
-
 		[HorizontalGroup("LifetimeType")]
 		[LabelText("生命週期")]
 		public LifetimeType LifetimeType;
@@ -58,7 +52,7 @@ namespace Sumorin.GameFramework.BuffSystem
 		{
 			return new BuffConfig
 			{
-				BuffName = BuffName.GetLocalizedString(),
+				BuffName = DataName.GetLocalizedString(),
 				LifetimeType = LifetimeType,
 				Lifetime = Lifetime,
 				StackBehavior = StackBehavior,
@@ -68,25 +62,5 @@ namespace Sumorin.GameFramework.BuffSystem
 				Effects = Effects ?? new List<ModifyEffectInfo>()
 			};
 		}
-
-	#if UNITY_EDITOR
-		/// <summary>
-		/// 驗證資料是否合法
-		/// </summary>
-		/// <returns>資料是否合法</returns>
-		public override bool IsDataLegal()
-		{
-			return base.IsDataLegal() && IsBuffNameLegal();
-		}
-
-		/// <summary>
-		/// 驗證 Buff 名稱是否已設定
-		/// </summary>
-		/// <returns>名稱已設定則回傳 true</returns>
-		private bool IsBuffNameLegal()
-		{
-			return !BuffName.IsNullOrEmpty();
-		}
-	#endif
 	}
 }

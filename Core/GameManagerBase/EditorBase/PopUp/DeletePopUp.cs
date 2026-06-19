@@ -1,4 +1,4 @@
-﻿using Sirenix.OdinInspector;
+using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using System;
 using UnityEditor;
@@ -6,47 +6,52 @@ using UnityEngine;
 
 namespace Sumorin.GameFramework.GameManagerBase
 {
-    /// <summary>
-    /// 刪除資料確認彈出視窗
-    /// </summary>
-    [Serializable]
-    public class DeletePopUp
-    {
-        [Title("刪除確認")]
-        [InlineEditor, ShowInInspector, ReadOnly]
-        private SODataBase soData;
+	/// <summary>
+	/// 刪除資料確認彈出視窗
+	/// </summary>
+	[Serializable]
+	public class DeletePopUp
+	{
+		[Title("刪除確認")]
+		[InlineEditor, ShowInInspector, ReadOnly]
+		private SODataBase soData;
 
-        private string assetPath;
-        private static OdinEditorWindow popupWindow;
+		private string assetPath;
+		private readonly Action onDeleted;
+		private static OdinEditorWindow popupWindow;
 
-        /// <summary>
-        /// 初始化刪除彈出視窗
-        /// </summary>
-        /// <param name="soData">要刪除的資料</param>
-        public DeletePopUp(SODataBase soData)
-        {
-            this.soData = soData;
-            assetPath = AssetDatabase.GetAssetPath(soData);
-        }
+		/// <summary>
+		/// 初始化刪除彈出視窗
+		/// </summary>
+		/// <param name="soData">要刪除的資料</param>
+		/// <param name="onDeleted">刪除完成後的回呼</param>
+		public DeletePopUp(SODataBase soData, Action onDeleted = null)
+		{
+			this.soData = soData;
+			this.onDeleted = onDeleted;
+			assetPath = AssetDatabase.GetAssetPath(soData);
+		}
 
-        /// <summary>
-        /// 開啟刪除確認視窗
-        /// </summary>
-        /// <param name="soData">要刪除的資料</param>
-        /// <param name="rect">視窗位置</param>
-        public static void OpenWindow(SODataBase soData, Rect rect)
-        {
-            popupWindow = OdinEditorWindow.InspectObjectInDropDown(new DeletePopUp(soData), rect, 300);
-        }
+		/// <summary>
+		/// 開啟刪除確認視窗
+		/// </summary>
+		/// <param name="soData">要刪除的資料</param>
+		/// <param name="rect">視窗位置</param>
+		/// <param name="onDeleted">刪除完成後的回呼</param>
+		public static void OpenWindow(SODataBase soData, Rect rect, Action onDeleted = null)
+		{
+			popupWindow = OdinEditorWindow.InspectObjectInDropDown(new DeletePopUp(soData, onDeleted), rect, 300);
+		}
 
-        /// <summary>
-        /// 執行刪除
-        /// </summary>
-        [Button]
-        public void Delete()
-        {
-            AssetDatabase.DeleteAsset(assetPath);
-            popupWindow.Close();
-        }
-    }
+		/// <summary>
+		/// 執行刪除
+		/// </summary>
+		[Button]
+		public void Delete()
+		{
+			AssetDatabase.DeleteAsset(assetPath);
+			popupWindow.Close();
+			onDeleted?.Invoke();
+		}
+	}
 }

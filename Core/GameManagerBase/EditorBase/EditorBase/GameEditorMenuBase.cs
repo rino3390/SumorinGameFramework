@@ -36,6 +36,11 @@ namespace Sumorin.GameFramework.GameManagerBase
 		/// </summary>
 		public virtual string TabName => GetType().Name;
 
+		/// <summary>
+		/// 選單樹重建後觸發，供宿主視窗同步重建
+		/// </summary>
+		public event Action MenuTreeRebuilt;
+
 		private bool initialized;
 
 		/// <summary>
@@ -56,6 +61,7 @@ namespace Sumorin.GameFramework.GameManagerBase
 		public void ForceMenuTreeRebuild()
 		{
 			MenuTree = BuildMenuTree();
+			MenuTreeRebuilt?.Invoke();
 		}
 
 		public override string ToString() => TabName;
