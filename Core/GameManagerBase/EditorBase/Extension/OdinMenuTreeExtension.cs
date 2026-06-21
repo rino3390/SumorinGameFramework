@@ -57,19 +57,27 @@ namespace Sumorin.GameFramework.GameManagerBase
 		}
 
 		/// <summary>
-		/// 以資料的本地化顯示名稱（DataName）作為選單名稱，未設定時保留原檔名
+		/// 以資料的本地化顯示名稱（DataName）作為選單名稱，未設定時保留原檔名；
+		/// 掛 OnDrawItem 每次重繪重算，DataName 變更後即時反映。
 		/// </summary>
 		/// <param name="menuItem">選單項目</param>
 		private static void UseDataNameAsMenuName(OdinMenuItem menuItem)
 		{
-			if(menuItem.Value is not SODataBase data || data.DataName.IsNullOrEmpty()) return;
+			if(menuItem.Value is not SODataBase data) return;
 
-			var displayName = ResolveDataName(data.DataName);
-
-			if(!string.IsNullOrEmpty(displayName))
+			void Apply()
 			{
-				menuItem.Name = displayName;
+				if(data.DataName.IsNullOrEmpty()) return;
+
+				var displayName = ResolveDataName(data.DataName);
+				if(!string.IsNullOrEmpty(displayName))
+				{
+					menuItem.Name = displayName;
+				}
 			}
+
+			Apply();                              // 初始名稱（搜尋／首次顯示）
+			menuItem.OnDrawItem += _ => Apply();  // 每次重繪即時更新
 		}
 
 		/// <summary>

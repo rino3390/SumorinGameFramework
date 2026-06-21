@@ -103,7 +103,7 @@ namespace Sumorin.GameFramework.GameManager
 			var dropdownRect = new Rect(foldoutRect.xMax, rect.y, rect.width - EditorGUIUtility.labelWidth, rect.height);
 
 			EditorGUI.BeginProperty(foldoutRect, label, unityProperty);
-			unityProperty.isExpanded = EditorGUI.Foldout(foldoutRect, unityProperty.isExpanded, label, true);
+			unityProperty.isExpanded = EditorGUI.Foldout(foldoutRect, unityProperty.isExpanded, GetFoldoutLabel(label), true);
 
 			// 下拉選擇器按鈕
 			if(EditorGUI.DropdownButton(dropdownRect, GetFieldLabel(), FocusType.Passive))
@@ -168,6 +168,21 @@ namespace Sumorin.GameFramework.GameManager
 			}
 		}
 
+		/// <summary>
+		/// 取得 Foldout 標籤，將主要語言預覽附加在欄位 Label 右側（例如「顯示名稱 (生命值)」）
+		/// </summary>
+		/// <param name="label">欄位原始 Label</param>
+		/// <returns>附加預覽後的 Label，無預覽時回傳原 Label</returns>
+		private GUIContent GetFoldoutLabel(GUIContent label)
+		{
+			if(label == null) return label;
+
+			var preview = GetPrimaryLocaleValue();
+			if(string.IsNullOrEmpty(preview)) return label;
+
+			return new GUIContent($"{label.text} ({preview})", label.image, label.tooltip);
+		}
+
 		private GUIContent GetFieldLabel()
 		{
 			if(fieldLabel != null) return fieldLabel;
@@ -180,12 +195,7 @@ namespace Sumorin.GameFramework.GameManager
 				var eol = key.IndexOf('\n');
 				if(eol > 0) key = key.Substring(0, eol);
 
-				var preview = GetPrimaryLocaleValue();
-				var text = string.IsNullOrEmpty(preview) ?
-							   $"{selectedCollection.TableCollectionName}/{key}" :
-							   $"{selectedCollection.TableCollectionName}/{key}  ({preview})";
-
-				fieldLabel = new GUIContent(text, icon.image);
+				fieldLabel = new GUIContent($"{selectedCollection.TableCollectionName}/{key}", icon.image);
 			}
 			else
 			{
