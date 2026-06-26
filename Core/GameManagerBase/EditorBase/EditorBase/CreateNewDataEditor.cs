@@ -105,7 +105,7 @@ namespace Sumorin.GameFramework.GameManagerBase
         private void SetNewData()
         {
             Data = ScriptableObject.CreateInstance<T>();
-            Data.Id = GUID.NewGuid();
+            Data.Id = SumorinUtility.GUID.NewGuid();
             var root = DataRootPath.Split('/');
             Data.AssetName = root[^2] + " - " + Data.Id;
         }
