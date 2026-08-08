@@ -20,7 +20,6 @@ Unity MVP 架構共用框架，提供 DDD 核心、遊戲資料管理、模組�
 |------|----------|
 | Zenject | OpenUPM 或 Asset Store |
 | DoTween | Asset Store |
-| MessagePipe | OpenUPM 或 NuGet |
 | UniRx | OpenUPM |
 | UniTask | OpenUPM |
 | Odin Inspector | Asset Store（付費） |
@@ -36,8 +35,6 @@ Unity MVP 架構共用框架，提供 DDD 核心、遊戲資料管理、模組�
 "scopes": [
     "com.svermeulen.extenject",
     "com.cysharp.unitask",
-    "com.cysharp.messagepipe",
-    "com.cysharp.messagepipe.zenject",
     "com.neuecc.unirx"
 ]
 ```
@@ -122,7 +119,7 @@ public class PlayerService
 
 ### EventBus
 
-基於 MessagePipe 的事件系統，支援同步與非同步事件：
+自實作事件系統（DDDCore EventBus），支援同步與非同步事件：
 
 ```csharp
 // 定義事件
