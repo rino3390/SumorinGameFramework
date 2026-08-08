@@ -1,6 +1,5 @@
 {
     "name": "Game.View",
-    "rootNamespace": "Game.View",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],

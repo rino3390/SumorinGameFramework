@@ -720,8 +720,8 @@ namespace Sumorin.ModuleInstaller
             }
 
             // 生成 asmdef 檔案
-            CreateAsmdef("Script/Flow/Game.Flow.asmdef", "Game.Flow", Array.Empty<string>());
-            CreateAsmdef("Script/Presenter/Game.Presenter.asmdef", "Game.Presenter", new[] { "Game.Flow", "Game.View" });
+            CreateAsmdef("Script/Flow/Game.Flow.asmdef", "Game.Flow", new[] { "Sumorin.DDDCore", "Game.Presenter" });
+            CreateAsmdef("Script/Presenter/Game.Presenter.asmdef", "Game.Presenter", new[] { "Sumorin.DDDCore", "Game.View" });
             CreateAsmdef("Script/Utility/Game.Utility.asmdef", "Game.Utility", Array.Empty<string>());
             CreateAsmdef("Script/View/Game.View.asmdef", "Game.View", Array.Empty<string>());
         }
@@ -740,7 +740,6 @@ namespace Sumorin.ModuleInstaller
 
             var content = $@"{{
     ""name"": ""{asmdefName}"",
-    ""rootNamespace"": """",
     ""references"": [
         {referencesJson}
     ],

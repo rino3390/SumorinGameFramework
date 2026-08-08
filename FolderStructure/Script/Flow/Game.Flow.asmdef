@@ -1,6 +1,5 @@
 ﻿{
   "name": "Game.Flow",
-  "rootNamespace": "Game.Flow",
   "references": [
     "Sumorin.DDDCore",
     "Game.Presenter"
