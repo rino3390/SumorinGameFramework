@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace Sumorin.GameFramework.GameManager
+namespace Sumorin.GameManager
 {
     /// <summary>
     /// Odin 下拉選單工具

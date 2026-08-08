@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
-using Sumorin.GameFramework.GameManagerBase;
-using Sumorin.GameFramework.SumorinUtility.Editor;
+using Sumorin.GameManagerBase;
+using Sumorin.SumorinUtility.Editor;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
 using System.Collections.Generic;
 
-namespace Sumorin.GameFramework.GameSetting
+namespace Sumorin.GameSetting
 {
 	/// <summary>
 	/// 遊戲設定配置，管理要顯示的 Setting 項目

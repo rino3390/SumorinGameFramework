@@ -1,8 +1,8 @@
-﻿using Sumorin.GameFramework.SumorinUtility;
+﻿using Sumorin.SumorinUtility;
 using Sirenix.OdinInspector;
 using UnityEngine.Localization;
 
-namespace Sumorin.GameFramework.GameManagerBase
+namespace Sumorin.GameManagerBase
 {
 	/// <summary>
 	/// ScriptableObject 資料基底類別，提供 Id、AssetName 與本地化顯示名稱

@@ -1,12 +1,12 @@
-﻿using Sumorin.GameFramework.GameManagerBase;
-using Sumorin.GameFramework.SumorinUtility.Editor;
+﻿using Sumorin.GameManagerBase;
+using Sumorin.SumorinUtility.Editor;
 using Sirenix.OdinInspector;
 using System;
 using System.Collections;
 using System.Linq;
 using System.Reflection;
 
-namespace Sumorin.GameFramework.GameManager
+namespace Sumorin.GameManager
 {
 	/// <summary>
 	/// Editor 頁籤資料

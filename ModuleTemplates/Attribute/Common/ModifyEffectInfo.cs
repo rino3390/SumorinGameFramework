@@ -1,7 +1,7 @@
 using System;
 using Sirenix.OdinInspector;
 
-namespace Sumorin.GameFramework.AttributeSystem
+namespace Sumorin.AttributeSystem
 {
 	/// <summary>
 	/// 屬性修改效果資訊，描述如何修改一個屬性
@@ -14,7 +14,7 @@ namespace Sumorin.GameFramework.AttributeSystem
 		/// </summary>
 		[LabelText("目標屬性")]
 		[Required]
-		[ValueDropdown("@Sumorin.GameFramework.AttributeSystem.AttributeDropdownProvider.GetAttributeNames()")]
+		[ValueDropdown("@Sumorin.AttributeSystem.AttributeDropdownProvider.GetAttributeNames()")]
 		public string AttributeName;
 
 		/// <summary>

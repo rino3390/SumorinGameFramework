@@ -1,6 +1,5 @@
 ﻿{
   "name": "Sumorin.SumorinUtility",
-  "rootNamespace": "Sumorin.GameFramework.SumorinUtility",
   "references": [
     "UniRx",
     "Unity.Localization"

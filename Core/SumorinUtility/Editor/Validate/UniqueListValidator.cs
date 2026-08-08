@@ -6,9 +6,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-[assembly: RegisterValidator(typeof(Sumorin.GameFramework.SumorinUtility.Editor.UniqueListValidator<>))]
+[assembly: RegisterValidator(typeof(Sumorin.SumorinUtility.Editor.UniqueListValidator<>))]
 
-namespace Sumorin.GameFramework.SumorinUtility.Editor
+namespace Sumorin.SumorinUtility.Editor
 {
     /// <summary>
     /// UniqueListAttribute 的 Odin Inspector 驗證器

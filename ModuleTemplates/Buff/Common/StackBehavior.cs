@@ -1,6 +1,6 @@
 ﻿using Sirenix.OdinInspector;
 
-namespace Sumorin.GameFramework.BuffSystem
+namespace Sumorin.BuffSystem
 {
     /// <summary>
     /// Buff 堆疊行為

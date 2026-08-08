@@ -2,7 +2,7 @@
 using System;
 using UnityEngine.Localization;
 
-namespace Sumorin.GameFramework.AttributeSystem
+namespace Sumorin.AttributeSystem
 {
 	/// <summary>
 	/// 屬性配置，從 ScriptableObject 轉換而來

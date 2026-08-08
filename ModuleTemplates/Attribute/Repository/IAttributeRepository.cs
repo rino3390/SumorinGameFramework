@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using Sumorin.GameFramework.DDDCore;
+using Sumorin.DDDCore;
 
-namespace Sumorin.GameFramework.AttributeSystem
+namespace Sumorin.AttributeSystem
 {
     /// <summary>
     /// 屬性 Repository 介面，擴展基本 Repository 功能

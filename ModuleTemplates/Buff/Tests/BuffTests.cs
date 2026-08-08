@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
-using Sumorin.GameFramework.AttributeSystem;
+using Sumorin.AttributeSystem;
 using UniRx;
 
-namespace Sumorin.GameFramework.BuffSystem.Tests
+namespace Sumorin.BuffSystem.Tests
 {
 	[TestFixture]
 	public class BuffTests

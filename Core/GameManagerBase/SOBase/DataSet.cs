@@ -1,5 +1,5 @@
 ﻿#if UNITY_EDITOR
-	using Sumorin.GameFramework.SumorinUtility.Editor;
+	using Sumorin.SumorinUtility.Editor;
 	using Sirenix.Utilities.Editor;
 #endif
 	using Sirenix.OdinInspector;
@@ -10,7 +10,7 @@
 	using UnityEngine;
 	using Random = UnityEngine.Random;
 
-	namespace Sumorin.GameFramework.GameManagerBase
+	namespace Sumorin.GameManagerBase
 	{
 		/// <summary>
 		/// 資料集合基底類別，管理 SODataBase 衍生類別的清單

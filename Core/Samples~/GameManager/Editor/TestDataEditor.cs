@@ -1,6 +1,6 @@
-﻿using Sumorin.GameFramework.GameManagerBase;
+﻿using Sumorin.GameManagerBase;
 
-namespace Sumorin.GameFramework.Sample.GameManager.Editor
+namespace Sumorin.Sample.GameManager.Editor
 {
     /// <summary>
     /// 測試用資料 Editor 視窗

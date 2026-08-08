@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace Sumorin.GameFramework.SumorinUtility
+namespace Sumorin.SumorinUtility
 {
     /// <summary>
     /// 正規表達式驗證工具類別

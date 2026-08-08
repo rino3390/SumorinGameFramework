@@ -1,6 +1,6 @@
 ﻿using Zenject;
 
-namespace Sumorin.GameFramework.DDDCore
+namespace Sumorin.DDDCore
 {
 	/// <summary>
 	/// DDDCore Zenject Installer，負責註冊 EventBus 相關服務

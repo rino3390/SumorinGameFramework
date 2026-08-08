@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sumorin.GameFramework.SumorinUtility
+namespace Sumorin.SumorinUtility
 {
     /// <summary>
     /// GUID 產生器工具類別

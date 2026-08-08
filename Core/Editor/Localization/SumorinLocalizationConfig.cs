@@ -6,7 +6,7 @@ using UnityEditor.Localization;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
 
-namespace Sumorin.GameFramework.Localization.Editor
+namespace Sumorin.Localization.Editor
 {
     /// <summary>
     /// Sumorin Localization 視窗的設定項，提供主要語言（Project Locale）選擇

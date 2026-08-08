@@ -4,7 +4,7 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace Sumorin.GameFramework.GameManagerBase
+namespace Sumorin.GameManagerBase
 {
 	/// <summary>
 	/// 刪除資料確認彈出視窗

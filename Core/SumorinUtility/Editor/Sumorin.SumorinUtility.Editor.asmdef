@@ -1,6 +1,5 @@
 ﻿{
   "name": "Sumorin.SumorinUtility.Editor",
-  "rootNamespace": "Sumorin.GameFramework.SumorinUtility.Editor",
   "references": [
     "Sumorin.SumorinUtility",
     "Sirenix.OdinInspector.Attributes",

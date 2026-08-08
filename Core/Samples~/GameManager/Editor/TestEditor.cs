@@ -1,9 +1,9 @@
 ﻿#if UNITY_EDITOR
-using Sumorin.GameFramework.GameManagerBase;
+using Sumorin.GameManagerBase;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 
-namespace Sumorin.GameFramework.Sample.GameManager.Editor
+namespace Sumorin.Sample.GameManager.Editor
 {
     /// <summary>
     /// 測試用一般 Editor 視窗

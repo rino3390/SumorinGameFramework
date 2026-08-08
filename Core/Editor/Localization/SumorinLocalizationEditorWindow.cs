@@ -10,7 +10,7 @@ using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Tables;
 
-namespace Sumorin.GameFramework.Localization.Editor
+namespace Sumorin.Localization.Editor
 {
 	/// <summary>
 	/// 擴展的本地化編輯器視窗，新增 CSV 匯入匯出和複製 Entry 功能

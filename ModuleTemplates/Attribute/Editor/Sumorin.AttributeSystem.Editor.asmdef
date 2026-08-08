@@ -1,6 +1,5 @@
 ﻿{
   "name": "Sumorin.AttributeSystem.Editor",
-  "rootNamespace": "Sumorin.GameFramework.AttributeSystem",
   "references": [
     "Sumorin.AttributeSystem",
     "Sumorin.GameManager.Base",

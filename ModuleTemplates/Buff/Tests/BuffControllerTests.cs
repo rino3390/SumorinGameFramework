@@ -3,11 +3,11 @@ using System.Linq;
 using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
-using Sumorin.GameFramework.AttributeSystem;
-using Sumorin.GameFramework.DDDCore;
+using Sumorin.AttributeSystem;
+using Sumorin.DDDCore;
 using UniRx;
 
-namespace Sumorin.GameFramework.BuffSystem.Tests
+namespace Sumorin.BuffSystem.Tests
 {
 	[TestFixture]
 	public class BuffControllerTests

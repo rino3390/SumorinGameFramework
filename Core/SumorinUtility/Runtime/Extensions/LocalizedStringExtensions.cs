@@ -1,6 +1,6 @@
 using UnityEngine.Localization;
 
-namespace Sumorin.GameFramework.SumorinUtility
+namespace Sumorin.SumorinUtility
 {
     /// <summary>
     /// LocalizedString 擴充方法

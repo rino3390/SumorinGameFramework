@@ -1,12 +1,12 @@
-﻿using Sumorin.GameFramework.SumorinUtility;
-using Sumorin.GameFramework.SumorinUtility.Editor;
+﻿using Sumorin.SumorinUtility;
+using Sumorin.SumorinUtility.Editor;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities.Editor;
 using System.Linq;
 using UnityEngine;
 
-namespace Sumorin.GameFramework.GameManagerBase
+namespace Sumorin.GameManagerBase
 {
     /// <summary>
     /// 建立新資料的 Editor 視窗基底類別

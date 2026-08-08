@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Sumorin.GameFramework.AttributeSystem;
+using Sumorin.AttributeSystem;
 
-namespace Sumorin.GameFramework.BuffSystem
+namespace Sumorin.BuffSystem
 {
 	/// <summary>
 	/// 記錄單一 Stack 產生的所有效果

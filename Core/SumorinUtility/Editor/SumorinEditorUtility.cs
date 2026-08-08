@@ -10,7 +10,7 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Sumorin.GameFramework.SumorinUtility.Editor
+namespace Sumorin.SumorinUtility.Editor
 {
 	/// <summary>
 	/// Unity Editor 工具類別，提供資產搜尋、建立等常用功能

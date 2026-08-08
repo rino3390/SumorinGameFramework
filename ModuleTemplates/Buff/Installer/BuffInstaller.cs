@@ -1,6 +1,6 @@
 ﻿using Zenject;
 
-namespace Sumorin.GameFramework.BuffSystem
+namespace Sumorin.BuffSystem
 {
     /// <summary>
     /// Buff 系統的 Zenject Installer

@@ -1,4 +1,4 @@
-using Sumorin.GameFramework.SumorinUtility;
+using Sumorin.SumorinUtility;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities.Editor;
 using System.Linq;
@@ -8,7 +8,7 @@ using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
 using UnityEngine.Localization.Tables;
 
-namespace Sumorin.GameFramework.GameManagerBase
+namespace Sumorin.GameManagerBase
 {
 	/// <summary>
 	/// OdinMenuTree 擴充方法

@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using Sumorin.GameFramework.AttributeSystem;
-using Sumorin.GameFramework.GameManagerBase;
+using Sumorin.AttributeSystem;
+using Sumorin.GameManagerBase;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-namespace Sumorin.GameFramework.BuffSystem
+namespace Sumorin.BuffSystem
 {
 	/// <summary>
 	/// Buff 配置 ScriptableObject
@@ -19,7 +19,7 @@ namespace Sumorin.GameFramework.BuffSystem
 		[HorizontalGroup("LifetimeType")]
 		[HideLabel]
 		[HideIf("LifetimeType", LifetimeType.Permanent)]
-		[SuffixLabel("@LifetimeType == Sumorin.GameFramework.BuffSystem.LifetimeType.TimeBased ? \"秒\" : \"回合\"", Overlay = true)]
+		[SuffixLabel("@LifetimeType == Sumorin.BuffSystem.LifetimeType.TimeBased ? \"秒\" : \"回合\"", Overlay = true)]
 		public float Lifetime;
 
 		[HorizontalGroup("Stack")]

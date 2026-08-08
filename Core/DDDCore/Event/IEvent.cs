@@ -1,4 +1,4 @@
-﻿namespace Sumorin.GameFramework.DDDCore
+﻿namespace Sumorin.DDDCore
 {
 	public interface IEvent { }
 }

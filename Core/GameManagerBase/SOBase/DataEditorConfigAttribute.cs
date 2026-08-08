@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sumorin.GameFramework.GameManagerBase
+namespace Sumorin.GameManagerBase
 {
 	/// <summary>
 	/// 標記 SODataBase 子類別的 Editor 配置，用於動態建立 DataEditor Tab

@@ -4,7 +4,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace Sumorin.GameFramework.DDDCore
+namespace Sumorin.DDDCore
 {
     /// <summary>
     /// 事件匯流排實作，使用字典管理訂閱者

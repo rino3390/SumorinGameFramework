@@ -1,6 +1,5 @@
 {
     "name": "Sumorin.GameSetting.Editor",
-    "rootNamespace": "Sumorin.GameFramework.GameSetting",
     "references": [
         "Sumorin.GameManager.Base",
         "Sumorin.SumorinUtility.Editor"

@@ -1,6 +1,5 @@
 ﻿{
     "name": "Sumorin.TestFramework",
-    "rootNamespace": "Zenject",
     "references": [
         "Zenject"
     ],

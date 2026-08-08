@@ -1,6 +1,6 @@
-﻿using Sumorin.GameFramework.DDDCore;
+﻿using Sumorin.DDDCore;
 
-namespace Sumorin.GameFramework.BuffSystem
+namespace Sumorin.BuffSystem
 {
     /// <summary>
     /// Buff 施加事件

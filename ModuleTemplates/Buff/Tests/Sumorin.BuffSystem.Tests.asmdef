@@ -1,6 +1,5 @@
 {
     "name": "Sumorin.BuffSystem.Tests",
-    "rootNamespace": "Sumorin.GameFramework.BuffSystem.Tests",
     "references": [
         "UniTask",
         "Sumorin.DDDCore",

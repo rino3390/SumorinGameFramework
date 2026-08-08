@@ -1,6 +1,5 @@
 ﻿{
     "name": "Sumorin.ModuleInstaller",
-    "rootNamespace": "Sumorin.GameFramework.ModuleInstaller",
     "references": [
         "UniTask",
         "Sumorin.SumorinUtility.Editor"

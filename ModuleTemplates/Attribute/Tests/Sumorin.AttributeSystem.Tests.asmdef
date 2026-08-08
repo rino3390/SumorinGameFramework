@@ -1,6 +1,5 @@
 {
     "name": "Sumorin.AttributeSystem.Tests",
-    "rootNamespace": "Sumorin.GameFramework.AttributeSystem.Tests",
     "references": [
         "Sumorin.DDDCore",
         "Sumorin.TestFramework",

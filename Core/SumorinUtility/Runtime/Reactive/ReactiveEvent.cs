@@ -1,7 +1,7 @@
 ﻿using System;
 using UniRx;
 
-namespace Sumorin.GameFramework.SumorinUtility
+namespace Sumorin.SumorinUtility
 {
     /// <summary>
     /// 響應式事件，結合 Subject 的觸發能力與 IObservable 的訂閱介面
