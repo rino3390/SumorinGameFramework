@@ -1,6 +1,5 @@
 ﻿{
   "name": "Game.Presenter",
-  "rootNamespace": "Game.Presenter",
   "references": [
     "Sumorin.DDDCore",
     "Game.View"

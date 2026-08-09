@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Sumorin.GameFramework.SumorinUtility.Editor;
+using Sumorin.SumorinUtility.Editor;
 
-namespace Sumorin.GameFramework.AttributeSystem
+namespace Sumorin.AttributeSystem
 {
 	/// <summary>
 	/// 提供屬性名稱下拉選單的資料來源

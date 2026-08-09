@@ -1,4 +1,4 @@
-﻿namespace Sumorin.GameFramework.GameManagerBase
+﻿namespace Sumorin.GameManagerBase
 {
     /// <summary>
     /// Odin Inspector 佈局常數定義

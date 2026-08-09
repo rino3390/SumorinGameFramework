@@ -1,6 +1,6 @@
 ﻿using Zenject;
 
-namespace Sumorin.GameFramework.AttributeSystem
+namespace Sumorin.AttributeSystem
 {
     /// <summary>
     /// 屬性系統的 Zenject Installer

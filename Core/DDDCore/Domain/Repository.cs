@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sumorin.GameFramework.DDDCore
+namespace Sumorin.DDDCore
 {
 	/// <summary>
 	///     Repository 實作，提供 Entity 的記憶體儲存

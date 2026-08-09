@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Localization.Components;
 using UnityEngine.SceneManagement;
 
-namespace Sumorin.GameFramework.SumorinUtility.Editor
+namespace Sumorin.SumorinUtility.Editor
 {
     /// <summary>
     /// 在 Unity 場景中建立本地化物件的工具類別

@@ -1,6 +1,5 @@
 ﻿{
     "name": "Sumorin.Localization.Editor",
-    "rootNamespace": "Sumorin.GameFramework.Localization.Editor",
     "references": [
         "GUID:3656feb4b010c5941972fb7b3b9eec3e",
         "Unity.Localization",

@@ -1,6 +1,5 @@
 {
     "name": "Sumorin.BuffSystem",
-    "rootNamespace": "Sumorin.GameFramework.BuffSystem",
     "references": [
         "Sumorin.AttributeSystem",
         "Sumorin.DDDCore",

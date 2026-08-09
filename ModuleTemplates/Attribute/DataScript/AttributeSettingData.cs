@@ -1,8 +1,8 @@
-﻿using Sumorin.GameFramework.SumorinUtility;
+﻿using Sumorin.SumorinUtility;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 
-namespace Sumorin.GameFramework.AttributeSystem
+namespace Sumorin.AttributeSystem
 {
 	/// <summary>
 	/// 屬性系統配置，包含所有屬性的定義

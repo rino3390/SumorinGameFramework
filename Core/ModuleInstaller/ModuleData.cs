@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Sumorin.GameFramework.ModuleInstaller
+namespace Sumorin.ModuleInstaller
 {
     /// <summary>
     /// 模組安裝狀態

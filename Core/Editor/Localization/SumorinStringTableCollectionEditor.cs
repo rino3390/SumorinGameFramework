@@ -6,7 +6,7 @@ using UnityEditor.Localization;
 using UnityEngine;
 using UnityEngine.Localization.Tables;
 
-namespace Sumorin.GameFramework.Localization.Editor
+namespace Sumorin.Localization.Editor
 {
     /// <summary>
     /// 擴展的 StringTableCollection 編輯器，新增複製 Entry 和 Tab 導航功能

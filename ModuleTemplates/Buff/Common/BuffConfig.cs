@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using Sumorin.GameFramework.AttributeSystem;
+using Sumorin.AttributeSystem;
 
-namespace Sumorin.GameFramework.BuffSystem
+namespace Sumorin.BuffSystem
 {
 	/// <summary>
 	/// Buff 配置結構

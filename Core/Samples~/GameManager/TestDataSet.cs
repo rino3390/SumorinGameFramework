@@ -1,6 +1,6 @@
-﻿using Sumorin.GameFramework.GameManagerBase;
+﻿using Sumorin.GameManagerBase;
 
-namespace Sumorin.GameFramework.Sample.GameManager
+namespace Sumorin.Sample.GameManager
 {
     /// <summary>
     /// 測試用資料集合

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using Sumorin.GameFramework.DDDCore;
+using Sumorin.DDDCore;
 using UniRx;
 
-namespace Sumorin.GameFramework.AttributeSystem
+namespace Sumorin.AttributeSystem
 {
     /// <summary>
     /// 通用屬性實例，不知道「生命」「攻擊」等具體概念

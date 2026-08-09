@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Sumorin.GameFramework.DDDCore;
+using Sumorin.DDDCore;
 using System.Linq;
 using UniRx;
 
-namespace Sumorin.GameFramework.BuffSystem
+namespace Sumorin.BuffSystem
 {
 	/// <summary>
 	/// Buff Entity，效果容器

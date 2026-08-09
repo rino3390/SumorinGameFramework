@@ -1,4 +1,4 @@
-﻿namespace Sumorin.GameFramework.AttributeSystem
+﻿namespace Sumorin.AttributeSystem
 {
     /// <summary>
     /// 修改器，用於改變屬性值

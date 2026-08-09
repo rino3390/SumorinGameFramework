@@ -1,8 +1,7 @@
 ﻿{
-  "name": "Sumorin.GameFramework.Sample.GameManager.Editor",
-  "rootNamespace": "Sumorin.GameFramework.Sample.GameManager.Editor",
+  "name": "Sumorin.Sample.GameManager.Editor",
   "references": [
-    "Sumorin.GameFramework.Sample.GameManager",
+    "Sumorin.Sample.GameManager",
     "Sumorin.GameManager.Base",
     "Sumorin.SOBase",
     "Sirenix.OdinInspector.Attributes",

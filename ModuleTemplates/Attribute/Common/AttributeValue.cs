@@ -1,7 +1,7 @@
 using System;
 using Sirenix.OdinInspector;
 
-namespace Sumorin.GameFramework.AttributeSystem
+namespace Sumorin.AttributeSystem
 {
 	/// <summary>
 	/// 屬性初始值，供其他 Domain 設定初始屬性使用
@@ -14,7 +14,7 @@ namespace Sumorin.GameFramework.AttributeSystem
 		/// </summary>
 		[LabelText("屬性")]
 		[Required]
-		[ValueDropdown("@Sumorin.GameFramework.AttributeSystem.AttributeDropdownProvider.GetAttributeNames()")]
+		[ValueDropdown("@Sumorin.AttributeSystem.AttributeDropdownProvider.GetAttributeNames()")]
 		public string AttributeName;
 
 		/// <summary>

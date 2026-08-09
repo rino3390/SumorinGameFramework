@@ -2,7 +2,7 @@
 using Sirenix.OdinInspector.Editor;
 using System;
 
-namespace Sumorin.GameFramework.GameManagerBase
+namespace Sumorin.GameManagerBase
 {
 	/// <summary>
 	/// GameManager 選單模組的基底類別

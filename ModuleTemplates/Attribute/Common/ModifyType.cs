@@ -1,4 +1,4 @@
-﻿namespace Sumorin.GameFramework.AttributeSystem
+﻿namespace Sumorin.AttributeSystem
 {
     /// <summary>
     /// 修改器類型，定義數值的計算方式

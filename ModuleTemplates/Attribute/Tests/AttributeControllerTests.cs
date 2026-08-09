@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using UniRx;
 
-namespace Sumorin.GameFramework.AttributeSystem.Tests
+namespace Sumorin.AttributeSystem.Tests
 {
 	[TestFixture]
 	public class AttributeControllerTests

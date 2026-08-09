@@ -14,7 +14,7 @@ using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
 using UnityEngine.Localization.Tables;
 
-namespace Sumorin.GameFramework.GameManager
+namespace Sumorin.GameManager
 {
 	/// <summary>
 	/// 簡化版 LocalizedString Drawer

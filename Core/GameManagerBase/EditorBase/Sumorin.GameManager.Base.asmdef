@@ -1,6 +1,5 @@
 ﻿{
     "name": "Sumorin.GameManager.Base",
-    "rootNamespace": "Sumorin.GameFramework.GameManagerBase",
     "references": [
         "Sumorin.SOBase",
         "Sumorin.SumorinUtility",

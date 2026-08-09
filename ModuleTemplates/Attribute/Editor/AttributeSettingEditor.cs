@@ -1,10 +1,10 @@
-﻿using Sumorin.GameFramework.GameManagerBase;
-using Sumorin.GameFramework.SumorinUtility.Editor;
+﻿using Sumorin.GameManagerBase;
+using Sumorin.SumorinUtility.Editor;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using UnityEngine;
 
-namespace Sumorin.GameFramework.AttributeSystem
+namespace Sumorin.AttributeSystem
 {
 	/// <summary>
 	/// 屬性設定編輯器

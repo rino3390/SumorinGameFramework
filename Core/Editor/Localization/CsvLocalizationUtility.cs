@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Tables;
 
-namespace Sumorin.GameFramework.Localization.Editor
+namespace Sumorin.Localization.Editor
 {
     /// <summary>
     /// CSV 本地化匯入匯出工具類

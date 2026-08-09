@@ -1,6 +1,5 @@
 {
     "name": "Sumorin.AttributeSystem",
-    "rootNamespace": "Sumorin.GameFramework.AttributeSystem",
     "references": [
         "Sumorin.DDDCore",
         "Sumorin.SumorinUtility",

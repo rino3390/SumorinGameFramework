@@ -7,7 +7,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace Sumorin.GameFramework.ModuleInstaller
+namespace Sumorin.ModuleInstaller
 {
     /// <summary>
     /// 模組安裝器 Editor Window
@@ -720,10 +720,10 @@ namespace Sumorin.GameFramework.ModuleInstaller
             }
 
             // 生成 asmdef 檔案
-            CreateAsmdef("Script/Flow/Game.Flow.asmdef", "Game.Flow", new[] { "Sumorin.GameFramework" });
-            CreateAsmdef("Script/Presenter/Game.Presenter.asmdef", "Game.Presenter", new[] { "Sumorin.GameFramework", "Game.Flow", "Game.View" });
+            CreateAsmdef("Script/Flow/Game.Flow.asmdef", "Game.Flow", new[] { "Sumorin.DDDCore", "Game.Presenter" });
+            CreateAsmdef("Script/Presenter/Game.Presenter.asmdef", "Game.Presenter", new[] { "Sumorin.DDDCore", "Game.View" });
             CreateAsmdef("Script/Utility/Game.Utility.asmdef", "Game.Utility", Array.Empty<string>());
-            CreateAsmdef("Script/View/Game.View.asmdef", "Game.View", new[] { "Sumorin.GameFramework" });
+            CreateAsmdef("Script/View/Game.View.asmdef", "Game.View", Array.Empty<string>());
         }
 
         private void CreateAsmdef(string relativePath, string asmdefName, string[] references)
@@ -740,7 +740,6 @@ namespace Sumorin.GameFramework.ModuleInstaller
 
             var content = $@"{{
     ""name"": ""{asmdefName}"",
-    ""rootNamespace"": """",
     ""references"": [
         {referencesJson}
     ],

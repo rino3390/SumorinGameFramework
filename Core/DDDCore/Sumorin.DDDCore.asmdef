@@ -1,6 +1,5 @@
 {
     "name": "Sumorin.DDDCore",
-    "rootNamespace": "Sumorin.GameFramework.DDDCore",
     "references": [
         "UniTask",
         "Zenject"

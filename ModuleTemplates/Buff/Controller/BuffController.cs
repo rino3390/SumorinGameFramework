@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Sumorin.GameFramework.AttributeSystem;
-using Sumorin.GameFramework.DDDCore;
-using Sumorin.GameFramework.SumorinUtility;
+using Sumorin.AttributeSystem;
+using Sumorin.DDDCore;
+using Sumorin.SumorinUtility;
 using UniRx;
 using Zenject;
 
-namespace Sumorin.GameFramework.BuffSystem
+namespace Sumorin.BuffSystem
 {
 	/// <summary>
 	/// Buff Controller 實作（資源型），管理 Buff 生命週期、堆疊、互斥邏輯與效果套用

@@ -1,7 +1,7 @@
-﻿using Sumorin.GameFramework.GameManagerBase;
+﻿using Sumorin.GameManagerBase;
 using UnityEngine;
 
-namespace Sumorin.GameFramework.BuffSystem
+namespace Sumorin.BuffSystem
 {
 	/// <summary>
 	/// Buff 資料集合

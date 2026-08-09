@@ -1,8 +1,8 @@
-﻿using Sumorin.GameFramework.GameManagerBase;
-using Sumorin.GameFramework.SumorinUtility.Editor;
+﻿using Sumorin.GameManagerBase;
+using Sumorin.SumorinUtility.Editor;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
-using Sumorin.GameFramework.Localization.Editor;
+using Sumorin.Localization.Editor;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
 using System;
@@ -11,7 +11,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace Sumorin.GameFramework.GameManager
+namespace Sumorin.GameManager
 {
 	/// <summary>
 	/// 遊戲管理主視窗

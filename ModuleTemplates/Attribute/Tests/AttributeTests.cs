@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace Sumorin.GameFramework.AttributeSystem.Tests
+namespace Sumorin.AttributeSystem.Tests
 {
     [TestFixture]
     public class AttributeTests

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using Sumorin.GameFramework.DDDCore;
+using Sumorin.DDDCore;
 
-namespace Sumorin.GameFramework.BuffSystem
+namespace Sumorin.BuffSystem
 {
     /// <summary>
     /// Buff Repository 介面，擴展基本 Repository 功能

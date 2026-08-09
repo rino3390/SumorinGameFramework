@@ -1,6 +1,6 @@
 ﻿using Sirenix.OdinInspector.Editor;
 
-namespace Sumorin.GameFramework.GameManager
+namespace Sumorin.GameManager
 {
     /// <summary>
     /// 空白視窗佔位符

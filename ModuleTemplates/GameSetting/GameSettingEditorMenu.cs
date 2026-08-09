@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using Sumorin.GameFramework.GameManagerBase;
-using Sumorin.GameFramework.SumorinUtility.Editor;
+using Sumorin.GameManagerBase;
+using Sumorin.SumorinUtility.Editor;
 using Sirenix.OdinInspector.Editor;
 using UnityEngine;
 
-namespace Sumorin.GameFramework.GameSetting
+namespace Sumorin.GameSetting
 {
 	/// <summary>
 	/// 遊戲設定編輯器選單
