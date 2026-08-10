@@ -25,12 +25,7 @@ namespace Sumorin.Presentation
 		/// <param name="provider">決定 View 從哪來、回哪去的供應策略</param>
 		public ViewRegistry(IViewProvider<TView> provider)
 		{
-			if(provider == null)
-			{
-				throw new ArgumentNullException(nameof(provider));
-			}
-
-			this.provider = provider;
+			this.provider = provider ?? throw new ArgumentNullException(nameof(provider));
 		}
 
 		/// <summary>
@@ -82,9 +77,8 @@ namespace Sumorin.Presentation
 		public void Remove(string id)
 		{
 			if(id == null) return;
-			if(views.TryGetValue(id, out var view) == false) return;
 
-			views.Remove(id);
+			if(!views.Remove(id, out var view)) return;
 
 			if(view == null) return;
 

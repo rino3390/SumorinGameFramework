@@ -18,12 +18,7 @@ namespace Sumorin.Presentation
 		/// <param name="prefab">生成用的 prefab</param>
 		public TransientViewProvider(TView prefab)
 		{
-			if(prefab == null)
-			{
-				throw new ArgumentNullException(nameof(prefab));
-			}
-
-			this.prefab = prefab;
+			this.prefab = prefab != null ? prefab : throw new ArgumentNullException(nameof(prefab));
 		}
 
 		/// <inheritdoc />
