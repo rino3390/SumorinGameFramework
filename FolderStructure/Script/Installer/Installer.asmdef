@@ -1,8 +1,16 @@
-﻿{
-  "name": "Game.Presenter",
+{
+  "name": "Installer",
   "references": [
+    "ActionHandler",
+    "Flow",
+    "Presenter",
     "Sumorin.DDDCore",
-    "Game.View"
+    "Sumorin.Presentation",
+    "UniRx",
+    "UniTask",
+    "Utility",
+    "View",
+    "Zenject"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

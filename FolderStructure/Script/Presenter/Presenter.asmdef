@@ -1,6 +1,13 @@
 {
-  "name": "Game.Utility",
-  "references": [],
+  "name": "Presenter",
+  "references": [
+    "Sumorin.Presentation",
+    "UniRx",
+    "UniTask",
+    "Utility",
+    "View",
+    "Zenject"
+  ],
   "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,

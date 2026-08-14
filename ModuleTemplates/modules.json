@@ -19,16 +19,19 @@
         "FolderStructure/Prefab/.gitkeep",
         "FolderStructure/Resources/.gitkeep",
         "FolderStructure/Scenes/.gitkeep",
+        "FolderStructure/Script/ActionHandler/ActionHandler.asmdef",
         "FolderStructure/Script/Domains/.gitkeep",
-        "FolderStructure/Script/Flow/Game.Flow.asmdef",
-        "FolderStructure/Script/Presenter/Game.Presenter.asmdef",
-        "FolderStructure/Script/Utility/Game.Utility.asmdef",
+        "FolderStructure/Script/Flow/Action/.gitkeep",
+        "FolderStructure/Script/Flow/Event/.gitkeep",
+        "FolderStructure/Script/Flow/Tick/.gitkeep",
+        "FolderStructure/Script/Flow/Flow.asmdef",
+        "FolderStructure/Script/Installer/Installer.asmdef",
+        "FolderStructure/Script/Presenter/AssetProvider/.gitkeep",
+        "FolderStructure/Script/Presenter/Presenter.asmdef",
+        "FolderStructure/Script/Utility/Utility.asmdef",
         "FolderStructure/Script/View/Behaviour/.gitkeep",
-        "FolderStructure/Script/View/Data/.gitkeep",
-        "FolderStructure/Script/View/Event/.gitkeep",
-        "FolderStructure/Script/View/Game.View.asmdef",
         "FolderStructure/Script/View/UI/.gitkeep",
-        "FolderStructure/Script/View/ViewRepo/.gitkeep"
+        "FolderStructure/Script/View/View.asmdef"
       ]
     },
     {

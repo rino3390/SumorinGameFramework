@@ -1,8 +1,12 @@
-﻿{
-  "name": "Game.Flow",
+{
+  "name": "View",
   "references": [
-    "Sumorin.DDDCore",
-    "Game.Presenter"
+    "ActionHandler",
+    "Sumorin.Presentation",
+    "UniRx",
+    "UniTask",
+    "Utility",
+    "Zenject"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],
