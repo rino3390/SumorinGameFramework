@@ -2,7 +2,7 @@
 using System.Linq;
 using Sumorin.SumorinUtility.Editor;
 
-namespace Sumorin.AttributeSystem
+namespace Sumorin.Attribute
 {
 	/// <summary>
 	/// 提供屬性名稱下拉選單的資料來源
@@ -21,11 +21,9 @@ namespace Sumorin.AttributeSystem
 		public static IEnumerable<string> GetAttributeNames(string excludeName)
 		{
 			var settingData = SumorinEditorUtility.FindAsset<AttributeSettingData>();
-			if (settingData == null) return new[] { "" };
+			if(settingData == null) return new[] { "" };
 
-			var names = settingData.Attributes
-				.Select(x => x.Id)
-				.Where(x => !string.IsNullOrEmpty(x) && (excludeName == "" || x != excludeName));
+			var names = settingData.Attributes.Select(x => x.Id).Where(x => !string.IsNullOrEmpty(x) && (excludeName == "" || x != excludeName));
 
 			return new[] { "" }.Concat(names);
 		}

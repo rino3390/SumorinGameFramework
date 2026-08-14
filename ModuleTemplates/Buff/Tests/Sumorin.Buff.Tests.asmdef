@@ -1,0 +1,35 @@
+{
+    "name": "Sumorin.Buff.Tests",
+    "references": [
+        "Sumorin.Buff",
+        "Sumorin.Buff.Contract",
+        "Sumorin.Buff.Command",
+        "Sumorin.Buff.Query",
+        "Sumorin.Attribute",
+        "Sumorin.Attribute.Contract",
+        "Sumorin.DDDCore",
+        "Sumorin.TestFramework",
+        "Sumorin.SumorinUtility",
+        "UniRx",
+        "UniTask",
+        "Zenject",
+        "Zenject-TestFramework"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll",
+        "FluentAssertions.dll",
+        "NSubstitute.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

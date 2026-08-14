@@ -1,0 +1,32 @@
+{
+    "name": "Sumorin.Attribute.Tests",
+    "references": [
+        "Sumorin.Attribute",
+        "Sumorin.Attribute.Contract",
+        "Sumorin.Attribute.Command",
+        "Sumorin.Attribute.Query",
+        "Sumorin.DDDCore",
+        "Sumorin.TestFramework",
+        "Sumorin.SumorinUtility",
+        "UniRx",
+        "Zenject",
+        "Zenject-TestFramework"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll",
+        "FluentAssertions.dll",
+        "NSubstitute.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

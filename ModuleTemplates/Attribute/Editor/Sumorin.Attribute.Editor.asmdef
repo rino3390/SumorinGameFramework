@@ -1,0 +1,20 @@
+{
+    "name": "Sumorin.Attribute.Editor",
+    "references": [
+        "Sumorin.Attribute.Contract",
+        "Sumorin.Attribute.Data",
+        "Sumorin.GameManager.Base",
+        "Sumorin.SumorinUtility.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

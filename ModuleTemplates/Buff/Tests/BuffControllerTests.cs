@@ -1,670 +1,384 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Generic;
 using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
-using Sumorin.AttributeSystem;
+using Sumorin.Attribute;
 using Sumorin.DDDCore;
-using UniRx;
+using Zenject;
 
-namespace Sumorin.BuffSystem.Tests
+namespace Sumorin.Buff.Tests
 {
 	[TestFixture]
-	public class BuffControllerTests
+	public class BuffControllerTests: ZenjectUnitTestFixture
 	{
-		private BuffController controller;
 		private BuffRepository repository;
-		private IPublisher mockPublisher;
-		private IAttributeController mockAttributeController;
+		private IPublisher publisher;
+		private IAttributeController attributeController;
 
 		[SetUp]
-		public void Setup()
+		public override void Setup()
 		{
-			mockPublisher = Substitute.For<IPublisher>();
-			mockAttributeController = Substitute.For<IAttributeController>();
-
-			// 設定 AddModifiers 回傳模擬的 modifierId
-			var callCount = 0;
-			mockAttributeController.AddModifiers(Arg.Any<string>(), Arg.Any<List<ModifyEffectInfo>>(), Arg.Any<string>(), Arg.Any<string>())
-								   .Returns(callInfo =>
-									   {
-										   var effects = callInfo.ArgAt<List<ModifyEffectInfo>>(1);
-										   return effects.Select(e => (e.AttributeName, $"mod-{++callCount}")).ToList();
-									   }
-								   );
-
+			base.Setup();
 			repository = new BuffRepository();
-			controller = new BuffController(repository, mockPublisher, mockAttributeController);
+			publisher = Substitute.For<IPublisher>();
+			attributeController = Substitute.For<IAttributeController>();
+		}
 
-			// 註冊配置
-			var configs = new List<BuffConfig>
+		private BuffController CreateController(Dictionary<string, IConfig> configs = null)
+		{
+			Container.Bind<IBuffRepository>().FromInstance(repository);
+			Container.Bind<IPublisher>().FromInstance(publisher);
+			Container.Bind<IAttributeController>().FromInstance(attributeController);
+			Container.Bind<ConfigManager>().FromInstance(new ConfigManager(configs ?? DefaultConfigs()));
+			return Container.Instantiate<BuffController>();
+		}
+
+		private static Dictionary<string, IConfig> DefaultConfigs() =>
+			new()
 			{
-				new()
-				{
-					BuffName = "Poison",
-					LifetimeType = LifetimeType.TimeBased,
-					Lifetime = 10f,
-					StackBehavior = StackBehavior.IncreaseStack,
-					MaxStack = 5,
-					MutualExclusionGroup = null,
-					Priority = 0,
-					Effects = new List<ModifyEffectInfo>
-					{
-						new() { AttributeName = "Health", ModifyType = ModifyType.Flat, Value = -5 }
-					},
-					Tags = new List<string> { "Debuff", "DoT" }
-				},
-				new()
-				{
-					BuffName = "Burn",
-					LifetimeType = LifetimeType.TimeBased,
-					Lifetime = 5f,
-					StackBehavior = StackBehavior.RefreshDuration,
-					MaxStack = -1,
-					MutualExclusionGroup = null,
-					Priority = 0,
-					Effects = new List<ModifyEffectInfo>
-					{
-						new() { AttributeName = "Defense", ModifyType = ModifyType.Percent, Value = -20 }
-					},
-					Tags = new List<string> { "Debuff", "DoT" }
-				},
-				new()
-				{
-					BuffName = "SpeedUp",
-					LifetimeType = LifetimeType.TimeBased,
-					Lifetime = 8f,
-					StackBehavior = StackBehavior.RefreshDuration,
-					MaxStack = -1,
-					MutualExclusionGroup = "Movement",
-					Priority = 1,
-					Effects = new List<ModifyEffectInfo>
-					{
-						new() { AttributeName = "Speed", ModifyType = ModifyType.Percent, Value = 30 }
-					},
-					Tags = new List<string> { "Buff", "Movement" }
-				},
-				new()
-				{
-					BuffName = "SpeedDown",
-					LifetimeType = LifetimeType.TimeBased,
-					Lifetime = 8f,
-					StackBehavior = StackBehavior.RefreshDuration,
-					MaxStack = -1,
-					MutualExclusionGroup = "Movement",
-					Priority = 1,
-					Effects = new List<ModifyEffectInfo>
-					{
-						new() { AttributeName = "Speed", ModifyType = ModifyType.Percent, Value = -30 }
-					},
-					Tags = new List<string> { "Debuff", "Movement" }
-				},
-				new()
-				{
-					BuffName = "Invincible",
-					LifetimeType = LifetimeType.TurnBased,
-					Lifetime = 2f,
-					StackBehavior = StackBehavior.Replace,
-					MaxStack = -1,
-					MutualExclusionGroup = null,
-					Priority = 0,
-					Effects = new List<ModifyEffectInfo>
-					{
-						new() { AttributeName = "InvincibleCount", ModifyType = ModifyType.Flat, Value = 1 }
-					},
-					Tags = new List<string> { "Buff", "Immunity" }
-				},
-				new()
-				{
-					BuffName = "Independent",
-					LifetimeType = LifetimeType.TimeBased,
-					Lifetime = 5f,
-					StackBehavior = StackBehavior.Independent,
-					MaxStack = -1,
-					MutualExclusionGroup = null,
-					Priority = 0,
-					Effects = new List<ModifyEffectInfo>(),
-					Tags = new List<string> { "Buff" }
-				},
-				new()
-				{
-					BuffName = "Permanent",
-					LifetimeType = LifetimeType.Permanent,
-					Lifetime = 0f,
-					StackBehavior = StackBehavior.RefreshDuration,
-					MaxStack = -1,
-					MutualExclusionGroup = null,
-					Priority = 0,
-					Effects = new List<ModifyEffectInfo>(),
-					Tags = new List<string> { "Buff", "Passive" },
-					RemoveAllOnExpire = true
-				},
-				new()
-				{
-					BuffName = "StackPoison",
-					LifetimeType = LifetimeType.TimeBased,
-					Lifetime = 5f,
-					StackBehavior = StackBehavior.IncreaseStack,
-					MaxStack = 5,
-					MutualExclusionGroup = null,
-					Priority = 0,
-					Effects = new List<ModifyEffectInfo>
-					{
-						new() { AttributeName = "Health", ModifyType = ModifyType.Flat, Value = -5 }
-					},
-					Tags = new List<string> { "Debuff" },
-					RemoveAllOnExpire = false
-				},
-				new()
-				{
-					BuffName = "StackShield",
-					LifetimeType = LifetimeType.TurnBased,
-					Lifetime = 2f,
-					StackBehavior = StackBehavior.IncreaseStack,
-					MaxStack = 5,
-					MutualExclusionGroup = null,
-					Priority = 0,
-					Effects = new List<ModifyEffectInfo>
-					{
-						new() { AttributeName = "Defense", ModifyType = ModifyType.Flat, Value = 10 }
-					},
-					Tags = new List<string> { "Buff" },
-					RemoveAllOnExpire = false
-				}
+				["Poison"] = new FakeBuffConfig(LifetimeType.TimeBased, 10f, StackBehavior.IncreaseStack, 5, tags: new List<string> { "Debuff", "DoT" }),
+				["Burn"] = new FakeBuffConfig(LifetimeType.TimeBased, 5f, tags: new List<string> { "Debuff", "DoT" }),
+				["Invincible"] = new FakeBuffConfig(LifetimeType.TurnBased, 2f, StackBehavior.Replace),
+				["Passive"] = new FakeBuffConfig(LifetimeType.Permanent, 0f),
+				["Echo"] = new FakeBuffConfig(LifetimeType.TimeBased, 6f, StackBehavior.Independent),
+				["SpeedUp"] = new FakeBuffConfig(LifetimeType.TimeBased, 8f, mutualExclusionGroup: "Movement", priority: 1),
+				["SpeedDown"] = new FakeBuffConfig(LifetimeType.TimeBased, 8f, mutualExclusionGroup: "Movement")
 			};
-			controller.RegisterConfigs(configs);
+
+		[Test]
+		public void AddBuff_WithRegisteredConfig_CreatesBuffAndPublishesEvent()
+		{
+			var controller = CreateController();
+
+			var result = controller.AddBuff("owner-1", "Poison", "source-1");
+
+			result.IsSuccess.Should().BeTrue();
+			repository.Get(result.Value)
+					  .Should()
+					  .BeEquivalentTo(
+						  new
+						  {
+							  BuffName = "Poison",
+							  OwnerId = "owner-1",
+							  SourceId = "source-1",
+							  StackCount = 1
+						  }
+					  );
+			publisher.Received(1).Publish(Arg.Is<BuffApplied>(e => e.BuffId == result.Value && e.OwnerId == "owner-1" && e.BuffName == "Poison"));
 		}
 
 		[Test]
-		public void AddBuff_WithValidParameters_CreatesBuffAndPublishesEvent()
+		public void AddBuff_WithRegisteredConfig_AppliesFirstStackEffectsWithoutStackChangedEvent()
 		{
-			var buffId = controller.AddBuff("owner-1", "Poison", "source-1");
+			var controller = CreateController();
 
-			Assert.IsNotNull(buffId);
-			var buff = controller.GetBuff(buffId);
-			Assert.AreEqual("Poison", buff.Config.BuffName);
-			Assert.AreEqual("owner-1", buff.OwnerId);
-			Assert.AreEqual("source-1", buff.SourceId);
-			mockPublisher.Received(1)
-						 .Publish(Arg.Is<BuffApplied>(e => e.BuffId == buffId && e.OwnerId == "owner-1" && e.BuffName == "Poison" && e.SourceId == "source-1"));
+			var result = controller.AddBuff("owner-1", "Poison", "source-1");
+
+			attributeController.Received(1).AddModifiers("owner-1", Arg.Any<List<ModifyEffectInfo>>(), result.Value, "Poison");
+			publisher.DidNotReceive().Publish(Arg.Any<BuffStackChanged>());
 		}
 
 		[Test]
-		public void AddBuff_WithIncreaseStack_IncreasesStackCountAndPublishesEvent()
+		public void AddBuff_WithUnknownConfig_FailsAndPublishesNothing()
 		{
-			var buffId1 = controller.AddBuff("owner-1", "Poison", "source-1");
-			var buffId2 = controller.AddBuff("owner-1", "Poison", "source-2");
+			var controller = CreateController();
 
-			Assert.AreEqual(buffId1, buffId2);
-			var buff = controller.GetBuff(buffId1);
-			Assert.AreEqual(2, buff.StackCount);
-			mockPublisher.Received(1).Publish(Arg.Is<BuffStackChanged>(e => e.OldStack == 1 && e.NewStack == 2));
+			controller.AddBuff("owner-1", "Unknown", "source-1").IsSuccess.Should().BeFalse();
+			publisher.DidNotReceive().Publish(Arg.Any<BuffApplied>());
+		}
+
+		[TestCase(null, TestName = "擁有者為 null 時失敗")]
+		[TestCase("", TestName = "擁有者為空字串時失敗")]
+		public void AddBuff_WithoutOwnerId_Fails(string ownerId)
+		{
+			CreateController().AddBuff(ownerId, "Poison", "source-1").IsSuccess.Should().BeFalse();
 		}
 
 		[Test]
-		public void AddBuff_WithRefreshDuration_RefreshesDuration()
+		public void AddBuff_WhenSameBuffExistsWithIncreaseStack_AddsStackAndPublishesStackChanged()
 		{
-			var buffId = controller.AddBuff("owner-1", "Burn", "source-1");
-			controller.TickTime(3f); // 模擬時間流逝，剩餘 2 秒
+			var controller = CreateController();
+			var buffId = controller.AddBuff("owner-1", "Poison", "source-1").Value;
 
-			controller.AddBuff("owner-1", "Burn", "source-2");
+			var result = controller.AddBuff("owner-1", "Poison", "source-2");
 
-			var buff = controller.GetBuff(buffId);
-			Assert.AreEqual(5f, buff.RemainingLifetime);
+			result.Value.Should().Be(buffId);
+			repository.Get(buffId).StackCount.Should().Be(2);
+			publisher.Received(1).Publish(Arg.Is<BuffStackChanged>(e => e.OldStack == 1 && e.NewStack == 2));
 		}
 
 		[Test]
-		public void AddBuff_WithReplace_ReplacesExistingBuff()
+		public void AddBuff_WhenAtMaxStack_KeepsStackCount()
 		{
-			var buffId1 = controller.AddBuff("owner-1", "Invincible", "source-1");
-			var buffId2 = controller.AddBuff("owner-1", "Invincible", "source-2");
+			var controller = CreateController();
+			var buffId = controller.AddBuff("owner-1", "Poison", "source-1").Value;
 
-			Assert.AreNotEqual(buffId1, buffId2);
-			Assert.IsNull(controller.GetBuff(buffId1));
-			Assert.IsNotNull(controller.GetBuff(buffId2));
+			for(var i = 0; i < 10; i++)
+			{
+				controller.AddBuff("owner-1", "Poison", "source-1");
+			}
+
+			repository.Get(buffId).StackCount.Should().Be(5);
 		}
 
 		[Test]
-		public void AddBuff_WithIndependent_CreatesMultipleBuffs()
+		public void AddBuff_WhenSameBuffExistsWithRefreshDuration_RefreshesLifetimeWithoutAddingStack()
 		{
-			var buffId1 = controller.AddBuff("owner-1", "Independent", "source-1");
-			var buffId2 = controller.AddBuff("owner-1", "Independent", "source-2");
+			var controller = CreateController();
+			var buffId = controller.AddBuff("owner-1", "Burn", "source-1").Value;
+			controller.AdjustBuffLifetime(buffId, -3f);
 
-			Assert.AreNotEqual(buffId1, buffId2);
-			Assert.IsNotNull(controller.GetBuff(buffId1));
-			Assert.IsNotNull(controller.GetBuff(buffId2));
-			Assert.AreEqual(2, controller.GetBuffsByOwner("owner-1").Count);
+			var result = controller.AddBuff("owner-1", "Burn", "source-2");
+
+			result.Value.Should().Be(buffId);
+			repository.Get(buffId).Should().BeEquivalentTo(new { RemainingLifetime = 5f, StackCount = 1 });
 		}
 
 		[Test]
-		public void AddBuff_WithMutualExclusion_RemovesConflictingBuff()
+		public void AddBuff_WhenSameBuffExistsWithIndependent_CreatesSecondBuff()
 		{
-			var buffId1 = controller.AddBuff("owner-1", "SpeedDown", "source-1");
-			var buffId2 = controller.AddBuff("owner-1", "SpeedUp", "source-2");
+			var controller = CreateController();
+			var firstId = controller.AddBuff("owner-1", "Echo", "source-1").Value;
 
-			Assert.IsNull(controller.GetBuff(buffId1));
-			Assert.IsNotNull(controller.GetBuff(buffId2));
+			var secondId = controller.AddBuff("owner-1", "Echo", "source-2").Value;
+
+			secondId.Should().NotBe(firstId);
+			repository.GetByOwner("owner-1").Should().HaveCount(2);
 		}
 
 		[Test]
-		public void RemoveBuff_WithExistingBuff_RemovesBuffAndPublishesEvent()
+		public void AddBuff_WhenSameBuffExistsWithReplace_RemovesOldAndCreatesNew()
 		{
-			var buffId = controller.AddBuff("owner-1", "Poison", "source-1");
-			mockPublisher.ClearReceivedCalls();
+			var controller = CreateController();
+			var firstId = controller.AddBuff("owner-1", "Invincible", "source-1").Value;
 
-			controller.RemoveBuff(buffId);
+			var secondId = controller.AddBuff("owner-1", "Invincible", "source-2").Value;
 
-			Assert.IsNull(controller.GetBuff(buffId));
-			mockPublisher.Received(1).Publish(Arg.Is<BuffRemoved>(e => e.BuffId == buffId && e.OwnerId == "owner-1" && e.BuffName == "Poison"));
+			secondId.Should().NotBe(firstId);
+			repository.Get(firstId).Should().BeNull();
+			publisher.Received(1).Publish(Arg.Is<BuffRemoved>(e => e.BuffId == firstId && e.Reason == BuffRemoveReason.Replaced));
 		}
 
 		[Test]
-		public void RemoveBuff_WithNonExistingBuff_DoesNothing()
+		public void AddBuff_WhenBlockedByHigherPriorityInSameGroup_Fails()
 		{
-			controller.RemoveBuff("non-existing");
+			var controller = CreateController();
+			controller.AddBuff("owner-1", "SpeedUp", "source-1");
 
-			mockPublisher.DidNotReceive().Publish(Arg.Any<BuffRemoved>());
+			controller.AddBuff("owner-1", "SpeedDown", "source-2").IsSuccess.Should().BeFalse();
+			repository.GetByOwner("owner-1").Should().ContainSingle();
 		}
 
 		[Test]
-		public void RemoveBuffsBySource_RemovesAllBuffsFromSource()
+		public void AddBuff_WhenReplacingLowerPriorityInSameGroup_RemovesTheOldOne()
 		{
+			var controller = CreateController();
+			var lowerId = controller.AddBuff("owner-1", "SpeedDown", "source-1").Value;
+
+			controller.AddBuff("owner-1", "SpeedUp", "source-2").IsSuccess.Should().BeTrue();
+
+			repository.Get(lowerId).Should().BeNull();
+			publisher.Received(1).Publish(Arg.Is<BuffRemoved>(e => e.BuffId == lowerId && e.Reason == BuffRemoveReason.Replaced));
+		}
+
+		[Test]
+		public void RemoveBuff_WithExistingBuff_RemovesModifiersAndPublishesEvent()
+		{
+			var controller = CreateController();
+			var buffId = controller.AddBuff("owner-1", "Poison", "source-1").Value;
+
+			controller.RemoveBuff(buffId).IsSuccess.Should().BeTrue();
+
+			repository.Get(buffId).Should().BeNull();
+			attributeController.Received(1).RemoveAllModifiersBySource("owner-1", buffId);
+			publisher.Received(1).Publish(Arg.Is<BuffRemoved>(e => e.BuffId == buffId && e.Reason == BuffRemoveReason.Manual));
+		}
+
+		[Test]
+		public void RemoveBuffsBySource_WithMixedSources_RemovesOnlyThatSource()
+		{
+			var controller = CreateController();
+			var poisonId = controller.AddBuff("owner-1", "Poison", "sword-1").Value;
+			var burnId = controller.AddBuff("owner-1", "Burn", "staff-1").Value;
+
+			controller.RemoveBuffsBySource("owner-1", "sword-1");
+
+			repository.Get(poisonId).Should().BeNull();
+			repository.Get(burnId).Should().NotBeNull();
+			publisher.Received(1).Publish(Arg.Is<BuffRemoved>(e => e.Reason == BuffRemoveReason.SourceRemoved));
+		}
+
+		[Test]
+		public void RemoveBuffsByOwner_WithMultipleOwners_RemovesOnlyThatOwner()
+		{
+			var controller = CreateController();
 			controller.AddBuff("owner-1", "Poison", "source-1");
 			controller.AddBuff("owner-1", "Burn", "source-1");
-			controller.AddBuff("owner-1", "Independent", "source-2");
-
-			controller.RemoveBuffsBySource("owner-1", "source-1");
-
-			Assert.AreEqual(1, controller.GetBuffsByOwner("owner-1").Count);
-			mockPublisher.Received(2).Publish(Arg.Any<BuffRemoved>());
-		}
-
-		[Test]
-		public void RemoveBuffsByOwner_RemovesAllBuffsFromOwnerAndPublishesEvents()
-		{
-			controller.AddBuff("owner-1", "Poison", "source-1");
-			controller.AddBuff("owner-1", "Burn", "source-2");
-			controller.AddBuff("owner-2", "Independent", "source-3");
-			mockPublisher.ClearReceivedCalls();
+			controller.AddBuff("owner-2", "Poison", "source-1");
 
 			controller.RemoveBuffsByOwner("owner-1");
 
-			Assert.IsEmpty(controller.GetBuffsByOwner("owner-1"));
-			Assert.AreEqual(1, controller.GetBuffsByOwner("owner-2").Count);
-			mockPublisher.Received(2).Publish(Arg.Any<BuffRemoved>());
+			repository.GetByOwner("owner-1").Should().BeEmpty();
+			repository.GetByOwner("owner-2").Should().ContainSingle();
 		}
 
 		[Test]
-		public void RemoveBuffsByTag_RemovesAllBuffsWithTagAndPublishesEvents()
+		public void RemoveBuffsByTag_WithMatchingTag_RemovesTaggedBuffs()
 		{
-			controller.AddBuff("owner-1", "Poison", "source-1");  // Tags: Debuff, DoT
-			controller.AddBuff("owner-1", "Burn", "source-2");    // Tags: Debuff, DoT
-			controller.AddBuff("owner-1", "SpeedUp", "source-3"); // Tags: Buff, Movement
-			mockPublisher.ClearReceivedCalls();
+			var controller = CreateController();
+			controller.AddBuff("owner-1", "Poison", "source-1");
+			var passiveId = controller.AddBuff("owner-1", "Passive", "source-1").Value;
 
 			controller.RemoveBuffsByTag("owner-1", "DoT");
 
-			Assert.AreEqual(1, controller.GetBuffsByOwner("owner-1").Count);
-			Assert.AreEqual("SpeedUp", controller.GetBuffsByOwner("owner-1")[0].Config.BuffName);
-			mockPublisher.Received(2).Publish(Arg.Any<BuffRemoved>());
+			repository.GetByOwner("owner-1").Should().BeEquivalentTo(new[] { new { Id = passiveId } });
+			publisher.Received(1).Publish(Arg.Is<BuffRemoved>(e => e.Reason == BuffRemoveReason.TagRemoved));
 		}
 
 		[Test]
-		public void RemoveBuffsByTag_WithNonMatchingTag_DoesNothing()
+		public void TickTime_WithTimeBasedBuff_ReducesLifetime()
 		{
-			controller.AddBuff("owner-1", "Poison", "source-1");
+			var controller = CreateController();
+			var buffId = controller.AddBuff("owner-1", "Poison", "source-1").Value;
 
-			controller.RemoveBuffsByTag("owner-1", "NonExistentTag");
+			controller.TickTime(3f).IsSuccess.Should().BeTrue();
 
-			Assert.AreEqual(1, controller.GetBuffsByOwner("owner-1").Count);
+			repository.Get(buffId).RemainingLifetime.Should().Be(7f);
 		}
 
 		[Test]
-		public void TickTime_WithExpiredBuff_RemovesBuff()
+		public void TickTime_WhenLifetimeDepleted_RemovesBuffWithExpiredReason()
 		{
-			var buffId = controller.AddBuff("owner-1", "Burn", "source-1");
+			var controller = CreateController();
+			var buffId = controller.AddBuff("owner-1", "Burn", "source-1").Value;
 
-			controller.TickTime(6f);
+			controller.TickTime(5f);
 
-			Assert.IsNull(controller.GetBuff(buffId));
-			mockPublisher.Received(1).Publish(Arg.Any<BuffRemoved>());
+			repository.Get(buffId).Should().BeNull();
+			publisher.Received(1).Publish(Arg.Is<BuffRemoved>(e => e.BuffId == buffId && e.Reason == BuffRemoveReason.Expired));
 		}
 
 		[Test]
-		public void TickTime_WithNonExpiredBuff_KeepsBuff()
+		public void TickTime_WithNonTimeBasedBuffs_LeavesThemUntouched()
 		{
-			var buffId = controller.AddBuff("owner-1", "Burn", "source-1");
+			var controller = CreateController();
+			var turnId = controller.AddBuff("owner-1", "Invincible", "source-1").Value;
+			var permanentId = controller.AddBuff("owner-1", "Passive", "source-1").Value;
+
+			controller.TickTime(100f);
+
+			repository.Get(turnId).RemainingLifetime.Should().Be(2f);
+			repository.Get(permanentId).RemainingLifetime.Should().Be(0f);
+		}
+
+		[Test]
+		public void TickTurn_WithTurnBasedBuff_ReducesLifetimeForThatOwnerOnly()
+		{
+			var controller = CreateController();
+			var ownerBuffId = controller.AddBuff("owner-1", "Invincible", "source-1").Value;
+			var otherBuffId = controller.AddBuff("owner-2", "Invincible", "source-1").Value;
+
+			controller.TickTurn("owner-1").IsSuccess.Should().BeTrue();
+
+			repository.Get(ownerBuffId).RemainingLifetime.Should().Be(1f);
+			repository.Get(otherBuffId).RemainingLifetime.Should().Be(2f);
+		}
+
+		[Test]
+		public void AdjustStack_WithPositiveDelta_AppliesModifiersAndPublishesStackChanged()
+		{
+			var controller = CreateController();
+			var buffId = controller.AddBuff("owner-1", "Poison", "source-1").Value;
+			attributeController.ClearReceivedCalls();
+
+			controller.AdjustStack(buffId, 1).IsSuccess.Should().BeTrue();
+
+			repository.Get(buffId).StackCount.Should().Be(2);
+			attributeController.Received(1).AddModifiers("owner-1", Arg.Any<List<ModifyEffectInfo>>(), buffId, "Poison");
+			publisher.Received(1).Publish(Arg.Is<BuffStackChanged>(e => e.OldStack == 1 && e.NewStack == 2));
+		}
+
+		[Test]
+		public void AdjustStack_WithNegativeDelta_RemovesModifiersAndPublishesStackChanged()
+		{
+			var controller = CreateController();
+			var buffId = controller.AddBuff("owner-1", "Poison", "source-1").Value;
+			controller.AdjustStack(buffId, 1);
+			attributeController.ClearReceivedCalls();
+
+			controller.AdjustStack(buffId, -1);
+
+			repository.Get(buffId).StackCount.Should().Be(1);
+			attributeController.Received(1).RemoveModifier("owner-1", Arg.Any<ModifyEffectInfo>(), buffId);
+			publisher.Received(1).Publish(Arg.Is<BuffStackChanged>(e => e.OldStack == 2 && e.NewStack == 1));
+		}
+
+		[Test]
+		public void AdjustStack_WhenLastStackRemoved_RemovesBuffWithExpiredReason()
+		{
+			var controller = CreateController();
+			var buffId = controller.AddBuff("owner-1", "Poison", "source-1").Value;
+
+			controller.AdjustStack(buffId, -1);
+
+			repository.Get(buffId).Should().BeNull();
+			publisher.Received(1).Publish(Arg.Is<BuffRemoved>(e => e.BuffId == buffId && e.Reason == BuffRemoveReason.Expired));
+		}
+
+		[Test]
+		public void ObserveStackCount_WhenStackChanges_ReflectsNewCount()
+		{
+			var controller = CreateController();
+			var buffId = controller.AddBuff("owner-1", "Poison", "source-1").Value;
+			var observed = controller.ObserveStackCount(buffId);
+			observed.Value.Should().Be(1);
+
+			controller.AdjustStack(buffId, 1);
+
+			observed.Value.Should().Be(2);
+		}
+
+		[Test]
+		public void ObserveLifetime_WhenTicked_ReflectsRemainingLifetime()
+		{
+			var controller = CreateController();
+			var buffId = controller.AddBuff("owner-1", "Poison", "source-1").Value;
+			var observed = controller.ObserveLifetime(buffId);
+			observed.Value.Should().Be(10f);
 
 			controller.TickTime(3f);
 
-			Assert.IsNotNull(controller.GetBuff(buffId));
-			Assert.AreEqual(2f, controller.GetBuff(buffId).RemainingLifetime);
+			observed.Value.Should().Be(7f);
+		}
+
+		[TestCase(TestName = "訂閱不存在的 Buff 回傳 null")]
+		public void ObserveValues_WithUnknownBuff_ReturnNull()
+		{
+			var controller = CreateController();
+
+			controller.ObserveStackCount("buff-404").Should().BeNull();
+			controller.ObserveLifetime("buff-404").Should().BeNull();
 		}
 
 		[Test]
-		public void TickTurn_WithExpiredBuff_RemovesBuff()
+		public void GetBuffInfo_WithExistingBuff_ReturnsSnapshot()
 		{
-			var buffId = controller.AddBuff("owner-1", "Invincible", "source-1");
+			var controller = CreateController();
+			var buffId = controller.AddBuff("owner-1", "Poison", "source-1").Value;
 
-			controller.TickTurn("owner-1");
-			controller.TickTurn("owner-1");
-
-			Assert.IsNull(controller.GetBuff(buffId));
-			mockPublisher.Received(1).Publish(Arg.Any<BuffRemoved>());
+			controller.GetBuffInfo(buffId).Should().Be(new BuffInfo(buffId, "Poison", 1, LifetimeType.TimeBased, 10f));
 		}
 
 		[Test]
-		public void ObserveBuffs_NotifiesOnBuffAdded()
+		public void GetBuffInfo_WithUnknownBuff_ReturnsNull()
 		{
-			List<BuffInfo> receivedBuffs = null;
-			controller.ObserveBuffs("owner-1").Subscribe(buffs => receivedBuffs = buffs);
-
-			var buffId = controller.AddBuff("owner-1", "Poison", "source-1");
-
-			receivedBuffs.Should().BeEquivalentTo(new[] { new { BuffId = buffId, BuffName = "Poison", StackCount = 1 } });
+			CreateController().GetBuffInfo("buff-404").Should().BeNull();
 		}
 
 		[Test]
-		public void ObserveBuffs_NotifiesOnBuffRemoved()
+		public void RemoveBuff_OnUnknownBuff_FailsInsteadOfIgnoring()
 		{
-			var buffId = controller.AddBuff("owner-1", "Poison", "source-1");
-			List<BuffInfo> receivedBuffs = null;
-			controller.ObserveBuffs("owner-1").Subscribe(buffs => receivedBuffs = buffs);
-
-			controller.RemoveBuff(buffId);
-
-			receivedBuffs.Should().BeEmpty();
-		}
-
-		[Test]
-		public void AdjustBuffLifetime_WithPositiveDelta_ExtendsLifetime()
-		{
-			var buffId = controller.AddBuff("owner-1", "Invincible", "source-1");
-
-			controller.AdjustBuffLifetime(buffId, 3);
-
-			var buff = controller.GetBuff(buffId);
-			Assert.AreEqual(5f, buff.RemainingLifetime);
-		}
-
-		[Test]
-		public void AdjustBuffLifetime_WithNegativeDelta_ReducesLifetime()
-		{
-			var buffId = controller.AddBuff("owner-1", "Burn", "source-1");
-
-			controller.AdjustBuffLifetime(buffId, -2f);
-
-			var buff = controller.GetBuff(buffId);
-			Assert.AreEqual(3f, buff.RemainingLifetime);
-		}
-
-		[Test]
-		public void AdjustBuffLifetime_WithNonExistingBuff_DoesNothing()
-		{
-			controller.AdjustBuffLifetime("non-existing", 3);
-
-			// 不應拋出例外
-			Assert.Pass();
-		}
-
-		[Test]
-		public void AdjustBuffLifetime_WithPermanentBuff_DoesNotAffect()
-		{
-			var buffId = controller.AddBuff("owner-1", "Permanent", "source-1");
-
-			controller.AdjustBuffLifetime(buffId, 10f);
-
-			var buff = controller.GetBuff(buffId);
-			Assert.AreEqual(0f, buff.RemainingLifetime);
-		}
-
-		[Test]
-		public void AdjustBuffLifetime_ReducingBelowZero_RemovesBuff()
-		{
-			var buffId = controller.AddBuff("owner-1", "Burn", "source-1");
-
-			controller.AdjustBuffLifetime(buffId, -10f);
-
-			Assert.IsNull(controller.GetBuff(buffId));
-			mockPublisher.Received(1).Publish(Arg.Is<BuffRemoved>(e => e.BuffId == buffId && e.Reason == "Expired"));
-		}
-
-		[Test]
-		public void AdjustBuffLifetime_NotifiesBuffsChanged()
-		{
-			var buffId = controller.AddBuff("owner-1", "Burn", "source-1");
-			List<BuffInfo> receivedBuffs = null;
-			controller.ObserveBuffs("owner-1").Subscribe(buffs => receivedBuffs = buffs);
-
-			controller.AdjustBuffLifetime(buffId, 5f);
-
-			Assert.IsNotNull(receivedBuffs);
-			Assert.AreEqual(10f, receivedBuffs[0].RemainingLifetime);
-		}
-
-		[Test]
-		public void SetBuffLifetime_SetsLifetimeToSpecifiedValue()
-		{
-			var buffId = controller.AddBuff("owner-1", "Burn", "source-1");
-
-			controller.SetBuffLifetime(buffId, 3f);
-
-			var buff = controller.GetBuff(buffId);
-			Assert.AreEqual(3f, buff.RemainingLifetime);
-		}
-
-		[Test]
-		public void SetBuffLifetime_WithNonExistingBuff_DoesNothing()
-		{
-			controller.SetBuffLifetime("non-existing", 10f);
-
-			// 不應拋出例外
-			Assert.Pass();
-		}
-
-		[Test]
-		public void SetBuffLifetime_WithPermanentBuff_DoesNotAffect()
-		{
-			var buffId = controller.AddBuff("owner-1", "Permanent", "source-1");
-
-			controller.SetBuffLifetime(buffId, 10f);
-
-			var buff = controller.GetBuff(buffId);
-			Assert.AreEqual(0f, buff.RemainingLifetime);
-		}
-
-		[Test]
-		public void SetBuffLifetime_ToZero_RemovesBuff()
-		{
-			var buffId = controller.AddBuff("owner-1", "Burn", "source-1");
-
-			controller.SetBuffLifetime(buffId, 0f);
-
-			Assert.IsNull(controller.GetBuff(buffId));
-			mockPublisher.Received(1).Publish(Arg.Is<BuffRemoved>(e => e.BuffId == buffId && e.Reason == "Expired"));
-		}
-
-		[Test]
-		public void SetBuffLifetime_NotifiesBuffsChanged()
-		{
-			var buffId = controller.AddBuff("owner-1", "Burn", "source-1");
-			List<BuffInfo> receivedBuffs = null;
-			controller.ObserveBuffs("owner-1").Subscribe(buffs => receivedBuffs = buffs);
-
-			controller.SetBuffLifetime(buffId, 3f);
-
-			Assert.IsNotNull(receivedBuffs);
-			Assert.AreEqual(3f, receivedBuffs[0].RemainingLifetime);
-		}
-
-		[TestCase("Burn", TestName = "RefreshDuration does not increase stack")]
-		[TestCase("SpeedUp", TestName = "RefreshDuration with MutualExclusion does not increase stack")]
-		public void AddBuff_WithNonStackBehavior_DoesNotIncreaseStackCount(string buffName)
-		{
-			controller.AddBuff("owner-1", buffName, "source-1");
-			controller.AddBuff("owner-1", buffName, "source-2");
-
-			var buffs = controller.GetBuffsByOwner("owner-1");
-			Assert.AreEqual(1, buffs.Count);
-			Assert.AreEqual(1, buffs[0].StackCount);
-		}
-
-		[Test]
-		public void AddBuff_AppliesEffects()
-		{
-			var buffId = controller.AddBuff("owner-1", "Poison", "source-1");
-
-			mockAttributeController.Received(1)
-								   .AddModifiers(
-									   "owner-1",
-									   Arg.Is<List<ModifyEffectInfo>>(list => list.Count == 1 && list[0].AttributeName == "Health" && list[0].Value == -5),
-									   buffId, "Poison"
-								   );
-			controller.GetBuff(buffId).StackRecords.Should().HaveCount(1);
-		}
-
-		[Test]
-		public void RemoveBuff_RemovesEffects()
-		{
-			var buffId = controller.AddBuff("owner-1", "Poison", "source-1");
-			mockAttributeController.ClearReceivedCalls();
-
-			controller.RemoveBuff(buffId);
-
-			mockAttributeController.Received(1).RemoveAllModifiersBySource("owner-1", buffId);
-		}
-
-		[Test]
-		public void AddBuff_WithIncreaseStack_AddsModifiersForNewStack()
-		{
-			controller.AddBuff("owner-1", "Poison", "source-1");
-			mockAttributeController.ClearReceivedCalls();
-
-			controller.AddBuff("owner-1", "Poison", "source-2");
-
-			mockAttributeController.Received(1)
-								   .AddModifiers(
-									   "owner-1",
-									   Arg.Is<List<ModifyEffectInfo>>(list => list.Count == 1 && list[0].AttributeName == "Health" && list[0].Value == -5),
-									   Arg.Any<string>(), "Poison"
-								   );
-		}
-
-		[Test]
-		public void AdjustStack_WithNegativeDelta_DecreasesStackAndRemovesModifiers()
-		{
-			var buffId = controller.AddBuff("owner-1", "Poison", "source-1");
-			controller.AddBuff("owner-1", "Poison", "source-2"); // stack = 2
-			mockAttributeController.ClearReceivedCalls();
-
-			controller.AdjustStack(buffId, -1);
-
-			var buff = controller.GetBuff(buffId);
-			Assert.AreEqual(1, buff.StackCount);
-			mockAttributeController.Received(1).RemoveModifier("owner-1", Arg.Is<ModifyEffectInfo>(e => e.AttributeName == "Health" && e.Value == -5), buffId);
-		}
-
-		[Test]
-		public void AdjustStack_WithPositiveDelta_IncreasesStackAndAddsModifiers()
-		{
-			var buffId = controller.AddBuff("owner-1", "Poison", "source-1");
-			mockAttributeController.ClearReceivedCalls();
-
-			controller.AdjustStack(buffId, 2);
-
-			var buff = controller.GetBuff(buffId);
-			Assert.AreEqual(3, buff.StackCount);
-			mockAttributeController.Received(2)
-								   .AddModifiers(
-									   "owner-1",
-									   Arg.Is<List<ModifyEffectInfo>>(list => list.Count == 1 && list[0].AttributeName == "Health" && list[0].Value == -5),
-									   buffId, "Poison"
-								   );
-		}
-
-		[Test]
-		public void AdjustStack_ReducingToZero_RemovesBuffAndPublishesEvent()
-		{
-			var buffId = controller.AddBuff("owner-1", "Poison", "source-1");
-			mockPublisher.ClearReceivedCalls();
-
-			controller.AdjustStack(buffId, -1);
-
-			Assert.IsNull(controller.GetBuff(buffId));
-			mockPublisher.Received(1).Publish(Arg.Is<BuffRemoved>(e => e.BuffId == buffId));
-		}
-
-		[Test]
-		public void AdjustStack_WithNonExistingBuff_DoesNothing()
-		{
-			controller.AdjustStack("non-existing", -1);
-
-			// 不應拋出例外
-			Assert.Pass();
-		}
-
-		[Test]
-		public void TickTime_WithRemoveAllOnExpireFalse_RemovesOneStackAndRefreshesLifetime()
-		{
-			var buffId = controller.AddBuff("owner-1", "StackPoison", "source-1");
-			controller.AddBuff("owner-1", "StackPoison", "source-2"); // stack = 2
-
-			controller.TickTime(6f); // 超過 5 秒
-
-			var buff = controller.GetBuff(buffId);
-			Assert.IsNotNull(buff);
-			Assert.AreEqual(1, buff.StackCount);
-			Assert.AreEqual(5f, buff.RemainingLifetime);
-		}
-
-		[Test]
-		public void TickTime_WithRemoveAllOnExpireFalse_WhenLastStack_RemovesBuff()
-		{
-			var buffId = controller.AddBuff("owner-1", "StackPoison", "source-1"); // stack = 1
-
-			controller.TickTime(6f); // 超過 5 秒
-
-			Assert.IsNull(controller.GetBuff(buffId));
-			mockPublisher.Received(1).Publish(Arg.Is<BuffRemoved>(e => e.BuffId == buffId));
-		}
-
-		[Test]
-		public void TickTurn_WithRemoveAllOnExpireFalse_RemovesOneStackAndRefreshesLifetime()
-		{
-			var buffId = controller.AddBuff("owner-1", "StackShield", "source-1");
-			controller.AddBuff("owner-1", "StackShield", "source-2"); // stack = 2
-
-			controller.TickTurn("owner-1");
-			controller.TickTurn("owner-1"); // 2 回合後
-
-			var buff = controller.GetBuff(buffId);
-			Assert.IsNotNull(buff);
-			Assert.AreEqual(1, buff.StackCount);
-			Assert.AreEqual(2f, buff.RemainingLifetime);
-		}
-
-		[Test]
-		public void TickTurn_WithRemoveAllOnExpireFalse_WhenLastStack_RemovesBuff()
-		{
-			var buffId = controller.AddBuff("owner-1", "StackShield", "source-1"); // stack = 1
-
-			controller.TickTurn("owner-1");
-			controller.TickTurn("owner-1"); // 2 回合後
-
-			Assert.IsNull(controller.GetBuff(buffId));
-			mockPublisher.Received(1).Publish(Arg.Is<BuffRemoved>(e => e.BuffId == buffId));
-		}
-
-		[Test]
-		public void TickTurn_WithMultipleTurns_DecreasesLifetimeBySpecifiedAmount()
-		{
-			var buffId = controller.AddBuff("owner-1", "StackShield", "source-1"); // Lifetime = 2
-
-			controller.TickTurn("owner-1", 1);
-
-			var buff = controller.GetBuff(buffId);
-			Assert.IsNotNull(buff);
-			Assert.AreEqual(1f, buff.RemainingLifetime);
+			CreateController().RemoveBuff("buff-404").IsSuccess.Should().BeFalse();
 		}
 	}
 }

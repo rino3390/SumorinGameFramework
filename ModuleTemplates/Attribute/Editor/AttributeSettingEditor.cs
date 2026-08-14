@@ -4,12 +4,12 @@ using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using UnityEngine;
 
-namespace Sumorin.AttributeSystem
+namespace Sumorin.Attribute
 {
 	/// <summary>
 	/// 屬性設定編輯器
 	/// </summary>
-	public class AttributeSettingEditor : GameEditorMenuBase
+	public class AttributeSettingEditor: GameEditorMenuBase
 	{
 		public override string TabName => "屬性設定";
 
@@ -34,7 +34,7 @@ namespace Sumorin.AttributeSystem
 		private AttributeSettingData GetOrCreateConfig()
 		{
 			var configData = SumorinEditorUtility.FindAsset<AttributeSettingData>();
-			if (configData != null) return configData;
+			if(configData != null) return configData;
 
 			configData = ScriptableObject.CreateInstance<AttributeSettingData>();
 			SumorinEditorUtility.CreateSOData(configData, "Data/Setting/AttributeSettingData");

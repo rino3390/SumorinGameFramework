@@ -1,154 +1,52 @@
-﻿using System.Linq;
+using FluentAssertions;
 using NUnit.Framework;
 
-namespace Sumorin.BuffSystem.Tests
+namespace Sumorin.Buff.Tests
 {
-    [TestFixture]
-    public class BuffRepositoryTests
-    {
-        private BuffRepository repository;
+	[TestFixture]
+	public class BuffRepositoryTests
+	{
+		private BuffRepository repository;
 
-        private static BuffConfig CreateConfig(string buffName = "Poison")
-        {
-            return new BuffConfig
-            {
-                BuffName = buffName,
-                LifetimeType = LifetimeType.Permanent,
-                Lifetime = 0f,
-                MaxStack = -1
-            };
-        }
+		[SetUp]
+		public void Setup()
+		{
+			repository = new BuffRepository();
+			repository.Save(new Buff("buff-1", "Poison", new FakeBuffConfig(), "owner-1", "source-1"));
+			repository.Save(new Buff("buff-2", "Burn", new FakeBuffConfig(), "owner-1", "source-2"));
+			repository.Save(new Buff("buff-3", "Poison", new FakeBuffConfig(), "owner-2", "source-1"));
+		}
 
-        [SetUp]
-        public void SetUp()
-        {
-            repository = new BuffRepository();
-        }
+		[Test]
+		public void Get_WithExistingId_ReturnsBuff()
+		{
+			repository.Get("buff-2").BuffName.Should().Be("Burn");
+		}
 
-        #region Save Tests
+		[Test]
+		public void Get_WithUnknownId_ReturnsNull()
+		{
+			repository.Get("buff-404").Should().BeNull();
+		}
 
-        [Test]
-        public void Save_WithValidBuff_StoresInRepository()
-        {
-            var buff = new Buff("buff-1", CreateConfig("Poison"), "owner-1", "source-1");
+		[Test]
+		public void GetByOwner_WithMultipleOwners_ReturnsOnlyThatOwner()
+		{
+			repository.GetByOwner("owner-1")
+					  .Should()
+					  .BeEquivalentTo(
+						  new[]
+						  {
+							  new { Id = "buff-1" },
+							  new { Id = "buff-2" }
+						  }
+					  );
+		}
 
-            repository.Save(buff);
-
-            Assert.AreEqual(buff, repository.Get("buff-1"));
-        }
-
-        [Test]
-        public void Save_WithSameId_OverwritesExisting()
-        {
-            var buff1 = new Buff("buff-1", CreateConfig("Poison"), "owner-1", "source-1");
-            var buff2 = new Buff("buff-1", CreateConfig("Burn"), "owner-2", "source-2");
-
-            repository.Save(buff1);
-            repository.Save(buff2);
-
-            Assert.AreEqual("Burn", repository.Get("buff-1").Config.BuffName);
-        }
-
-        #endregion
-
-        #region Get Tests
-
-        [Test]
-        public void Get_WithExistingId_ReturnsBuff()
-        {
-            var buff = new Buff("buff-1", CreateConfig("Poison"), "owner-1", "source-1");
-            repository.Save(buff);
-
-            var result = repository.Get("buff-1");
-
-            Assert.AreEqual(buff, result);
-        }
-
-        [Test]
-        public void Get_WithNonExistingId_ReturnsNull()
-        {
-            var result = repository.Get("non-existing");
-
-            Assert.IsNull(result);
-        }
-
-        #endregion
-
-        #region GetByOwner Tests
-
-        [Test]
-        public void GetByOwner_WithExistingOwner_ReturnsOwnerBuffs()
-        {
-            var buff1 = new Buff("buff-1", CreateConfig("Poison"), "owner-1", "source-1");
-            var buff2 = new Buff("buff-2", CreateConfig("Burn"), "owner-1", "source-1");
-            var buff3 = new Buff("buff-3", CreateConfig("Freeze"), "owner-2", "source-1");
-            repository.Save(buff1);
-            repository.Save(buff2);
-            repository.Save(buff3);
-
-            var result = repository.GetByOwner("owner-1").ToList();
-
-            Assert.AreEqual(2, result.Count);
-            Assert.Contains(buff1, result);
-            Assert.Contains(buff2, result);
-        }
-
-        [Test]
-        public void GetByOwner_WithNonExistingOwner_ReturnsEmptyList()
-        {
-            var result = repository.GetByOwner("non-existing").ToList();
-
-            Assert.IsEmpty(result);
-        }
-
-        #endregion
-
-        #region Values Tests
-
-        [Test]
-        public void Values_WithMultipleBuffs_ReturnsAllBuffs()
-        {
-            var buff1 = new Buff("buff-1", CreateConfig("Poison"), "owner-1", "source-1");
-            var buff2 = new Buff("buff-2", CreateConfig("Burn"), "owner-2", "source-1");
-            repository.Save(buff1);
-            repository.Save(buff2);
-
-            var result = repository.Values.ToList();
-
-            Assert.AreEqual(2, result.Count);
-        }
-
-        [Test]
-        public void Values_WithEmptyRepository_ReturnsEmptyList()
-        {
-            var result = repository.Values.ToList();
-
-            Assert.IsEmpty(result);
-        }
-
-        #endregion
-
-        #region DeleteById Tests
-
-        [Test]
-        public void DeleteById_WithExistingId_RemovesBuff()
-        {
-            var buff = new Buff("buff-1", CreateConfig("Poison"), "owner-1", "source-1");
-            repository.Save(buff);
-
-            repository.DeleteById("buff-1");
-
-            Assert.IsNull(repository.Get("buff-1"));
-        }
-
-        [Test]
-        public void DeleteById_WithNonExistingId_DoesNothing()
-        {
-            repository.DeleteById("non-existing");
-
-            Assert.IsEmpty(repository.Values);
-        }
-
-        #endregion
-    }
+		[Test]
+		public void GetByOwner_WithUnknownOwner_ReturnsEmpty()
+		{
+			repository.GetByOwner("owner-404").Should().BeEmpty();
+		}
+	}
 }

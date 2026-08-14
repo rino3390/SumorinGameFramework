@@ -1,0 +1,27 @@
+{
+    "name": "Sumorin.Buff",
+    "references": [
+        "Sumorin.Buff.Contract",
+        "Sumorin.Attribute",
+        "Sumorin.Attribute.Contract",
+        "Sumorin.DDDCore",
+        "Sumorin.SumorinUtility",
+        "UniRx",
+        "Zenject"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.svermeulen.extenject",
+            "expression": "",
+            "define": "ZENJECT"
+        }
+    ],
+    "noEngineReferences": false
+}

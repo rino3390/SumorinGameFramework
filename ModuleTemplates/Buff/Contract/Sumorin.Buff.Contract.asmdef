@@ -1,0 +1,16 @@
+{
+    "name": "Sumorin.Buff.Contract",
+    "references": [
+        "Sumorin.Attribute.Contract",
+        "Sumorin.DDDCore"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
