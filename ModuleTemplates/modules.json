@@ -59,6 +59,17 @@
       "files": []
     },
     {
+      "id": "save-system",
+      "name": "存檔系統",
+      "description": "存檔 Domain，提供存檔參與者、Repository 轉接層與存檔槽、全域槽的存讀檔協調",
+      "version": "1.0.0",
+      "dependencies": [],
+      "folders": [
+        "ModuleTemplates/Save"
+      ],
+      "files": []
+    },
+    {
       "id": "game-setting",
       "name": "GameSetting",
       "description": "遊戲設定模組，提供 Editor 工具來管理遊戲設定檔",

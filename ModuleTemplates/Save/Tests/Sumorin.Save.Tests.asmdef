@@ -1,0 +1,27 @@
+{
+    "name": "Sumorin.Save.Tests",
+    "references": [
+        "Sumorin.Save",
+        "Sumorin.Save.Contract",
+        "Sumorin.DDDCore",
+        "UniTask",
+        "Zenject"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll",
+        "FluentAssertions.dll",
+        "NSubstitute.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

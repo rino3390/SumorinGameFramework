@@ -1,0 +1,26 @@
+{
+    "name": "Sumorin.Save.Installer",
+    "references": [
+        "Sumorin.Save",
+        "Sumorin.Save.Contract",
+        "Sumorin.Save.Command",
+        "Sumorin.Save.Query",
+        "Sumorin.DDDCore",
+        "Zenject"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.svermeulen.extenject",
+            "expression": "",
+            "define": "ZENJECT"
+        }
+    ],
+    "noEngineReferences": false
+}
