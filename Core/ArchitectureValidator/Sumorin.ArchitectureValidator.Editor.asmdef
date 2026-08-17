@@ -1,0 +1,22 @@
+{
+  "name": "Sumorin.ArchitectureValidator.Editor",
+  "rootNamespace": "",
+  "references": [
+    "Sumorin.DDDCore",
+    "Sumorin.Presentation",
+    "Sumorin.SOBase",
+    "UniRx",
+    "Zenject"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
