@@ -1,7 +1,7 @@
 namespace Sumorin.Save
 {
 	/// <summary>
-	///     序列化介面，由專案層實作
+	///     序列化介面，預設實作為 NewtonsoftSaveSerializer，可由專案層覆寫
 	/// </summary>
 	/// <remarks>
 	///     實作必須掛上值面型別的轉換器，讓值面欄位落地為純值而非其內部結構。

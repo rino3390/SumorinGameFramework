@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace Sumorin.Save
 {
 	/// <summary>
-	///     存取媒介介面，由專案層實作
+	///     存取媒介介面，預設實作為 <see cref="LocalFileSaveStorage" />，可由專案層覆寫
 	/// </summary>
 	/// <remarks>
 	///     落盤時機由實作決定，可當場寫入或轉背景。

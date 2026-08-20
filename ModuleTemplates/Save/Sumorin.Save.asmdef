@@ -1,23 +1,27 @@
 {
-    "name": "Sumorin.Save",
-    "references": [
-        "Sumorin.Save.Contract",
-        "Sumorin.DDDCore",
-        "Zenject"
-    ],
-    "includePlatforms": [],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [
-        {
-            "name": "com.svermeulen.extenject",
-            "expression": "",
-            "define": "ZENJECT"
-        }
-    ],
-    "noEngineReferences": false
+  "name": "Sumorin.Save",
+  "references": [
+    "Sumorin.Save.Contract",
+    "Sumorin.DDDCore",
+    "UniRx",
+    "Zenject"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "Newtonsoft.Json.dll",
+    "Zenject-usage.dll"
+  ],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [
+    {
+      "name": "com.svermeulen.extenject",
+      "expression": "",
+      "define": "ZENJECT"
+    }
+  ],
+  "noEngineReferences": false
 }
