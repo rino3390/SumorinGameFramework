@@ -21,6 +21,13 @@ namespace Sumorin.ModuleInstaller
 		private const string ModuleTemplatesPrefix = "ModuleTemplates/";
 		private const string DomainsPath = "Script/Domains";
 		private const string ScriptPath = "Script";
+		private const string VersionRecordFile = "ProjectSettings/SumorinModules.json";
+
+		/// <summary>
+		/// 安裝紀錄檔路徑（專案根目錄下的 ProjectSettings）
+		/// </summary>
+		private static string VersionRecordPath => Path.Combine(Directory.GetParent(Application.dataPath)?.FullName ?? Application.dataPath, VersionRecordFile)
+													   .Replace("\\", "/");
 
 		private ModuleManifest manifest;
 		private List<ModuleRuntimeData> modules = new();
@@ -112,7 +119,7 @@ namespace Sumorin.ModuleInstaller
 			EditorGUILayout.EndHorizontal();
 
 			// 版本與說明
-			EditorGUILayout.LabelField($"版本: {module.Info.version} | ID: {module.Info.id}", EditorStyles.miniLabel);
+			EditorGUILayout.LabelField($"版本: {GetVersionText(module)} | ID: {module.Info.id}", EditorStyles.miniLabel);
 			EditorGUILayout.LabelField(module.Info.description, EditorStyles.wordWrappedLabel);
 
 			// 依賴資訊（含狀態圖示）
@@ -172,6 +179,23 @@ namespace Sumorin.ModuleInstaller
 
 						break;
 
+					case ModuleInstallStatus.UpdateAvailable:
+						GUI.enabled = !module.HasUnmetDependencies && !isDownloading;
+
+						if(GUILayout.Button("更新", GUILayout.Width(80)))
+						{
+							InstallModuleAsync(module).Forget();
+						}
+
+						GUI.enabled = !isDownloading;
+
+						if(GUILayout.Button("移除", GUILayout.Width(80)))
+						{
+							RemoveModule(module);
+						}
+
+						break;
+
 					case ModuleInstallStatus.PartiallyInstalled:
 						if(GUILayout.Button("修復", GUILayout.Width(80)))
 						{
@@ -213,6 +237,10 @@ namespace Sumorin.ModuleInstaller
 					GUI.backgroundColor = new Color(0.3f, 0.8f, 0.3f);
 					GUILayout.Label("已安裝", noHoverStyle, GUILayout.Width(60));
 					break;
+				case ModuleInstallStatus.UpdateAvailable:
+					GUI.backgroundColor = new Color(1f, 0.6f, 0.2f);
+					GUILayout.Label("可更新", noHoverStyle, GUILayout.Width(60));
+					break;
 				case ModuleInstallStatus.PartiallyInstalled:
 					GUI.backgroundColor = new Color(0.9f, 0.7f, 0.2f);
 					GUILayout.Label("部分安裝", noHoverStyle, GUILayout.Width(60));
@@ -224,6 +252,17 @@ namespace Sumorin.ModuleInstaller
 			}
 
 			GUI.backgroundColor = originalColor;
+		}
+
+		/// <summary>
+		/// 版本顯示文字，可更新時顯示「已安裝版本 → 遠端版本」
+		/// </summary>
+		private static string GetVersionText(ModuleRuntimeData module)
+		{
+			if(module.Status != ModuleInstallStatus.UpdateAvailable) return module.Info.version;
+
+			var installedVersion = string.IsNullOrEmpty(module.InstalledVersion) ? "未知" : module.InstalledVersion;
+			return $"{installedVersion} → {module.Info.version}";
 		}
 
 		private void DrawDependencyStatus(string dependencyName, bool isSatisfied)
@@ -278,7 +317,7 @@ namespace Sumorin.ModuleInstaller
 			{
 				CheckModuleStatus(module);
 
-				if(module.Status == ModuleInstallStatus.Installed)
+				if(module.IsInstalled)
 				{
 					installedModuleIds.Add(module.Info.id);
 				}
@@ -300,14 +339,27 @@ namespace Sumorin.ModuleInstaller
 		{
 			module.MissingFiles.Clear();
 			module.InstalledFiles.Clear();
+			module.InstalledVersion = GetInstalledVersion(module.Info.id);
 
 			// FolderStructure 特殊處理：檢查資料夾是否存在
 			if(IsBaseModule(module))
 			{
 				CheckFolderStructureStatus(module);
-				return;
+			}
+			else
+			{
+				CheckModuleFileStatus(module);
 			}
 
+			// 檔案完整時再比對版本，遠端較新則轉為可更新
+			if(module.Status == ModuleInstallStatus.Installed && ModuleVersionRecord.IsUpdateAvailable(module.InstalledVersion, module.Info.version))
+			{
+				module.Status = ModuleInstallStatus.UpdateAvailable;
+			}
+		}
+
+		private void CheckModuleFileStatus(ModuleRuntimeData module)
+		{
 			// 使用 GetAllFiles() 取得所有檔案（包含從 folders 展開的）
 			var allFiles = module.GetAllFiles();
 
@@ -357,6 +409,7 @@ namespace Sumorin.ModuleInstaller
 				"Script/Flow",
 				"Script/Installer",
 				"Script/Presenter",
+				"Script/Utility",
 				"Script/View",
 				"Art",
 				"Data",
@@ -402,18 +455,12 @@ namespace Sumorin.ModuleInstaller
 		/// </summary>
 		private void ScanLocalInstalledFiles(ModuleRuntimeData module)
 		{
-			foreach(var folder in module.Info.folders)
+			var baseDir = Path.Combine(Application.dataPath, GetModuleBasePath(module)).Replace("\\", "/") + "/";
+
+			foreach(var localDir in GetModuleLocalDirectories(module))
 			{
-				if(!folder.StartsWith(ModuleTemplatesPrefix)) continue;
-
-				var modulePath = folder.Substring(ModuleTemplatesPrefix.Length);
-				var basePath = !string.IsNullOrEmpty(module.Info.installPath) ? module.Info.installPath :
-							   IsFolderStructureInstalled()                   ? DomainsPath : ScriptPath;
-				var localDir = Path.Combine(Application.dataPath, basePath, modulePath).Replace("\\", "/");
-
 				if(!Directory.Exists(localDir)) continue;
 
-				var baseDir = Path.Combine(Application.dataPath, basePath).Replace("\\", "/") + "/";
 				var files = Directory.GetFiles(localDir, "*", SearchOption.AllDirectories);
 
 				foreach(var file in files)
@@ -422,6 +469,72 @@ namespace Sumorin.ModuleInstaller
 
 					var relativeToBase = file.Replace("\\", "/").Substring(baseDir.Length);
 					module.InstalledFiles.Add(ModuleTemplatesPrefix + relativeToBase);
+				}
+			}
+		}
+
+		/// <summary>
+		/// 模組安裝的基底路徑
+		/// </summary>
+		private string GetModuleBasePath(ModuleRuntimeData module)
+		{
+			if(!string.IsNullOrEmpty(module.Info.installPath)) return module.Info.installPath;
+
+			return IsFolderStructureInstalled() ? DomainsPath : ScriptPath;
+		}
+
+		/// <summary>
+		/// 取得模組在本地的安裝根目錄清單
+		/// </summary>
+		private List<string> GetModuleLocalDirectories(ModuleRuntimeData module)
+		{
+			var basePath = GetModuleBasePath(module);
+			var directories = new List<string>();
+
+			foreach(var folder in module.Info.folders)
+			{
+				if(!folder.StartsWith(ModuleTemplatesPrefix)) continue;
+
+				var modulePath = folder.Substring(ModuleTemplatesPrefix.Length);
+				directories.Add(Path.Combine(Application.dataPath, basePath, modulePath).Replace("\\", "/"));
+			}
+
+			return directories;
+		}
+
+		/// <summary>
+		/// 更新前的確認對話框，說明整個模組資料夾會被清空
+		/// </summary>
+		private bool ConfirmUpdate(ModuleRuntimeData module)
+		{
+			var directories = GetModuleLocalDirectories(module).Where(Directory.Exists).ToList();
+
+			if(directories.Count == 0) return true;
+
+			var displayPaths = directories.Select(d => "Assets/" + d.Substring(Application.dataPath.Length + 1));
+
+			var message = $"更新「{module.Info.name}」會先刪除整個模組資料夾，再重新下載新版檔案。\n\n"
+						  + $"以下資料夾內的所有檔案都會消失，包含你自己新增或修改的內容：\n• {string.Join("\n• ", displayPaths)}\n\n"
+						  + "確定要更新嗎？";
+
+			return EditorUtility.DisplayDialog("確認更新", message, "確定更新", "取消");
+		}
+
+		/// <summary>
+		/// 刪除模組的整個安裝資料夾，供更新前清除舊版殘留檔案
+		/// </summary>
+		private void DeleteModuleDirectories(ModuleRuntimeData module)
+		{
+			foreach(var directory in GetModuleLocalDirectories(module))
+			{
+				if(!Directory.Exists(directory)) continue;
+
+				Directory.Delete(directory, true);
+				var metaPath = directory + ".meta";
+
+				if(File.Exists(metaPath))
+				{
+					File.Delete(metaPath);
 				}
 			}
 		}
@@ -454,6 +567,40 @@ namespace Sumorin.ModuleInstaller
 			return Directory.Exists(domainsPath);
 		}
 
+		/// <summary>
+		/// 取得本地紀錄的已安裝版本，沒有紀錄時回傳 null
+		/// </summary>
+		private static string GetInstalledVersion(string moduleId)
+		{
+			return ModuleVersionRecord.Load(VersionRecordPath).TryGetValue(moduleId, out var version) ? version : null;
+		}
+
+		/// <summary>
+		/// 把模組的遠端版本寫入安裝紀錄
+		/// </summary>
+		private static void RecordInstalledVersion(ModuleRuntimeData module)
+		{
+			var versions = ModuleVersionRecord.Load(VersionRecordPath);
+			versions[module.Info.id] = module.Info.version;
+			ModuleVersionRecord.Save(VersionRecordPath, versions);
+			module.InstalledVersion = module.Info.version;
+		}
+
+		/// <summary>
+		/// 從安裝紀錄移除模組
+		/// </summary>
+		private static void ClearInstalledVersion(ModuleRuntimeData module)
+		{
+			var versions = ModuleVersionRecord.Load(VersionRecordPath);
+
+			if(versions.Remove(module.Info.id))
+			{
+				ModuleVersionRecord.Save(VersionRecordPath, versions);
+			}
+
+			module.InstalledVersion = null;
+		}
+
 		private string GetRemoteFileUrl(string relativePath)
 		{
 			return manifest.baseUrl + relativePath;
@@ -467,6 +614,11 @@ namespace Sumorin.ModuleInstaller
 				return;
 			}
 
+			// 更新既有安裝時要先清空資料夾，改版搬移過的檔案才不會殘留
+			var isUpdate = module.Status == ModuleInstallStatus.UpdateAvailable && !IsBaseModule(module);
+
+			if(isUpdate && !ConfirmUpdate(module)) return;
+
 			isDownloading = true;
 			downloadingModule = module;
 			Repaint();
@@ -478,6 +630,7 @@ namespace Sumorin.ModuleInstaller
 				{
 					InstallFolderStructure();
 					AssetDatabase.Refresh();
+					RecordInstalledVersion(module);
 					CheckModuleStatus(module);
 					CheckAllModuleStatus();
 					return;
@@ -487,6 +640,12 @@ namespace Sumorin.ModuleInstaller
 				if(module.Info.folders.Count > 0 && !module.IsFoldersResolved)
 				{
 					await ResolveFoldersAsync(module);
+				}
+
+				// 解析成功才清空舊版檔案，避免解析失敗時把模組刪光
+				if(isUpdate)
+				{
+					DeleteModuleDirectories(module);
 				}
 
 				await DownloadModuleFilesAsync(module, module.GetAllFiles());
@@ -512,6 +671,7 @@ namespace Sumorin.ModuleInstaller
 				{
 					InstallFolderStructure();
 					AssetDatabase.Refresh();
+					RecordInstalledVersion(module);
 					CheckModuleStatus(module);
 					CheckAllModuleStatus();
 					return;
@@ -579,6 +739,13 @@ namespace Sumorin.ModuleInstaller
 			}
 
 			AssetDatabase.Refresh();
+
+			// 全部下載成功才更新安裝紀錄，有失敗就維持舊版本以便重新更新
+			if(failedFiles.Count == 0)
+			{
+				RecordInstalledVersion(module);
+			}
+
 			CheckModuleStatus(module);
 			CheckAllModuleStatus();
 
@@ -637,9 +804,7 @@ namespace Sumorin.ModuleInstaller
 		private void RemoveModule(ModuleRuntimeData module)
 		{
 			// 檢查是否有其他模組依賴此模組
-			var dependentModules = modules.Where(m => m.Status == ModuleInstallStatus.Installed && m.Info.dependencies.Contains(module.Info.id))
-										  .Select(m => m.Info.name)
-										  .ToList();
+			var dependentModules = modules.Where(m => m.IsInstalled && m.Info.dependencies.Contains(module.Info.id)).Select(m => m.Info.name).ToList();
 
 			// 建立確認訊息
 			var message = "";
@@ -693,6 +858,7 @@ namespace Sumorin.ModuleInstaller
 			}
 
 			AssetDatabase.Refresh();
+			ClearInstalledVersion(module);
 			CheckModuleStatus(module);
 			CheckAllModuleStatus();
 			Repaint();
