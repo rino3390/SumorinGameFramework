@@ -15,11 +15,10 @@ namespace Sumorin.Save
 		/// <summary>
 		///     寫入一個存檔槽
 		/// </summary>
-		/// <param name="slotId">存檔槽識別碼</param>
+		/// <param name="info">中繼資料，寫入哪一個存檔槽由其識別碼決定</param>
 		/// <param name="data">以存檔鍵為索引的參與者資料</param>
-		/// <param name="info">中繼資料</param>
 		/// <returns>寫入是否成功</returns>
-		bool Save(string slotId, IReadOnlyDictionary<string, string> data, SaveSlotInfo info);
+		bool Save(SaveSlotInfo info, IReadOnlyDictionary<string, string> data);
 
 		/// <summary>
 		///     讀取一個存檔槽

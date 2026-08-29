@@ -126,7 +126,7 @@ namespace Sumorin.Save
 			}
 
 			var info = new SaveSlotInfo(slotId, DateTime.Now, description);
-			return storage.Save(slotId, data, info) ? CommandResult.Ok() : CommandResult.Fail($"存檔失敗：{slotId}");
+			return storage.Save(info, data) ? CommandResult.Ok() : CommandResult.Fail($"存檔失敗：{slotId}");
 		}
 
 		private void Restore(IReadOnlyDictionary<string, string> data, bool isGlobal)

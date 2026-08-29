@@ -33,7 +33,7 @@ namespace Sumorin.Save.Tests
 		[Test]
 		public void Save_WithSlotData_WritesDataAndMetaIntoSlotFolder()
 		{
-			var result = storage.Save("slot-1", Payload(), Info("slot-1"));
+			var result = storage.Save(Info("slot-1"), Payload());
 
 			result.Should().BeTrue();
 			var directory = Path.Combine(root, "Saves", "slot-1");
@@ -46,7 +46,7 @@ namespace Sumorin.Save.Tests
 		[TestCase("", TestName = "空字串回傳失敗")]
 		public void Save_WithInvalidSlotId_ReturnsFalse(string slotId)
 		{
-			var result = storage.Save(slotId, Payload(), Info(slotId));
+			var result = storage.Save(Info(slotId), Payload());
 
 			result.Should().BeFalse();
 			Directory.Exists(Path.Combine(root, "Saves")).Should().BeFalse();
@@ -55,7 +55,7 @@ namespace Sumorin.Save.Tests
 		[Test]
 		public void Load_AfterSave_ReturnsTheSameData()
 		{
-			storage.Save("slot-1", Payload(), Info("slot-1"));
+			storage.Save(Info("slot-1"), Payload());
 
 			var result = storage.Load("slot-1");
 
@@ -65,7 +65,7 @@ namespace Sumorin.Save.Tests
 		[Test]
 		public void Load_AfterSaveGlobalSlot_ReturnsTheSameData()
 		{
-			storage.Save(SaveSlot.GlobalId, Payload(), Info(SaveSlot.GlobalId));
+			storage.Save(Info(SaveSlot.GlobalId), Payload());
 
 			var result = storage.Load(SaveSlot.GlobalId);
 
@@ -81,7 +81,7 @@ namespace Sumorin.Save.Tests
 		[Test]
 		public void Delete_WithExistingSlot_RemovesSlotFolderAndReturnsTrue()
 		{
-			storage.Save("slot-1", Payload(), Info("slot-1"));
+			storage.Save(Info("slot-1"), Payload());
 
 			var result = storage.Delete("slot-1");
 
@@ -98,8 +98,8 @@ namespace Sumorin.Save.Tests
 		[Test]
 		public void ListSlots_WithSavedSlots_ReturnsTheirMetadata()
 		{
-			storage.Save("slot-1", Payload(), Info("slot-1"));
-			storage.Save("slot-2", Payload(), Info("slot-2"));
+			storage.Save(Info("slot-1"), Payload());
+			storage.Save(Info("slot-2"), Payload());
 
 			var result = storage.ListSlots();
 
@@ -126,7 +126,7 @@ namespace Sumorin.Save.Tests
 		[Test]
 		public void ListSlots_WithFolderMissingMeta_SkipsThatFolder()
 		{
-			storage.Save("slot-1", Payload(), Info("slot-1"));
+			storage.Save(Info("slot-1"), Payload());
 			Directory.CreateDirectory(Path.Combine(root, "Saves", "orphan"));
 
 			var result = storage.ListSlots();
@@ -137,7 +137,7 @@ namespace Sumorin.Save.Tests
 		[Test]
 		public void ListSlots_WithUnreadableMeta_SkipsThatFolder()
 		{
-			storage.Save("slot-1", Payload(), Info("slot-1"));
+			storage.Save(Info("slot-1"), Payload());
 			var broken = Directory.CreateDirectory(Path.Combine(root, "Saves", "broken"));
 			File.WriteAllText(Path.Combine(broken.FullName, "meta.json"), "not json");
 
@@ -149,7 +149,7 @@ namespace Sumorin.Save.Tests
 		[Test]
 		public void ListSlots_WithGlobalSlotSaved_DoesNotIncludeIt()
 		{
-			storage.Save(SaveSlot.GlobalId, Payload(), Info(SaveSlot.GlobalId));
+			storage.Save(Info(SaveSlot.GlobalId), Payload());
 
 			storage.ListSlots().Should().BeEmpty();
 		}

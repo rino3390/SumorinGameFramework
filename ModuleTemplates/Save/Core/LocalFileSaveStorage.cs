@@ -45,8 +45,9 @@ namespace Sumorin.Save
 
 	#region ISaveStorage Members
 		/// <inheritdoc />
-		public bool Save(string slotId, IReadOnlyDictionary<string, string> data, SaveSlotInfo info)
+		public bool Save(SaveSlotInfo info, IReadOnlyDictionary<string, string> data)
 		{
+			var slotId = info.SlotId;
 			if(!IsValidSlotId(slotId)) return false;
 
 			try

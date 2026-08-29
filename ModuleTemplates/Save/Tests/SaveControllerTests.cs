@@ -18,7 +18,7 @@ namespace Sumorin.Save.Tests
 		{
 			storage = Substitute.For<ISaveStorage>();
 			publisher = Substitute.For<IPublisher>();
-			storage.Save(Arg.Any<string>(), Arg.Any<IReadOnlyDictionary<string, string>>(), Arg.Any<SaveSlotInfo>()).Returns(true);
+			storage.Save(Arg.Any<SaveSlotInfo>(), Arg.Any<IReadOnlyDictionary<string, string>>()).Returns(true);
 			storage.Delete(Arg.Any<string>()).Returns(true);
 		}
 
@@ -41,7 +41,7 @@ namespace Sumorin.Save.Tests
 		{
 			var controller = new SaveController(null, storage, publisher);
 			IReadOnlyDictionary<string, string> capturedData = null;
-			storage.Save("slot-1", Arg.Do<IReadOnlyDictionary<string, string>>(data => capturedData = data), Arg.Any<SaveSlotInfo>()).Returns(true);
+			storage.Save(Arg.Any<SaveSlotInfo>(), Arg.Do<IReadOnlyDictionary<string, string>>(data => capturedData = data)).Returns(true);
 
 			var result = controller.Save("slot-1", "空存檔");
 
@@ -57,7 +57,7 @@ namespace Sumorin.Save.Tests
 			var controller = CreateController(progress, settings);
 			IReadOnlyDictionary<string, string> capturedData = null;
 			var capturedInfo = default(SaveSlotInfo);
-			storage.Save("slot-1", Arg.Do<IReadOnlyDictionary<string, string>>(data => capturedData = data), Arg.Do<SaveSlotInfo>(info => capturedInfo = info))
+			storage.Save(Arg.Do<SaveSlotInfo>(info => capturedInfo = info), Arg.Do<IReadOnlyDictionary<string, string>>(data => capturedData = data))
 				   .Returns(true);
 
 			var result = controller.Save("slot-1", "第一章");
@@ -81,7 +81,7 @@ namespace Sumorin.Save.Tests
 		{
 			var controller = CreateController();
 			IReadOnlyDictionary<string, string> capturedData = null;
-			storage.Save("slot-1", Arg.Do<IReadOnlyDictionary<string, string>>(data => capturedData = data), Arg.Any<SaveSlotInfo>()).Returns(true);
+			storage.Save(Arg.Any<SaveSlotInfo>(), Arg.Do<IReadOnlyDictionary<string, string>>(data => capturedData = data)).Returns(true);
 
 			var result = controller.Save("slot-1", "空存檔");
 
@@ -93,7 +93,7 @@ namespace Sumorin.Save.Tests
 		public void Save_WhenStorageRejects_Fails()
 		{
 			var controller = CreateController(CreateParticipant("progress", 0, false, "progress-data"));
-			storage.Save("slot-1", Arg.Any<IReadOnlyDictionary<string, string>>(), Arg.Any<SaveSlotInfo>()).Returns(false);
+			storage.Save(Arg.Any<SaveSlotInfo>(), Arg.Any<IReadOnlyDictionary<string, string>>()).Returns(false);
 
 			var result = controller.Save("slot-1", "第一章");
 
@@ -111,7 +111,7 @@ namespace Sumorin.Save.Tests
 			var result = controller.Save(slotId, "第一章");
 
 			result.IsSuccess.Should().BeFalse();
-			storage.DidNotReceive().Save(Arg.Any<string>(), Arg.Any<IReadOnlyDictionary<string, string>>(), Arg.Any<SaveSlotInfo>());
+			storage.DidNotReceive().Save(Arg.Any<SaveSlotInfo>(), Arg.Any<IReadOnlyDictionary<string, string>>());
 		}
 
 		[Test]
@@ -270,11 +270,14 @@ namespace Sumorin.Save.Tests
 			var settings = CreateParticipant("settings", 0, true, "settings-data");
 			var controller = CreateController(progress, settings);
 			IReadOnlyDictionary<string, string> capturedData = null;
-			storage.Save(SaveSlot.GlobalId, Arg.Do<IReadOnlyDictionary<string, string>>(data => capturedData = data), Arg.Any<SaveSlotInfo>()).Returns(true);
+			var capturedInfo = default(SaveSlotInfo);
+			storage.Save(Arg.Do<SaveSlotInfo>(info => capturedInfo = info), Arg.Do<IReadOnlyDictionary<string, string>>(data => capturedData = data))
+				   .Returns(true);
 
 			var result = controller.SaveGlobal();
 
 			result.IsSuccess.Should().BeTrue();
+			capturedInfo.SlotId.Should().Be(SaveSlot.GlobalId);
 			capturedData.Should().BeEquivalentTo(new Dictionary<string, string> { ["settings"] = "settings-data" });
 			progress.DidNotReceive().Export();
 		}
