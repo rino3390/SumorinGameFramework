@@ -16,10 +16,13 @@ namespace Sumorin.DDDCore
 		/// <summary>
 		///     建立 ConfigManager
 		/// </summary>
-		/// <param name="configs">配置 id 與配置內容的對應，由 Installer 從 DataScript 讀出</param>
-		public ConfigManager(IEnumerable<KeyValuePair<string, IConfig>> configs)
+		/// <remarks>
+		///     查找鍵取自配置自己的 <see cref="IConfig.Id" />，不另外指定，鍵與配置識別碼因此不會分歧。
+		/// </remarks>
+		/// <param name="configs">配置清單，由 Installer 從 DataScript 讀出</param>
+		public ConfigManager(IEnumerable<IConfig> configs)
 		{
-			this.configs = configs?.ToDictionary(pair => pair.Key, pair => pair.Value) ?? new Dictionary<string, IConfig>();
+			this.configs = configs?.ToDictionary(config => config.Id) ?? new Dictionary<string, IConfig>();
 		}
 
 		/// <summary>

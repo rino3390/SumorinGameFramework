@@ -1,17 +1,18 @@
 ﻿{
-    "name": "Sumorin.SOBase",
-    "references": [
-        "Sumorin.SumorinUtility",
-        "Sumorin.SumorinUtility.Editor",
-        "Unity.Localization"
-    ],
-    "includePlatforms": [],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "Sumorin.SOBase",
+  "references": [
+    "Sumorin.DDDCore",
+    "Sumorin.SumorinUtility",
+    "Sumorin.SumorinUtility.Editor",
+    "Unity.Localization"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
 }

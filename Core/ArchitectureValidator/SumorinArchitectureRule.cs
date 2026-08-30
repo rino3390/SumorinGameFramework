@@ -1,4 +1,5 @@
 #if ODIN_VALIDATOR
+	using System;
 	using System.Collections;
 	using System.Collections.Generic;
 	using Sirenix.OdinInspector;
@@ -27,6 +28,12 @@
 			/// <summary>要定位的成員或型別名，反射類違規靠它從原始碼回推行號</summary>
 			public readonly string Symbol;
 
+			/// <summary>修復按鈕的標籤，為 null 時不提供修復按鈕</summary>
+			public readonly string FixLabel;
+
+			/// <summary>按下修復按鈕時執行的動作</summary>
+			public readonly Action Fix;
+
 			/// <summary>
 			///     建立一筆架構違規
 			/// </summary>
@@ -40,8 +47,29 @@
 				Source = source;
 				Line = line;
 				Symbol = symbol;
+				FixLabel = null;
+				Fix = null;
 			}
 
+			/// <summary>
+			///     建立一筆可自動修復的架構違規
+			/// </summary>
+			/// <remarks>
+			///     只有修法唯一且無需人工判斷時才提供修復，否則讓使用者自己決定怎麼改。
+			/// </remarks>
+			/// <param name="message">違規描述</param>
+			/// <param name="source">違規來源資產，可為 null</param>
+			/// <param name="fixLabel">修復按鈕的標籤</param>
+			/// <param name="fix">按下修復按鈕時執行的動作</param>
+			public ArchitectureViolation(string message, UnityEngine.Object source, string fixLabel, Action fix)
+			{
+				Message = message;
+				Source = source;
+				Line = 0;
+				Symbol = null;
+				FixLabel = fixLabel;
+				Fix = fix;
+			}
 		}
 
 		/// <summary>
@@ -128,6 +156,12 @@
 			[LabelText("DataScript Id 完整性")]
 			public bool DataScriptId = true;
 
+			/// <summary>DataScript 資產必須被對應的 DataSet 收錄</summary>
+			[ToggleLeft]
+			[BoxGroup("資產")]
+			[LabelText("DataSet 收錄完整性")]
+			public bool DataSetMembership = true;
+
 			/// <summary>HitTimes 必須與動畫片段上的 Animation Event 時間一致</summary>
 			[ToggleLeft]
 			[BoxGroup("資產")]
@@ -149,6 +183,7 @@
 				Collect(result, ActionHandlerMustNotHoldView, new ActionHandlerMustNotHoldViewRule());
 				Collect(result, ViewMustImplementBindableView, new ViewMustImplementBindableViewRule());
 				Collect(result, DataScriptId, new DataScriptIdRule());
+				Collect(result, DataSetMembership, new DataSetMembershipRule());
 				Collect(result, AnimationHitAlignment, new AnimationHitAlignmentRule());
 
 				// 回傳值是給長時間驗證分幀用的，yield 一次就交還一幀控制權給 editor，
@@ -164,6 +199,11 @@
 				{
 					ref var item = ref result.AddError(WithLocation(violation));
 
+					if(violation.Fix != null)
+					{
+						item.WithFix(violation.FixLabel, violation.Fix);
+					}
+
 					if(violation.Source != null)
 					{
 						item.SetSelectionObject(violation.Source);
@@ -171,17 +211,19 @@
 				}
 			}
 
-			// 訊息一律附上路徑。點擊跳轉解決不了「我想直接搜這個檔」與「把回報貼給別人看」這兩件事
+			// 原始碼違規附上路徑與行號，點擊跳轉到不了指定的那一行。
+			// 訊息不得換行，Validator 視窗的列高只有一行，第二行會被切掉只剩上半截。
+			// 資產違規不附路徑，點擊就會選到該資產，再寫一次只是把列擠爆
 			private static string WithLocation(ArchitectureViolation violation)
 			{
-				if(violation.Source == null) return violation.Message;
+				if(violation.Source is not MonoScript script) return violation.Message;
 
-				var path = AssetDatabase.GetAssetPath(violation.Source);
+				var path = AssetDatabase.GetAssetPath(script);
 				if(string.IsNullOrEmpty(path)) return violation.Message;
 
 				var line = violation.Line > 0 ? violation.Line : SumorinArchitecture.LineOfSymbol(path, violation.Symbol);
 
-				return line > 0 ? $"{violation.Message}\n{path}:{line}" : $"{violation.Message}\n{path}";
+				return line > 0 ? $"{violation.Message}　{path}:{line}" : $"{violation.Message}　{path}";
 			}
 		}
 	}

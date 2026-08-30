@@ -1,13 +1,18 @@
 namespace Sumorin.DDDCore
 {
 	/// <summary>
-	///     配置數值的標記介面
+	///     配置數值的介面
 	/// </summary>
 	/// <remarks>
 	///     各 Domain 於 Contract 定義自己的 <c>I{X}Config</c> 繼承本介面，只含數值不含 Unity 資源型別。
-	///     不宣告 Id，配置的 id 是 <see cref="ConfigManager" /> 建字典時的鍵而非業務數值。
+	///     <see cref="Id" /> 同時是 <see cref="ConfigManager" /> 的查找鍵與 AssetProvider 取具體 SO 的鍵，兩者必為同一值。
+	///     DataScript 繼承 <c>SODataBase</c> 即已具備 <see cref="Id" />，不需重複宣告。
 	/// </remarks>
 	public interface IConfig
 	{
+		/// <summary>
+		///     配置識別碼，全專案唯一
+		/// </summary>
+		string Id { get; }
 	}
 }

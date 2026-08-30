@@ -5,6 +5,7 @@
     "Sumorin.DDDCore",
     "Sumorin.Presentation",
     "Sumorin.SOBase",
+    "Sumorin.SumorinUtility",
     "UniRx",
     "Zenject"
   ],

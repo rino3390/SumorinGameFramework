@@ -1,7 +1,11 @@
-#if ODIN_VALIDATOR
+﻿#if ODIN_VALIDATOR
+	using System;
+	using System.Collections;
 	using System.Collections.Generic;
 	using System.Linq;
+	using System.Reflection;
 	using Sumorin.GameManagerBase;
+	using Sumorin.SumorinUtility;
 	using UnityEditor;
 	using UnityEngine;
 
@@ -19,12 +23,8 @@
 
 				foreach(var data in DataScriptCache.All)
 				{
-					if(string.IsNullOrWhiteSpace(data.Id))
-					{
-						yield return new ArchitectureViolation($"{data.name} 的 Id 是空的。DataScript 的 Id 是 Domain 引用它的唯一依據", data);
-
-						continue;
-					}
+					// 識別碼本身是否合法由 DataScriptIdValidator 檢查，這裡只管跨資產的唯一性
+					if(!data.IsIdNameLegal()) continue;
 
 					if(!byId.TryGetValue(data.Id, out var owners))
 					{
@@ -39,14 +39,24 @@
 				{
 					if(pair.Value.Count <= 1) continue;
 
-					var names = string.Join("、", pair.Value.Select(data => data.name));
-
-					// 每一份都回報一次，才能從 Validator 視窗逐一點過去修
+					// 每一份都回報一次，才能從 Validator 視窗逐一點過去修。
+					// 不列出其他資產的名稱，訊息會長到看不完，點擊跳轉本來就找得到
 					foreach(var duplicate in pair.Value)
 					{
-						yield return new ArchitectureViolation($"Id «{pair.Key}» 重複於 {pair.Value.Count} 份資產：{names}", duplicate);
+						yield return new ArchitectureViolation($"Id «{pair.Key}» 與另外 {pair.Value.Count - 1} 份資產重複", duplicate, "重新產生Id", AssignGuid(duplicate));
 					}
 				}
+			}
+
+			// 識別碼只要求唯一，取不出語意時給 GUID 即可，使用者要可讀的名稱再自行改寫
+			private static Action AssignGuid(SODataBase data)
+			{
+				return () =>
+				{
+					data.IdName = SumorinUtility.GUID.NewGuid();
+					EditorUtility.SetDirty(data);
+					AssetDatabase.SaveAssets();
+				};
 			}
 		}
 
@@ -66,7 +76,7 @@
 
 					foreach(var message in Misalignments(config))
 					{
-						yield return new ArchitectureViolation($"{data.name}：{message}", data);
+						yield return new ArchitectureViolation(message, data);
 					}
 				}
 			}
@@ -92,6 +102,135 @@
 
 					yield return $"第 {i + 1} 個打點對不上，HitTimes 是 {hitTimes[i]:F3}s，Animation Event 是 {eventTimes[i]:F3}s（容差 {tolerance:F3}s）";
 				}
+			}
+		}
+
+		/// <summary>
+		///     有 <see cref="DataEditorConfigAttribute" /> 的 DataScript 資產必須被對應的 DataSet 收錄
+		/// </summary>
+		/// <remarks>
+		///     DataSet 是資產的執行期容器，沒被收錄的資產不會被打包，Domain 查不到那份配置。
+		///     從 GameManager 建立的資產會自動加入，本規則抓的是複製、匯入、外部刪除等繞過該流程的情況。
+		/// </remarks>
+		public class DataSetMembershipRule: IArchitectureRule
+		{
+			/// <inheritdoc />
+			public IEnumerable<ArchitectureViolation> FindViolations()
+			{
+				var collected = new HashSet<SODataBase>();
+				var setOfType = new Dictionary<Type, ScriptableObject>();
+
+				foreach(var dataSet in LoadDataSets())
+				{
+					var dataType = DataTypeOf(dataSet.GetType());
+
+					if(dataType != null) setOfType[dataType] = dataSet;
+
+					var index = 0;
+
+					foreach(var entry in Entries(dataSet))
+					{
+						index++;
+
+						if(entry == null)
+						{
+							yield return new ArchitectureViolation($"第 {index} 筆是空的", dataSet, "清掉空項目", Rebuild(dataSet));
+
+							continue;
+						}
+
+						collected.Add(entry);
+					}
+				}
+
+				var managed = DataScriptCache.All.Where(data => data.GetType().GetCustomAttribute<DataEditorConfigAttribute>() != null).ToList();
+
+				foreach(var group in managed.GroupBy(data => data.GetType()))
+				{
+					// 整個型別都沒有 DataSet 時只報一次，否則每份資產都會各報一次
+					if(!setOfType.TryGetValue(group.Key, out var dataSet))
+					{
+						yield return new ArchitectureViolation($"找不到 {group.Key.Name} 的 DataSet，{group.Count()} 份資料執行期載不到", group.First());
+
+						continue;
+					}
+
+					foreach(var data in group.Where(data => !collected.Contains(data)))
+					{
+						// 指向 DataSet 而非缺漏的資產。要修的是集合，點過去才是該編輯的對象
+						yield return new ArchitectureViolation($"{dataSet.name} 有遺漏 Data，需要修復否則執行期讀取不到", dataSet, $"加入 {data.name}", Add(dataSet, data));
+					}
+				}
+			}
+
+			// 修復動作在回報當下就綁好目標，按下按鈕時不需要重新掃描。
+			// 直接改清單欄位而不呼叫 DataSet 的方法，因為 DataSet<T> 是泛型，方法反射多一層對不上的風險
+			private static Action Add(ScriptableObject dataSet, SODataBase data)
+			{
+				return () =>
+				{
+					if(ListOf(dataSet) is not { } list || list.Contains(data)) return;
+
+					list.Add(data);
+					Save(dataSet);
+				};
+			}
+
+			private static Action Rebuild(ScriptableObject dataSet)
+			{
+				return () =>
+				{
+					if(ListOf(dataSet) is not { } list) return;
+
+					// 只清掉空洞，不整份重掃。重掃會把使用者刻意排除的資產一併抓回來
+					for(var i = list.Count - 1; i >= 0; i--)
+					{
+						if(list[i] == null) list.RemoveAt(i);
+					}
+
+					Save(dataSet);
+				};
+			}
+
+			private static IList ListOf(ScriptableObject dataSet)
+			{
+				return dataSet.GetType().GetField(nameof(DataSet<SODataBase>.Datas))?.GetValue(dataSet) as IList;
+			}
+
+			private static void Save(ScriptableObject dataSet)
+			{
+				EditorUtility.SetDirty(dataSet);
+				AssetDatabase.SaveAssets();
+			}
+
+			private static IEnumerable<ScriptableObject> LoadDataSets()
+			{
+				return AssetDatabase.FindAssets($"t:{nameof(ScriptableObject)}")
+									.Select(AssetDatabase.GUIDToAssetPath)
+									.Select(AssetDatabase.LoadAssetAtPath<ScriptableObject>)
+									.Where(asset => asset != null && DataTypeOf(asset.GetType()) != null);
+			}
+
+			private static IEnumerable<SODataBase> Entries(ScriptableObject dataSet)
+			{
+				var field = dataSet.GetType().GetField(nameof(DataSet<SODataBase>.Datas));
+
+				if(field?.GetValue(dataSet) is not IEnumerable list) yield break;
+
+				foreach(var item in list)
+				{
+					yield return item as SODataBase;
+				}
+			}
+
+			private static Type DataTypeOf(Type type)
+			{
+				for(var current = type; current != null; current = current.BaseType)
+				{
+					if(current.IsGenericType && current.GetGenericTypeDefinition() == typeof(DataSet<>)) return current.GetGenericArguments()[0];
+				}
+
+				return null;
 			}
 		}
 

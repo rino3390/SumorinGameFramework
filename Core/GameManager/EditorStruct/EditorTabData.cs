@@ -1,10 +1,7 @@
 ﻿using Sumorin.GameManagerBase;
-using Sumorin.SumorinUtility.Editor;
 using Sirenix.OdinInspector;
 using System;
 using System.Collections;
-using System.Linq;
-using System.Reflection;
 
 namespace Sumorin.GameManager
 {
@@ -26,7 +23,7 @@ namespace Sumorin.GameManager
 		[FoldoutGroup("Editor 設定", true)]
 		[ValueDropdown("GetWindowTypeList")]
 		[LabelText("繪製視窗")]
-		[Required]
+		[Required("必須指定要繪製的編輯器視窗")]
 		public Type CorrespondingWindowType;
 
 		/// <summary>
@@ -45,22 +42,7 @@ namespace Sumorin.GameManager
 
 		private static IEnumerable GetWindowTypeList()
 		{
-			// 掃描有 [DataEditorConfig] 的 SODataBase，取得 DynamicDataEditor<T> 類型
-			var dataEditorTypes = SumorinEditorUtility.GetTypesWithAttribute<SODataBase, DataEditorConfigAttribute>()
-				.Select(dataType => new ValueDropdownItem(
-					dataType.GetCustomAttribute<DataEditorConfigAttribute>().TabName,
-					typeof(DynamicDataEditor<>).MakeGenericType(dataType)
-				));
-
-			// 掃描其他 GameEditorMenuBase（排除 DynamicDataEditor）
-			var otherEditorTypes = SumorinEditorUtility.GetDerivedClasses<GameEditorMenuBase>(excludeGenericBase: typeof(DynamicDataEditor<>))
-				.Select(type =>
-				{
-					var instance = Activator.CreateInstance(type) as GameEditorMenuBase;
-					return new ValueDropdownItem(instance?.TabName ?? type.Name, type);
-				});
-
-			return dataEditorTypes.Concat(otherEditorTypes).ToList();
+			return EditorMenuTypeProvider.GetMenuTypes();
 		}
 	}
 }
