@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using Sirenix.OdinInspector;
+using UnityEngine.Serialization;
 
 namespace Sumorin.Attribute
 {
@@ -10,12 +11,13 @@ namespace Sumorin.Attribute
 	public struct AttributeValue
 	{
 		/// <summary>
-		///     目標屬性名稱
+		///     目標屬性的配置識別碼
 		/// </summary>
+		[FormerlySerializedAs("ConfigId")]
+		// 不加 Required，理由同 ModifyEffectInfo.AttributeConfigId
 		[LabelText("屬性")]
-		[Required]
-		[ValueDropdown("@Sumorin.Attribute.AttributeDropdownProvider.GetAttributeNames()")]
-		public string AttributeName;
+		[ValueDropdown("@Sumorin.Attribute.AttributeDropdownProvider.GetAttributes()")]
+		public string ConfigId;
 
 		/// <summary>
 		///     基礎值

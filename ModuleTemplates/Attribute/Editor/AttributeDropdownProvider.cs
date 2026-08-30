@@ -1,31 +1,35 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Sirenix.OdinInspector;
 using Sumorin.SumorinUtility.Editor;
 
 namespace Sumorin.Attribute
 {
 	/// <summary>
-	/// 提供屬性名稱下拉選單的資料來源
+	/// 提供屬性下拉選單的資料來源
 	/// </summary>
+	/// <remarks>
+	/// 選項顯示 <c>EditorLabel</c>，實際存入的值是 <c>Id</c>。
+	/// 不使用 <c>DataSet&lt;T&gt;.DrawValueDropDown</c>，該方法以泛型型別名稱搜尋資產，找不到衍生的集合資產。
+	/// </remarks>
 	public static class AttributeDropdownProvider
 	{
 		/// <summary>
-		/// 取得所有已定義的屬性名稱
+		/// 取得所有已定義的屬性
 		/// </summary>
-		public static IEnumerable<string> GetAttributeNames() => GetAttributeNames("");
+		public static IEnumerable<ValueDropdownItem> GetAttributes() => GetAttributes("");
 
 		/// <summary>
-		/// 取得所有已定義的屬性名稱（排除指定名稱）
+		/// 取得所有已定義的屬性（排除指定識別碼）
 		/// </summary>
-		/// <param name="excludeName">要排除的屬性名稱，為空字串時不過濾</param>
-		public static IEnumerable<string> GetAttributeNames(string excludeName)
+		/// <param name="excludeId">要排除的屬性識別碼，為空字串時不過濾</param>
+		public static IEnumerable<ValueDropdownItem> GetAttributes(string excludeId)
 		{
-			var settingData = SumorinEditorUtility.FindAsset<AttributeSettingData>();
-			if(settingData == null) return new[] { "" };
+			var items = SumorinEditorUtility.FindAssets<AttributeData>()
+											.Where(data => !string.IsNullOrEmpty(data.Id) && (excludeId == "" || data.Id != excludeId))
+											.Select(data => new ValueDropdownItem(data.AssetName, data.Id));
 
-			var names = settingData.Attributes.Select(x => x.Id).Where(x => !string.IsNullOrEmpty(x) && (excludeName == "" || x != excludeName));
-
-			return new[] { "" }.Concat(names);
+			return new[] { new ValueDropdownItem("（不指定）", "") }.Concat(items);
 		}
 	}
 }

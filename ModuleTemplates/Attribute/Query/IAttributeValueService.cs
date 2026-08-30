@@ -8,6 +8,6 @@ namespace Sumorin.Attribute
 	public interface IAttributeValueService
 	{
 		/// <inheritdoc cref="IAttributeController.ObserveAttribute" />
-		IReadOnlyReactiveProperty<AttributeValueInfo> ObserveAttribute(string ownerId, string attributeName);
+		IReadOnlyReactiveProperty<AttributeValueInfo> ObserveAttribute(string ownerId, string configId);
 	}
 }

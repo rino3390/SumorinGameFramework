@@ -13,9 +13,9 @@ namespace Sumorin.Buff
 		public string BuffId { get; }
 
 		/// <summary>
-		///     Buff 名稱
+		///     Buff 配置識別碼
 		/// </summary>
-		public string BuffName { get; }
+		public string ConfigId { get; }
 
 		/// <summary>
 		///     當前層數
@@ -36,14 +36,14 @@ namespace Sumorin.Buff
 		///     建立 Buff 狀態快照
 		/// </summary>
 		/// <param name="buffId">Buff 識別碼</param>
-		/// <param name="buffName">Buff 名稱</param>
+		/// <param name="configId">Buff 配置識別碼</param>
 		/// <param name="stackCount">當前層數</param>
 		/// <param name="lifetimeType">生命週期類型</param>
 		/// <param name="remainingLifetime">剩餘時效</param>
-		public BuffInfo(string buffId, string buffName, int stackCount, LifetimeType lifetimeType, float remainingLifetime)
+		public BuffInfo(string buffId, string configId, int stackCount, LifetimeType lifetimeType, float remainingLifetime)
 		{
 			BuffId = buffId;
-			BuffName = buffName;
+			ConfigId = configId;
 			StackCount = stackCount;
 			LifetimeType = lifetimeType;
 			RemainingLifetime = remainingLifetime;
@@ -51,9 +51,9 @@ namespace Sumorin.Buff
 
 	#region IEquatable<BuffInfo> Members
 		/// <inheritdoc />
-		public bool Equals(BuffInfo other)
-			=> BuffId == other.BuffId
-			&& BuffName == other.BuffName
+		public bool Equals(BuffInfo other) =>
+			BuffId == other.BuffId
+			&& ConfigId == other.ConfigId
 			&& StackCount == other.StackCount
 			&& LifetimeType == other.LifetimeType
 			&& RemainingLifetime.Equals(other.RemainingLifetime);
@@ -63,6 +63,6 @@ namespace Sumorin.Buff
 		public override bool Equals(object obj) => obj is BuffInfo other && Equals(other);
 
 		/// <inheritdoc />
-		public override int GetHashCode() => HashCode.Combine(BuffId, BuffName, StackCount, LifetimeType, RemainingLifetime);
+		public override int GetHashCode() => HashCode.Combine(BuffId, ConfigId, StackCount, LifetimeType, RemainingLifetime);
 	}
 }

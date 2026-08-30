@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using Sirenix.OdinInspector;
+using UnityEngine.Serialization;
 
 namespace Sumorin.Attribute
 {
@@ -10,12 +11,14 @@ namespace Sumorin.Attribute
 	public struct ModifyEffectInfo
 	{
 		/// <summary>
-		///     目標屬性名稱
+		///     目標屬性的配置識別碼
 		/// </summary>
+		[FormerlySerializedAs("ConfigId")]
+		// 不加 Required。值取自屬性資產的 Id，屬性沒填識別碼時這裡自然是空的
+		// 那時 DataScriptIdRule 已經在報同一件事並提供修復，這裡再報一次只是重複
 		[LabelText("目標屬性")]
-		[Required]
-		[ValueDropdown("@Sumorin.Attribute.AttributeDropdownProvider.GetAttributeNames()")]
-		public string AttributeName;
+		[ValueDropdown("@Sumorin.Attribute.AttributeDropdownProvider.GetAttributes()")]
+		public string AttributeConfigId;
 
 		/// <summary>
 		///     修改類型
@@ -27,7 +30,7 @@ namespace Sumorin.Attribute
 		///     修改數值
 		/// </summary>
 		[LabelText("數值")]
-		[Required]
+		[Required("修改數值不得為 0")]
 		public int Value;
 	}
 }

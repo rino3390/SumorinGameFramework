@@ -1,15 +1,13 @@
 {
-  "name": "Sumorin.Attribute.Editor",
+  "name": "Sumorin.Attribute.DataScript",
   "references": [
     "Sumorin.Attribute.Contract",
-    "Sumorin.Attribute.DataScript",
-    "Sumorin.GameManager.Base",
+    "Sumorin.DDDCore",
     "Sumorin.SOBase",
-    "Sumorin.SumorinUtility.Editor"
+    "Sumorin.SumorinUtility",
+    "Unity.Localization"
   ],
-  "includePlatforms": [
-    "Editor"
-  ],
+  "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
   "overrideReferences": false,

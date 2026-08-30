@@ -24,7 +24,7 @@ namespace Sumorin.Buff.Tests
 			attributeController = Substitute.For<IAttributeController>();
 		}
 
-		private BuffController CreateController(Dictionary<string, IConfig> configs = null)
+		private BuffController CreateController(List<IConfig> configs = null)
 		{
 			Container.Bind<IBuffRepository>().FromInstance(repository);
 			Container.Bind<IPublisher>().FromInstance(publisher);
@@ -33,16 +33,16 @@ namespace Sumorin.Buff.Tests
 			return Container.Instantiate<BuffController>();
 		}
 
-		private static Dictionary<string, IConfig> DefaultConfigs() =>
+		private static List<IConfig> DefaultConfigs() =>
 			new()
 			{
-				["Poison"] = new FakeBuffConfig(LifetimeType.TimeBased, 10f, StackBehavior.IncreaseStack, 5, tags: new List<string> { "Debuff", "DoT" }),
-				["Burn"] = new FakeBuffConfig(LifetimeType.TimeBased, 5f, tags: new List<string> { "Debuff", "DoT" }),
-				["Invincible"] = new FakeBuffConfig(LifetimeType.TurnBased, 2f, StackBehavior.Replace),
-				["Passive"] = new FakeBuffConfig(LifetimeType.Permanent, 0f),
-				["Echo"] = new FakeBuffConfig(LifetimeType.TimeBased, 6f, StackBehavior.Independent),
-				["SpeedUp"] = new FakeBuffConfig(LifetimeType.TimeBased, 8f, mutualExclusionGroup: "Movement", priority: 1),
-				["SpeedDown"] = new FakeBuffConfig(LifetimeType.TimeBased, 8f, mutualExclusionGroup: "Movement")
+				new FakeBuffConfig(LifetimeType.TimeBased, 10f, StackBehavior.IncreaseStack, 5, tags: new List<string> { "Debuff", "DoT" }, id: "Poison"),
+				new FakeBuffConfig(LifetimeType.TimeBased, 5f, tags: new List<string> { "Debuff", "DoT" }, id: "Burn"),
+				new FakeBuffConfig(LifetimeType.TurnBased, 2f, StackBehavior.Replace, id: "Invincible"),
+				new FakeBuffConfig(LifetimeType.Permanent, 0f, id: "Passive"),
+				new FakeBuffConfig(LifetimeType.TimeBased, 6f, StackBehavior.Independent, id: "Echo"),
+				new FakeBuffConfig(LifetimeType.TimeBased, 8f, mutualExclusionGroup: "Movement", priority: 1, id: "SpeedUp"),
+				new FakeBuffConfig(LifetimeType.TimeBased, 8f, mutualExclusionGroup: "Movement", id: "SpeedDown")
 			};
 
 		[Test]
@@ -58,13 +58,13 @@ namespace Sumorin.Buff.Tests
 					  .BeEquivalentTo(
 						  new
 						  {
-							  BuffName = "Poison",
+							  ConfigId = "Poison",
 							  OwnerId = "owner-1",
 							  SourceId = "source-1",
 							  StackCount = 1
 						  }
 					  );
-			publisher.Received(1).Publish(Arg.Is<BuffApplied>(e => e.BuffId == result.Value && e.OwnerId == "owner-1" && e.BuffName == "Poison"));
+			publisher.Received(1).Publish(Arg.Is<BuffApplied>(e => e.BuffId == result.Value && e.OwnerId == "owner-1" && e.ConfigId == "Poison"));
 		}
 
 		[Test]

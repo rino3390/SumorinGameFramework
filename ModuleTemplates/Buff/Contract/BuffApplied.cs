@@ -18,9 +18,9 @@ namespace Sumorin.Buff
 		public string OwnerId { get; }
 
 		/// <summary>
-		///     Buff 名稱
+		///     Buff 配置識別碼
 		/// </summary>
-		public string BuffName { get; }
+		public string ConfigId { get; }
 
 		/// <summary>
 		///     來源識別碼（施加者）
@@ -32,13 +32,13 @@ namespace Sumorin.Buff
 		/// </summary>
 		/// <param name="buffId">Buff 識別碼</param>
 		/// <param name="ownerId">擁有者識別碼</param>
-		/// <param name="buffName">Buff 名稱</param>
+		/// <param name="configId">Buff 配置識別碼</param>
 		/// <param name="sourceId">來源識別碼</param>
-		public BuffApplied(string buffId, string ownerId, string buffName, string sourceId)
+		public BuffApplied(string buffId, string ownerId, string configId, string sourceId)
 		{
 			BuffId = buffId;
 			OwnerId = ownerId;
-			BuffName = buffName;
+			ConfigId = configId;
 			SourceId = sourceId;
 		}
 	}

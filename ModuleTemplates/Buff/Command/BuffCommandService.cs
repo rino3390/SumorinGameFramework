@@ -12,15 +12,13 @@ namespace Sumorin.Buff
 		private IBuffController controller;
 
 		/// <inheritdoc cref="IBuffController.AddBuff" />
-		public CommandResult AddBuff(string ownerId, string buffName, string sourceId)
-			=> controller.AddBuff(ownerId, buffName, sourceId);
+		public CommandResult AddBuff(string ownerId, string configId, string sourceId) => controller.AddBuff(ownerId, configId, sourceId);
 
 		/// <inheritdoc cref="IBuffController.RemoveBuff" />
 		public CommandResult RemoveBuff(string buffId) => controller.RemoveBuff(buffId);
 
 		/// <inheritdoc cref="IBuffController.RemoveBuffsBySource" />
-		public CommandResult RemoveBuffsBySource(string ownerId, string sourceId)
-			=> controller.RemoveBuffsBySource(ownerId, sourceId);
+		public CommandResult RemoveBuffsBySource(string ownerId, string sourceId) => controller.RemoveBuffsBySource(ownerId, sourceId);
 
 		/// <inheritdoc cref="IBuffController.RemoveBuffsByOwner" />
 		public CommandResult RemoveBuffsByOwner(string ownerId) => controller.RemoveBuffsByOwner(ownerId);

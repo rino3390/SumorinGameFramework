@@ -20,9 +20,9 @@ namespace Sumorin.Buff
 		public IBuffConfig Config { get; }
 
 		/// <summary>
-		///     Buff 名稱，同時是配置的查找鍵
+		///     Buff 配置識別碼，同時是配置的查找鍵
 		/// </summary>
-		public string BuffName { get; }
+		public string ConfigId { get; }
 
 		/// <summary>
 		///     剩餘時效（秒或回合數）
@@ -76,22 +76,22 @@ namespace Sumorin.Buff
 		///     建立 Buff
 		/// </summary>
 		/// <param name="id">唯一識別碼</param>
-		/// <param name="buffName">Buff 名稱</param>
+		/// <param name="configId">Buff 配置識別碼</param>
 		/// <param name="config">Buff 配置</param>
 		/// <param name="ownerId">擁有者識別碼</param>
 		/// <param name="sourceId">來源識別碼</param>
 		/// <exception cref="ArgumentNullException">config 為 null 時拋出</exception>
-		/// <exception cref="ArgumentException">buffName、ownerId 或 sourceId 為 null 或空字串時拋出</exception>
-		public Buff(string id, string buffName, IBuffConfig config, string ownerId, string sourceId): base(id)
+		/// <exception cref="ArgumentException">configId、ownerId 或 sourceId 為 null 或空字串時拋出</exception>
+		public Buff(string id, string configId, IBuffConfig config, string ownerId, string sourceId): base(id)
 		{
 			if(config == null)
 			{
 				throw new ArgumentNullException(nameof(config));
 			}
 
-			if(string.IsNullOrEmpty(buffName))
+			if(string.IsNullOrEmpty(configId))
 			{
-				throw new ArgumentException("BuffName cannot be null or empty.", nameof(buffName));
+				throw new ArgumentException("ConfigId cannot be null or empty.", nameof(configId));
 			}
 
 			if(string.IsNullOrEmpty(ownerId))
@@ -104,7 +104,7 @@ namespace Sumorin.Buff
 				throw new ArgumentException("SourceId cannot be null or empty.", nameof(sourceId));
 			}
 
-			BuffName = buffName;
+			ConfigId = configId;
 			Config = config;
 			OwnerId = ownerId;
 			SourceId = sourceId;

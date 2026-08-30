@@ -6,6 +6,6 @@ namespace Sumorin.Attribute
 	public interface IAttributeQueryService
 	{
 		/// <inheritdoc cref="IAttributeController.GetValue" />
-		int GetValue(string ownerId, string attributeName);
+		int GetValue(string ownerId, string configId);
 	}
 }

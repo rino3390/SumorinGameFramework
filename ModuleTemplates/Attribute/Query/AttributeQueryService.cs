@@ -13,13 +13,13 @@ namespace Sumorin.Attribute
 
 	#region IAttributeQueryService Members
 		/// <inheritdoc />
-		public int GetValue(string ownerId, string attributeName) => controller.GetValue(ownerId, attributeName);
+		public int GetValue(string ownerId, string configId) => controller.GetValue(ownerId, configId);
 	#endregion
 
 	#region IAttributeValueService Members
 		/// <inheritdoc />
-		public IReadOnlyReactiveProperty<AttributeValueInfo> ObserveAttribute(string ownerId, string attributeName)
-			=> controller.ObserveAttribute(ownerId, attributeName);
+		public IReadOnlyReactiveProperty<AttributeValueInfo> ObserveAttribute(string ownerId, string configId) =>
+			controller.ObserveAttribute(ownerId, configId);
 	#endregion
 	}
 }

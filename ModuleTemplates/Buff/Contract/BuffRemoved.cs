@@ -21,9 +21,9 @@ namespace Sumorin.Buff
 		public string OwnerId { get; }
 
 		/// <summary>
-		///     Buff 名稱
+		///     Buff 配置識別碼
 		/// </summary>
-		public string BuffName { get; }
+		public string ConfigId { get; }
 
 		/// <summary>
 		///     移除原因
@@ -35,13 +35,13 @@ namespace Sumorin.Buff
 		/// </summary>
 		/// <param name="buffId">Buff 識別碼</param>
 		/// <param name="ownerId">擁有者識別碼</param>
-		/// <param name="buffName">Buff 名稱</param>
+		/// <param name="configId">Buff 配置識別碼</param>
 		/// <param name="reason">移除原因</param>
-		public BuffRemoved(string buffId, string ownerId, string buffName, BuffRemoveReason reason)
+		public BuffRemoved(string buffId, string ownerId, string configId, BuffRemoveReason reason)
 		{
 			BuffId = buffId;
 			OwnerId = ownerId;
-			BuffName = buffName;
+			ConfigId = configId;
 			Reason = reason;
 		}
 	}

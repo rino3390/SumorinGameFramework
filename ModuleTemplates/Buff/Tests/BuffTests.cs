@@ -25,7 +25,7 @@ namespace Sumorin.Buff.Tests
 					new
 					{
 						Id = "buff-1",
-						BuffName = "Poison",
+						ConfigId = "Poison",
 						OwnerId = "owner-1",
 						SourceId = "source-1",
 						StackCount = 1,
@@ -40,8 +40,8 @@ namespace Sumorin.Buff.Tests
 		{
 			var effects = new List<ModifyEffectInfo>
 			{
-				new() { AttributeName = "Health", ModifyType = ModifyType.Flat, Value = 10 },
-				new() { AttributeName = "Attack", ModifyType = ModifyType.Percent, Value = 20 }
+				new() { AttributeConfigId = "Health", ModifyType = ModifyType.Flat, Value = 10 },
+				new() { AttributeConfigId = "Attack", ModifyType = ModifyType.Percent, Value = 20 }
 			};
 
 			var buff = CreateBuff(new FakeBuffConfig(effects: effects));
@@ -54,8 +54,8 @@ namespace Sumorin.Buff.Tests
 		{
 			yield return new TestCaseData(null, "Poison", "owner-1", "source-1", typeof(ArgumentNullException), "id").SetName("id 為 null");
 			yield return new TestCaseData("", "Poison", "owner-1", "source-1", typeof(ArgumentException), "id").SetName("id 為空字串");
-			yield return new TestCaseData("buff-1", null, "owner-1", "source-1", typeof(ArgumentException), "buffName").SetName("buffName 為 null");
-			yield return new TestCaseData("buff-1", "", "owner-1", "source-1", typeof(ArgumentException), "buffName").SetName("buffName 為空字串");
+			yield return new TestCaseData("buff-1", null, "owner-1", "source-1", typeof(ArgumentException), "configId").SetName("configId 為 null");
+			yield return new TestCaseData("buff-1", "", "owner-1", "source-1", typeof(ArgumentException), "configId").SetName("configId 為空字串");
 			yield return new TestCaseData("buff-1", "Poison", null, "source-1", typeof(ArgumentException), "ownerId").SetName("ownerId 為 null");
 			yield return new TestCaseData("buff-1", "Poison", "", "source-1", typeof(ArgumentException), "ownerId").SetName("ownerId 為空字串");
 			yield return new TestCaseData("buff-1", "Poison", "owner-1", null, typeof(ArgumentException), "sourceId").SetName("sourceId 為 null");
@@ -63,10 +63,10 @@ namespace Sumorin.Buff.Tests
 		}
 
 		[TestCaseSource(nameof(InvalidParameterCases))]
-		public void Constructor_WithMissingRequiredValue_Throws(string id, string buffName, string ownerId, string sourceId, Type exceptionType,
+		public void Constructor_WithMissingRequiredValue_Throws(string id, string configId, string ownerId, string sourceId, Type exceptionType,
 																string paramName)
 		{
-			Action act = () => _ = new Buff(id, buffName, new FakeBuffConfig(), ownerId, sourceId);
+			Action act = () => _ = new Buff(id, configId, new FakeBuffConfig(), ownerId, sourceId);
 
 			var exception = act.Should().Throw<ArgumentException>().Which;
 			exception.Should().BeOfType(exceptionType);

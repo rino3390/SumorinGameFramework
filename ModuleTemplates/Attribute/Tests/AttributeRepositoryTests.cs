@@ -20,17 +20,17 @@ namespace Sumorin.Attribute.Tests
 		[TestCase("owner-1", "Health", "attr-1", TestName = "命中第一位擁有者的屬性")]
 		[TestCase("owner-1", "Attack", "attr-2", TestName = "同一擁有者的不同屬性各自可取")]
 		[TestCase("owner-2", "Health", "attr-3", TestName = "同名屬性依擁有者區分")]
-		public void Get_WithMatchingOwnerAndName_ReturnsAttribute(string ownerId, string attributeName, string expectedId)
+		public void Get_WithMatchingOwnerAndName_ReturnsAttribute(string ownerId, string configId, string expectedId)
 		{
-			repository.Get(ownerId, attributeName).Id.Should().Be(expectedId);
+			repository.Get(ownerId, configId).Id.Should().Be(expectedId);
 		}
 
 		[TestCase("owner-3", "Health", TestName = "擁有者不存在回傳 null")]
-		[TestCase("owner-1", "Defense", TestName = "屬性名稱不存在回傳 null")]
+		[TestCase("owner-1", "Defense", TestName = "屬性配置識別碼不存在回傳 null")]
 		[TestCase("owner-2", "Attack", TestName = "擁有者存在但無該屬性回傳 null")]
-		public void Get_WithUnmatchedOwnerOrName_ReturnsNull(string ownerId, string attributeName)
+		public void Get_WithUnmatchedOwnerOrName_ReturnsNull(string ownerId, string configId)
 		{
-			repository.Get(ownerId, attributeName).Should().BeNull();
+			repository.Get(ownerId, configId).Should().BeNull();
 		}
 
 		[Test]

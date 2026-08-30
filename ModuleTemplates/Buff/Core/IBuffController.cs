@@ -41,10 +41,10 @@ namespace Sumorin.Buff
 		///     施加 Buff，已存在同名 Buff 時依配置的堆疊行為處理
 		/// </summary>
 		/// <param name="ownerId">擁有者識別碼</param>
-		/// <param name="buffName">Buff 名稱</param>
+		/// <param name="configId">Buff 配置識別碼</param>
 		/// <param name="sourceId">來源識別碼（施加者）</param>
 		/// <returns>成功時酬載為 Buff 識別碼；配置不存在或被互斥擋下時失敗</returns>
-		CommandResult AddBuff(string ownerId, string buffName, string sourceId);
+		CommandResult AddBuff(string ownerId, string configId, string sourceId);
 
 		/// <summary>
 		///     移除 Buff

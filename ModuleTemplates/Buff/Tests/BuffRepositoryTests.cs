@@ -20,7 +20,7 @@ namespace Sumorin.Buff.Tests
 		[Test]
 		public void Get_WithExistingId_ReturnsBuff()
 		{
-			repository.Get("buff-2").BuffName.Should().Be("Burn");
+			repository.Get("buff-2").ConfigId.Should().Be("Burn");
 		}
 
 		[Test]

@@ -50,18 +50,18 @@ namespace Sumorin.Buff
 		}
 
 		/// <inheritdoc />
-		public CommandResult AddBuff(string ownerId, string buffName, string sourceId)
+		public CommandResult AddBuff(string ownerId, string configId, string sourceId)
 		{
 			if(string.IsNullOrEmpty(ownerId)) return CommandResult.Fail("擁有者識別碼不得為空");
 
-			var config = configs.Get<IBuffConfig>(buffName);
-			if(config == null) return CommandResult.Fail($"找不到 Buff 配置：{buffName}");
+			var config = configs.Get<IBuffConfig>(configId);
+			if(config == null) return CommandResult.Fail($"找不到 Buff 配置：{configId}");
 
-			if(!IsAllowedByMutualExclusion(ownerId, buffName, config)) return CommandResult.Fail("被同群組的高優先度 Buff 擋下");
+			if(!IsAllowedByMutualExclusion(ownerId, configId, config)) return CommandResult.Fail("被同群組的高優先度 Buff 擋下");
 
-			var existing = repository.Find(buff => buff.OwnerId == ownerId && buff.BuffName == buffName);
+			var existing = repository.Find(buff => buff.OwnerId == ownerId && buff.ConfigId == configId);
 
-			return existing == null ? CommandResult.Ok(CreateNewBuff(ownerId, buffName, sourceId, config).Id) : HandleStacking(existing, sourceId);
+			return existing == null ? CommandResult.Ok(CreateNewBuff(ownerId, configId, sourceId, config).Id) : HandleStacking(existing, sourceId);
 		}
 
 		/// <inheritdoc />
@@ -170,11 +170,11 @@ namespace Sumorin.Buff
 		}
 	#endregion
 
-		private static BuffInfo ToInfo(Buff buff) => new(buff.Id, buff.BuffName, buff.StackCount, buff.Config.LifetimeType, buff.RemainingLifetime);
+		private static BuffInfo ToInfo(Buff buff) => new(buff.Id, buff.ConfigId, buff.StackCount, buff.Config.LifetimeType, buff.RemainingLifetime);
 
-		private Buff CreateNewBuff(string ownerId, string buffName, string sourceId, IBuffConfig config)
+		private Buff CreateNewBuff(string ownerId, string configId, string sourceId, IBuffConfig config)
 		{
-			var buff = new Buff(GUID.NewGuid(), buffName, config, ownerId, sourceId);
+			var buff = new Buff(GUID.NewGuid(), configId, config, ownerId, sourceId);
 
 			// 建構時已有第一層，先掛上效果再訂閱，避免施加當下多發一次層數變化事實
 			ApplyStackEffects(buff, buff.StackRecords[0]);
@@ -187,7 +187,7 @@ namespace Sumorin.Buff
 				timedBuffs.Add(buff);
 			}
 
-			publisher.Publish(new BuffApplied(buff.Id, ownerId, buffName, sourceId));
+			publisher.Publish(new BuffApplied(buff.Id, ownerId, configId, sourceId));
 
 			return buff;
 		}
@@ -197,7 +197,7 @@ namespace Sumorin.Buff
 			switch(buff.Config.StackBehavior)
 			{
 				case StackBehavior.Independent:
-					return CommandResult.Ok(CreateNewBuff(buff.OwnerId, buff.BuffName, sourceId, buff.Config).Id);
+					return CommandResult.Ok(CreateNewBuff(buff.OwnerId, buff.ConfigId, sourceId, buff.Config).Id);
 
 				case StackBehavior.RefreshDuration:
 					buff.RefreshLifetime();
@@ -210,10 +210,10 @@ namespace Sumorin.Buff
 
 				case StackBehavior.Replace:
 					var ownerId = buff.OwnerId;
-					var buffName = buff.BuffName;
+					var configId = buff.ConfigId;
 					var config = buff.Config;
 					RemoveBuffInternal(buff, BuffRemoveReason.Replaced);
-					return CommandResult.Ok(CreateNewBuff(ownerId, buffName, sourceId, config).Id);
+					return CommandResult.Ok(CreateNewBuff(ownerId, configId, sourceId, config).Id);
 
 				default:
 					return CommandResult.Fail($"未支援的堆疊行為：{buff.Config.StackBehavior}");
@@ -236,7 +236,7 @@ namespace Sumorin.Buff
 		{
 			var ownerId = buff.OwnerId;
 			var buffId = buff.Id;
-			var buffName = buff.BuffName;
+			var configId = buff.ConfigId;
 
 			// 清空層數會觸發 Reset，連帶撤除這個 Buff 掛在屬性上的所有 Modifier
 			buff.ClearStacks();
@@ -251,7 +251,7 @@ namespace Sumorin.Buff
 			timedBuffs.Remove(buff);
 			buff.Dispose();
 
-			publisher.Publish(new BuffRemoved(buffId, ownerId, buffName, reason));
+			publisher.Publish(new BuffRemoved(buffId, ownerId, configId, reason));
 		}
 
 		private void SubscribeTo(Buff buff)
@@ -266,7 +266,7 @@ namespace Sumorin.Buff
 			subscriptions[buff.Id] = disposables;
 		}
 
-		private bool IsAllowedByMutualExclusion(string ownerId, string buffName, IBuffConfig config)
+		private bool IsAllowedByMutualExclusion(string ownerId, string configId, IBuffConfig config)
 		{
 			if(string.IsNullOrEmpty(config.MutualExclusionGroup)) return true;
 
@@ -276,7 +276,7 @@ namespace Sumorin.Buff
 			{
 				if(buff.Config.Priority > config.Priority) return false;
 
-				if(buff.BuffName != buffName)
+				if(buff.ConfigId != configId)
 				{
 					RemoveBuffInternal(buff, BuffRemoveReason.Replaced);
 				}
@@ -287,13 +287,13 @@ namespace Sumorin.Buff
 
 		private void ApplyStackEffects(Buff buff, StackRecord record)
 		{
-			attributeController.AddModifiers(buff.OwnerId, record.Effects, buff.Id, buff.BuffName);
+			attributeController.AddModifiers(buff.OwnerId, record.Effects, buff.Id, buff.ConfigId);
 		}
 
 		private void HandleStackAdded(Buff buff, StackRecord record)
 		{
 			ApplyStackEffects(buff, record);
-			publisher.Publish(new BuffStackChanged(buff.Id, buff.OwnerId, buff.BuffName, buff.StackCount - 1, buff.StackCount));
+			publisher.Publish(new BuffStackChanged(buff.Id, buff.OwnerId, buff.ConfigId, buff.StackCount - 1, buff.StackCount));
 		}
 
 		private void HandleStackRemoved(Buff buff, StackRecord record)
@@ -303,7 +303,7 @@ namespace Sumorin.Buff
 				attributeController.RemoveModifier(buff.OwnerId, effect, buff.Id);
 			}
 
-			publisher.Publish(new BuffStackChanged(buff.Id, buff.OwnerId, buff.BuffName, buff.StackCount + 1, buff.StackCount));
+			publisher.Publish(new BuffStackChanged(buff.Id, buff.OwnerId, buff.ConfigId, buff.StackCount + 1, buff.StackCount));
 		}
 
 		private void HandleStacksCleared(Buff buff)

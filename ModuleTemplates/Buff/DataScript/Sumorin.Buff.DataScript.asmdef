@@ -1,8 +1,10 @@
 {
-    "name": "Sumorin.Attribute.Data",
+    "name": "Sumorin.Buff.DataScript",
     "references": [
+        "Sumorin.Buff.Contract",
         "Sumorin.Attribute.Contract",
         "Sumorin.DDDCore",
+        "Sumorin.SOBase",
         "Sumorin.SumorinUtility",
         "Unity.Localization"
     ],

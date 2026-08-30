@@ -18,9 +18,9 @@ namespace Sumorin.Buff
 		public string OwnerId { get; }
 
 		/// <summary>
-		///     Buff 名稱
+		///     Buff 配置識別碼
 		/// </summary>
-		public string BuffName { get; }
+		public string ConfigId { get; }
 
 		/// <summary>
 		///     變化前層數
@@ -37,14 +37,14 @@ namespace Sumorin.Buff
 		/// </summary>
 		/// <param name="buffId">Buff 識別碼</param>
 		/// <param name="ownerId">擁有者識別碼</param>
-		/// <param name="buffName">Buff 名稱</param>
+		/// <param name="configId">Buff 配置識別碼</param>
 		/// <param name="oldStack">變化前層數</param>
 		/// <param name="newStack">變化後層數</param>
-		public BuffStackChanged(string buffId, string ownerId, string buffName, int oldStack, int newStack)
+		public BuffStackChanged(string buffId, string ownerId, string configId, int oldStack, int newStack)
 		{
 			BuffId = buffId;
 			OwnerId = ownerId;
-			BuffName = buffName;
+			ConfigId = configId;
 			OldStack = oldStack;
 			NewStack = newStack;
 		}

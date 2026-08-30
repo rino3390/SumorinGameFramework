@@ -21,7 +21,7 @@ namespace Sumorin.Attribute.Tests
 						 {
 							 Id = "attr-1",
 							 OwnerId = "owner-1",
-							 AttributeName = "Health",
+							 ConfigId = "Health",
 							 BaseValue = 100,
 							 MinValue = 0,
 							 MaxValue = 999,

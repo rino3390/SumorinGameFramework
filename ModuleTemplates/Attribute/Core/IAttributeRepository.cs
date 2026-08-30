@@ -9,12 +9,12 @@ namespace Sumorin.Attribute
 	public interface IAttributeRepository: IRepository<Attribute>
 	{
 		/// <summary>
-		/// 透過擁有者 Id 和屬性名稱取得屬性
+		/// 透過擁有者 Id 和屬性配置識別碼取得屬性
 		/// </summary>
 		/// <param name="ownerId">擁有者識別碼</param>
-		/// <param name="attributeName">屬性名稱</param>
+		/// <param name="configId">屬性配置識別碼</param>
 		/// <returns>找到的屬性，若不存在則回傳 null</returns>
-		Attribute Get(string ownerId, string attributeName);
+		Attribute Get(string ownerId, string configId);
 
 		/// <summary>
 		/// 取得指定擁有者的所有屬性

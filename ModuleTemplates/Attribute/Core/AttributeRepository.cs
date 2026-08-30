@@ -11,9 +11,9 @@ namespace Sumorin.Attribute
 	{
 	#region IAttributeRepository Members
 		/// <inheritdoc />
-		public Attribute Get(string ownerId, string attributeName)
+		public Attribute Get(string ownerId, string configId)
 		{
-			return Find(attr => attr.OwnerId == ownerId && attr.AttributeName == attributeName);
+			return Find(attr => attr.OwnerId == ownerId && attr.ConfigId == configId);
 		}
 
 		/// <inheritdoc />

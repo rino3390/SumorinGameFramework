@@ -8,6 +8,7 @@ namespace Sumorin.Buff.Tests
 	/// </summary>
 	public class FakeBuffConfig: IBuffConfig
 	{
+		public string Id { get; }
 		public LifetimeType LifetimeType { get; }
 		public float Lifetime { get; }
 		public StackBehavior StackBehavior { get; }
@@ -18,16 +19,12 @@ namespace Sumorin.Buff.Tests
 		public IReadOnlyList<string> Tags { get; }
 		public bool RemoveAllOnExpire { get; }
 
-		public FakeBuffConfig(LifetimeType lifetimeType = LifetimeType.TimeBased,
-							  float lifetime = 10f,
-							  StackBehavior stackBehavior = StackBehavior.RefreshDuration,
-							  int maxStack = -1,
-							  string mutualExclusionGroup = "",
-							  int priority = 0,
-							  IReadOnlyList<ModifyEffectInfo> effects = null,
-							  IReadOnlyList<string> tags = null,
-							  bool removeAllOnExpire = true)
+		public FakeBuffConfig(LifetimeType lifetimeType = LifetimeType.TimeBased, float lifetime = 10f,
+							  StackBehavior stackBehavior = StackBehavior.RefreshDuration, int maxStack = -1, string mutualExclusionGroup = "",
+							  int priority = 0, IReadOnlyList<ModifyEffectInfo> effects = null, IReadOnlyList<string> tags = null,
+							  bool removeAllOnExpire = true, string id = "Fake")
 		{
+			Id = id;
 			LifetimeType = lifetimeType;
 			Lifetime = lifetime;
 			StackBehavior = stackBehavior;
@@ -44,7 +41,7 @@ namespace Sumorin.Buff.Tests
 		/// </summary>
 		public static readonly IReadOnlyList<ModifyEffectInfo> DefaultEffects = new List<ModifyEffectInfo>
 		{
-			new() { AttributeName = "Health", ModifyType = ModifyType.Flat, Value = 10 }
+			new() { AttributeConfigId = "Health", ModifyType = ModifyType.Flat, Value = 10 }
 		};
 	}
 }

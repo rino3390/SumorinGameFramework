@@ -14,7 +14,7 @@ namespace Sumorin.Buff
 	///     欄位標註 <see cref="FormerlySerializedAsAttribute" /> 以保留舊版公開欄位的資產內容。
 	/// </remarks>
 	[DataEditorConfig("Buff 資料", "Data/Buff", "Buff")]
-	public class BuffData: SODataBase, IBuffConfig
+	public class BuffData: IconIncludedData, IBuffConfig
 	{
 		[SerializeField]
 		[FormerlySerializedAs("LifetimeType")]

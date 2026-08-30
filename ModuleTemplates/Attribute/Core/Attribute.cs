@@ -41,9 +41,9 @@ namespace Sumorin.Attribute
 		public IReadOnlyList<Modifier> Modifiers => modifiers;
 
 		/// <summary>
-		///     屬性名稱
+		///     屬性配置識別碼
 		/// </summary>
-		public string AttributeName { get; }
+		public string ConfigId { get; }
 
 		/// <summary>
 		///     擁有者識別碼
@@ -58,14 +58,14 @@ namespace Sumorin.Attribute
 		/// </summary>
 		/// <param name="id">唯一識別碼</param>
 		/// <param name="ownerId">擁有者識別碼</param>
-		/// <param name="attributeName">屬性名稱</param>
+		/// <param name="configId">屬性配置識別碼</param>
 		/// <param name="baseValue">基礎值</param>
 		/// <param name="minValue">最小值（預設 int.MinValue）</param>
 		/// <param name="maxValue">最大值（預設 int.MaxValue）</param>
-		public Attribute(string id, string ownerId, string attributeName, int baseValue, int minValue = int.MinValue, int maxValue = int.MaxValue): base(id)
+		public Attribute(string id, string ownerId, string configId, int baseValue, int minValue = int.MinValue, int maxValue = int.MaxValue): base(id)
 		{
 			OwnerId = ownerId;
-			AttributeName = attributeName;
+			ConfigId = configId;
 			BaseValue = baseValue;
 			MinValue = minValue;
 			MaxValue = maxValue;

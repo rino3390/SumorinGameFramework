@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
-using System.Linq;
 using Sumorin.GameManagerBase;
-using Sumorin.SumorinUtility.Editor;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
 using System.Collections.Generic;
@@ -35,19 +33,12 @@ namespace Sumorin.GameSetting
 
 		[LabelText("繪製視窗")]
 		[ValueDropdown("GetSettingEditorTypes")]
-		[Required]
+		[Required("必須指定要繪製的編輯器視窗")]
 		public Type SettingEditorType;
 
 		private static IEnumerable GetSettingEditorTypes()
 		{
-			return SumorinEditorUtility.GetDerivedClasses<GameEditorMenuBase>()
-				.Where(type => type != typeof(GameSettingEditorMenu))
-				.Select(type =>
-				{
-					var instance = Activator.CreateInstance(type) as GameEditorMenuBase;
-					return new ValueDropdownItem(instance?.TabName ?? type.Name, type);
-				})
-				.ToList();
+			return EditorMenuTypeProvider.GetSettingMenuTypes(typeof(GameSettingEditorMenu));
 		}
 	}
 }

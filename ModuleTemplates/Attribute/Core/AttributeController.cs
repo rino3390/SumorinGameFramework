@@ -22,21 +22,21 @@ namespace Sumorin.Attribute
 
 	#region IAttributeController Members
 		/// <inheritdoc />
-		public IReadOnlyReactiveProperty<AttributeValueInfo> ObserveAttribute(string ownerId, string attributeName)
+		public IReadOnlyReactiveProperty<AttributeValueInfo> ObserveAttribute(string ownerId, string configId)
 		{
-			return repository.Get(ownerId, attributeName)?.Current;
+			return repository.Get(ownerId, configId)?.Current;
 		}
 
 		/// <inheritdoc />
-		public int GetValue(string ownerId, string attributeName)
+		public int GetValue(string ownerId, string configId)
 		{
-			return repository.Get(ownerId, attributeName)?.Value ?? 0;
+			return repository.Get(ownerId, configId)?.Value ?? 0;
 		}
 
 		/// <inheritdoc />
-		public CommandResult SetBaseValue(string ownerId, string attributeName, int value)
+		public CommandResult SetBaseValue(string ownerId, string configId, int value)
 		{
-			var attribute = repository.Get(ownerId, attributeName);
+			var attribute = repository.Get(ownerId, configId);
 			if(attribute == null) return CommandResult.Fail("屬性不存在");
 
 			attribute.SetBaseValue(value);
@@ -44,12 +44,12 @@ namespace Sumorin.Attribute
 		}
 
 		/// <inheritdoc />
-		public CommandResult SetMinValue(string ownerId, string attributeName, int value)
+		public CommandResult SetMinValue(string ownerId, string configId, int value)
 		{
-			var config = configs.Get<IAttributeConfig>(attributeName);
+			var config = configs.Get<IAttributeConfig>(configId);
 			if(!string.IsNullOrEmpty(config?.RelationMin)) return CommandResult.Fail("下限由關聯屬性決定");
 
-			var attribute = repository.Get(ownerId, attributeName);
+			var attribute = repository.Get(ownerId, configId);
 			if(attribute == null) return CommandResult.Fail("屬性不存在");
 
 			attribute.SetMinValue(value);
@@ -57,12 +57,12 @@ namespace Sumorin.Attribute
 		}
 
 		/// <inheritdoc />
-		public CommandResult SetMaxValue(string ownerId, string attributeName, int value)
+		public CommandResult SetMaxValue(string ownerId, string configId, int value)
 		{
-			var config = configs.Get<IAttributeConfig>(attributeName);
+			var config = configs.Get<IAttributeConfig>(configId);
 			if(!string.IsNullOrEmpty(config?.RelationMax)) return CommandResult.Fail("上限由關聯屬性決定");
 
-			var attribute = repository.Get(ownerId, attributeName);
+			var attribute = repository.Get(ownerId, configId);
 			if(attribute == null) return CommandResult.Fail("屬性不存在");
 
 			attribute.SetMaxValue(value);
@@ -74,7 +74,7 @@ namespace Sumorin.Attribute
 		{
 			if(string.IsNullOrEmpty(sourceId)) return CommandResult.Fail("來源識別碼不得為空");
 
-			var attribute = repository.Get(ownerId, effect.AttributeName) ?? CreateAttributeInternal(ownerId, effect.AttributeName, 0);
+			var attribute = repository.Get(ownerId, effect.AttributeConfigId) ?? CreateAttributeInternal(ownerId, effect.AttributeConfigId, 0);
 
 			var modifierId = GUID.NewGuid();
 			attribute.AddModifier(new Modifier(modifierId, effect.ModifyType, effect.Value, sourceId, description));
@@ -96,9 +96,9 @@ namespace Sumorin.Attribute
 		}
 
 		/// <inheritdoc />
-		public CommandResult RemoveModifierById(string ownerId, string attributeName, string modifierId)
+		public CommandResult RemoveModifierById(string ownerId, string configId, string modifierId)
 		{
-			var attribute = repository.Get(ownerId, attributeName);
+			var attribute = repository.Get(ownerId, configId);
 			if(attribute == null) return CommandResult.Fail("屬性不存在");
 
 			attribute.RemoveModifierById(modifierId);
@@ -106,9 +106,9 @@ namespace Sumorin.Attribute
 		}
 
 		/// <inheritdoc />
-		public CommandResult RemoveModifiersBySource(string ownerId, string attributeName, string sourceId)
+		public CommandResult RemoveModifiersBySource(string ownerId, string configId, string sourceId)
 		{
-			var attribute = repository.Get(ownerId, attributeName);
+			var attribute = repository.Get(ownerId, configId);
 			if(attribute == null) return CommandResult.Fail("屬性不存在");
 
 			attribute.RemoveModifiersBySource(sourceId);
@@ -118,7 +118,7 @@ namespace Sumorin.Attribute
 		/// <inheritdoc />
 		public CommandResult RemoveModifier(string ownerId, ModifyEffectInfo effect, string sourceId)
 		{
-			var attribute = repository.Get(ownerId, effect.AttributeName);
+			var attribute = repository.Get(ownerId, effect.AttributeConfigId);
 			if(attribute == null) return CommandResult.Fail("屬性不存在");
 
 			attribute.RemoveFirstModifier(effect.ModifyType, effect.Value, sourceId);
@@ -137,17 +137,17 @@ namespace Sumorin.Attribute
 		}
 
 		/// <inheritdoc />
-		public CommandResult CreateAttribute(string ownerId, string attributeName, int baseValue)
+		public CommandResult CreateAttribute(string ownerId, string configId, int baseValue)
 		{
-			if(string.IsNullOrEmpty(attributeName)) return CommandResult.Fail("屬性名稱不得為空");
+			if(string.IsNullOrEmpty(configId)) return CommandResult.Fail("屬性配置識別碼不得為空");
 
-			return CommandResult.Ok(CreateAttributeInternal(ownerId, attributeName, baseValue).Id);
+			return CommandResult.Ok(CreateAttributeInternal(ownerId, configId, baseValue).Id);
 		}
 
 		/// <inheritdoc />
-		public CommandResult RemoveAttribute(string ownerId, string attributeName)
+		public CommandResult RemoveAttribute(string ownerId, string configId)
 		{
-			var attribute = repository.Get(ownerId, attributeName);
+			var attribute = repository.Get(ownerId, configId);
 			if(attribute == null) return CommandResult.Fail("屬性不存在");
 
 			RemoveAttributeInternal(attribute);
@@ -179,16 +179,16 @@ namespace Sumorin.Attribute
 		}
 	#endregion
 
-		private Attribute CreateAttributeInternal(string ownerId, string attributeName, int baseValue)
+		private Attribute CreateAttributeInternal(string ownerId, string configId, int baseValue)
 		{
-			var config = configs.Get<IAttributeConfig>(attributeName);
+			var config = configs.Get<IAttributeConfig>(configId);
 			var minValue = GetRelationValue(ownerId, config?.RelationMin, config?.Min ?? int.MinValue);
 			var maxValue = GetRelationValue(ownerId, config?.RelationMax, config?.Max ?? int.MaxValue);
 
-			var attribute = new Attribute(GUID.NewGuid(), ownerId, attributeName, baseValue, minValue, maxValue);
+			var attribute = new Attribute(GUID.NewGuid(), ownerId, configId, baseValue, minValue, maxValue);
 			repository.Save(attribute);
 			SubscribeTo(attribute);
-			UpdateDependentAttributes(ownerId, attributeName);
+			UpdateDependentAttributes(ownerId, configId);
 			return attribute;
 		}
 
@@ -206,12 +206,12 @@ namespace Sumorin.Attribute
 
 		private void SubscribeTo(Attribute attribute)
 		{
-			subscriptions[attribute.Id] = attribute.Current.Skip(1).Subscribe(_ => UpdateDependentAttributes(attribute.OwnerId, attribute.AttributeName));
+			subscriptions[attribute.Id] = attribute.Current.Skip(1).Subscribe(_ => UpdateDependentAttributes(attribute.OwnerId, attribute.ConfigId));
 		}
 
-		private void UpdateDependentAttributes(string ownerId, string sourceAttributeName)
+		private void UpdateDependentAttributes(string ownerId, string sourceConfigId)
 		{
-			var sourceAttribute = repository.Get(ownerId, sourceAttributeName);
+			var sourceAttribute = repository.Get(ownerId, sourceConfigId);
 			if(sourceAttribute == null) return;
 
 			foreach(var entry in configs.GetAll<IAttributeConfig>())
@@ -223,23 +223,23 @@ namespace Sumorin.Attribute
 					continue;
 				}
 
-				if(entry.Value.RelationMax == sourceAttributeName)
+				if(entry.Value.RelationMax == sourceConfigId)
 				{
 					target.SetMaxValue(sourceAttribute.Value);
 				}
 
-				if(entry.Value.RelationMin == sourceAttributeName)
+				if(entry.Value.RelationMin == sourceConfigId)
 				{
 					target.SetMinValue(sourceAttribute.Value);
 				}
 			}
 		}
 
-		private int GetRelationValue(string ownerId, string relationAttributeName, int defaultValue)
+		private int GetRelationValue(string ownerId, string relationConfigId, int defaultValue)
 		{
-			if(string.IsNullOrEmpty(relationAttributeName)) return defaultValue;
+			if(string.IsNullOrEmpty(relationConfigId)) return defaultValue;
 
-			return repository.Get(ownerId, relationAttributeName)?.Value ?? defaultValue;
+			return repository.Get(ownerId, relationConfigId)?.Value ?? defaultValue;
 		}
 	}
 }
