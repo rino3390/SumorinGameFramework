@@ -11,14 +11,14 @@ namespace Sumorin.Buff.Tests
 	[TestFixture]
 	public class BuffTests
 	{
-		private static Buff CreateBuff(IBuffConfig config = null) => new("buff-1", "Poison", config ?? new FakeBuffConfig(), "owner-1", "source-1");
+		private static Buff CreateBuff(IBuffConfig config = null) => new("buff-1", config ?? new FakeBuffConfig(), "owner-1", "source-1");
 
 		[TestCase(LifetimeType.TimeBased, 10f, TestName = "時間制保留配置時效")]
 		[TestCase(LifetimeType.TurnBased, 3f, TestName = "回合制保留配置時效")]
 		[TestCase(LifetimeType.Permanent, 0f, TestName = "永久型時效為 0")]
 		public void Constructor_WithValidParameters_SetsAllProperties(LifetimeType lifetimeType, float lifetime)
 		{
-			var buff = CreateBuff(new FakeBuffConfig(lifetimeType, lifetime, maxStack: 5));
+			var buff = CreateBuff(new FakeBuffConfig(lifetimeType, lifetime, maxStack: 5, id: "Poison"));
 
 			buff.Should()
 				.BeEquivalentTo(
@@ -52,21 +52,18 @@ namespace Sumorin.Buff.Tests
 
 		private static IEnumerable<TestCaseData> InvalidParameterCases()
 		{
-			yield return new TestCaseData(null, "Poison", "owner-1", "source-1", typeof(ArgumentNullException), "id").SetName("id 為 null");
-			yield return new TestCaseData("", "Poison", "owner-1", "source-1", typeof(ArgumentException), "id").SetName("id 為空字串");
-			yield return new TestCaseData("buff-1", null, "owner-1", "source-1", typeof(ArgumentException), "configId").SetName("configId 為 null");
-			yield return new TestCaseData("buff-1", "", "owner-1", "source-1", typeof(ArgumentException), "configId").SetName("configId 為空字串");
-			yield return new TestCaseData("buff-1", "Poison", null, "source-1", typeof(ArgumentException), "ownerId").SetName("ownerId 為 null");
-			yield return new TestCaseData("buff-1", "Poison", "", "source-1", typeof(ArgumentException), "ownerId").SetName("ownerId 為空字串");
-			yield return new TestCaseData("buff-1", "Poison", "owner-1", null, typeof(ArgumentException), "sourceId").SetName("sourceId 為 null");
-			yield return new TestCaseData("buff-1", "Poison", "owner-1", "", typeof(ArgumentException), "sourceId").SetName("sourceId 為空字串");
+			yield return new TestCaseData(null, "owner-1", "source-1", typeof(ArgumentNullException), "id").SetName("id 為 null");
+			yield return new TestCaseData("", "owner-1", "source-1", typeof(ArgumentException), "id").SetName("id 為空字串");
+			yield return new TestCaseData("buff-1", null, "source-1", typeof(ArgumentException), "ownerId").SetName("ownerId 為 null");
+			yield return new TestCaseData("buff-1", "", "source-1", typeof(ArgumentException), "ownerId").SetName("ownerId 為空字串");
+			yield return new TestCaseData("buff-1", "owner-1", null, typeof(ArgumentException), "sourceId").SetName("sourceId 為 null");
+			yield return new TestCaseData("buff-1", "owner-1", "", typeof(ArgumentException), "sourceId").SetName("sourceId 為空字串");
 		}
 
 		[TestCaseSource(nameof(InvalidParameterCases))]
-		public void Constructor_WithMissingRequiredValue_Throws(string id, string configId, string ownerId, string sourceId, Type exceptionType,
-																string paramName)
+		public void Constructor_WithMissingRequiredValue_Throws(string id, string ownerId, string sourceId, Type exceptionType, string paramName)
 		{
-			Action act = () => _ = new Buff(id, configId, new FakeBuffConfig(), ownerId, sourceId);
+			Action act = () => _ = new Buff(id, new FakeBuffConfig(), ownerId, sourceId);
 
 			var exception = act.Should().Throw<ArgumentException>().Which;
 			exception.Should().BeOfType(exceptionType);
@@ -76,9 +73,18 @@ namespace Sumorin.Buff.Tests
 		[Test]
 		public void Constructor_WithNullConfig_Throws()
 		{
-			Action act = () => _ = new Buff("buff-1", "Poison", null, "owner-1", "source-1");
+			Action act = () => _ = new Buff("buff-1", null, "owner-1", "source-1");
 
 			act.Should().ThrowExactly<ArgumentNullException>().WithParameterName("config");
+		}
+
+		[TestCase(null, TestName = "配置識別碼為 null")]
+		[TestCase("", TestName = "配置識別碼為空字串")]
+		public void Constructor_WithMissingConfigId_Throws(string configId)
+		{
+			Action act = () => _ = new Buff("buff-1", new FakeBuffConfig(id: configId), "owner-1", "source-1");
+
+			act.Should().ThrowExactly<ArgumentException>().WithParameterName("config");
 		}
 
 		[TestCase(LifetimeType.TimeBased, 0f, TestName = "時間制配置 0 修正為 1")]

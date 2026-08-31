@@ -12,9 +12,9 @@ namespace Sumorin.Buff.Tests
 		public void Setup()
 		{
 			repository = new BuffRepository();
-			repository.Save(new Buff("buff-1", "Poison", new FakeBuffConfig(), "owner-1", "source-1"));
-			repository.Save(new Buff("buff-2", "Burn", new FakeBuffConfig(), "owner-1", "source-2"));
-			repository.Save(new Buff("buff-3", "Poison", new FakeBuffConfig(), "owner-2", "source-1"));
+			repository.Save(new Buff("buff-1", new FakeBuffConfig(id: "Poison"), "owner-1", "source-1"));
+			repository.Save(new Buff("buff-2", new FakeBuffConfig(id: "Burn"), "owner-1", "source-2"));
+			repository.Save(new Buff("buff-3", new FakeBuffConfig(id: "Poison"), "owner-2", "source-1"));
 		}
 
 		[Test]

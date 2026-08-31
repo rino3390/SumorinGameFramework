@@ -49,7 +49,7 @@
       "id": "buff-system",
       "name": "Buff 系統",
       "description": "Buff Domain，提供生命週期管理、堆疊行為、互斥群組與屬性效果掛卸",
-      "version": "2.0.0",
+      "version": "3.0.0",
       "dependencies": [
         "attribute-system"
       ],

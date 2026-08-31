@@ -61,7 +61,7 @@ namespace Sumorin.Buff
 
 			var existing = repository.Find(buff => buff.OwnerId == ownerId && buff.ConfigId == configId);
 
-			return existing == null ? CommandResult.Ok(CreateNewBuff(ownerId, configId, sourceId, config).Id) : HandleStacking(existing, sourceId);
+			return existing == null ? CommandResult.Ok(CreateNewBuff(ownerId, sourceId, config).Id) : HandleStacking(existing, sourceId);
 		}
 
 		/// <inheritdoc />
@@ -172,9 +172,9 @@ namespace Sumorin.Buff
 
 		private static BuffInfo ToInfo(Buff buff) => new(buff.Id, buff.ConfigId, buff.StackCount, buff.Config.LifetimeType, buff.RemainingLifetime);
 
-		private Buff CreateNewBuff(string ownerId, string configId, string sourceId, IBuffConfig config)
+		private Buff CreateNewBuff(string ownerId, string sourceId, IBuffConfig config)
 		{
-			var buff = new Buff(GUID.NewGuid(), configId, config, ownerId, sourceId);
+			var buff = new Buff(GUID.NewGuid(), config, ownerId, sourceId);
 
 			// 建構時已有第一層，先掛上效果再訂閱，避免施加當下多發一次層數變化事實
 			ApplyStackEffects(buff, buff.StackRecords[0]);
@@ -187,7 +187,7 @@ namespace Sumorin.Buff
 				timedBuffs.Add(buff);
 			}
 
-			publisher.Publish(new BuffApplied(buff.Id, ownerId, configId, sourceId));
+			publisher.Publish(new BuffApplied(buff.Id, ownerId, config.Id, sourceId));
 
 			return buff;
 		}
@@ -197,7 +197,7 @@ namespace Sumorin.Buff
 			switch(buff.Config.StackBehavior)
 			{
 				case StackBehavior.Independent:
-					return CommandResult.Ok(CreateNewBuff(buff.OwnerId, buff.ConfigId, sourceId, buff.Config).Id);
+					return CommandResult.Ok(CreateNewBuff(buff.OwnerId, sourceId, buff.Config).Id);
 
 				case StackBehavior.RefreshDuration:
 					buff.RefreshLifetime();
@@ -210,10 +210,9 @@ namespace Sumorin.Buff
 
 				case StackBehavior.Replace:
 					var ownerId = buff.OwnerId;
-					var configId = buff.ConfigId;
 					var config = buff.Config;
 					RemoveBuffInternal(buff, BuffRemoveReason.Replaced);
-					return CommandResult.Ok(CreateNewBuff(ownerId, configId, sourceId, config).Id);
+					return CommandResult.Ok(CreateNewBuff(ownerId, sourceId, config).Id);
 
 				default:
 					return CommandResult.Fail($"未支援的堆疊行為：{buff.Config.StackBehavior}");
