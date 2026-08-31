@@ -22,11 +22,6 @@ namespace Sumorin.GameManagerBase
 	{
 		private readonly DataEditorConfigAttribute config;
 
-		/// <inheritdoc />
-		/// <remarks>
-		/// 不加模式後綴。嵌在設定頁時只會是清單模式，後綴沒有區分作用。
-		/// 兩種模式並列的下拉由 <see cref="EditorMenuTypeProvider" /> 自行加上後綴。
-		/// </remarks>
 		public override string TabName => config.TabName;
 
 		[Required("尚未建立資料集合")]
@@ -70,7 +65,6 @@ namespace Sumorin.GameManagerBase
 			if(dataSetType == null) return null;
 
 			var created = (DataSet<T>)ScriptableObject.CreateInstance(dataSetType);
-			// 用集合型別自己的名稱。接在資料型別後面會變成 BuffDataDataSet 這種重複的檔名
 			SumorinEditorUtility.CreateSOData(created, "Data/Set/" + dataSetType.Name);
 
 			return created;

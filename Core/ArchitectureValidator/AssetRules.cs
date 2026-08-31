@@ -5,7 +5,6 @@
 	using System.Linq;
 	using System.Reflection;
 	using Sumorin.GameManagerBase;
-	using Sumorin.SumorinUtility;
 	using UnityEditor;
 	using UnityEngine;
 
@@ -24,7 +23,7 @@
 				foreach(var data in DataScriptCache.All)
 				{
 					// 識別碼本身是否合法由 DataScriptIdValidator 檢查，這裡只管跨資產的唯一性
-					if(!data.IsIdNameLegal()) continue;
+					if(!data.IsIdLegal()) continue;
 
 					if(!byId.TryGetValue(data.Id, out var owners))
 					{
@@ -43,20 +42,44 @@
 					// 不列出其他資產的名稱，訊息會長到看不完，點擊跳轉本來就找得到
 					foreach(var duplicate in pair.Value)
 					{
-						yield return new ArchitectureViolation($"Id «{pair.Key}» 與另外 {pair.Value.Count - 1} 份資產重複", duplicate, "重新產生Id", AssignGuid(duplicate));
+						// 撞號來源不同，修法也不同。跨型別加前綴就能區分，同型別加前綴仍然一樣，只能編號
+						var sameType = pair.Value.Count(other => other.GetType() == duplicate.GetType()) > 1;
+
+						yield return sameType ?
+										 new ArchitectureViolation(Message(pair), duplicate, "加上編號", Rename(duplicate, duplicate.Id)) :
+										 new ArchitectureViolation(Message(pair), duplicate, "加上類別前綴", Rename(duplicate, duplicate.IdPrefix + "_" + duplicate.Id));
 					}
 				}
 			}
 
-			// 識別碼只要求唯一，取不出語意時給 GUID 即可，使用者要可讀的名稱再自行改寫
-			private static Action AssignGuid(SODataBase data)
+			private static string Message(KeyValuePair<string, List<SODataBase>> pair)
+			{
+				return $"Id «{pair.Key}» 與另外 {pair.Value.Count - 1} 份資產重複";
+			}
+
+			private static Action Rename(SODataBase data, string wanted)
 			{
 				return () =>
 				{
-					data.IdName = SumorinUtility.GUID.NewGuid();
+					data.Id = Vacant(wanted);
 					EditorUtility.SetDirty(data);
 					AssetDatabase.SaveAssets();
 				};
+			}
+
+			// 想要的識別碼被佔用時往後編號。已用識別碼是有限集合，迴圈必然終止
+			private static string Vacant(string wanted)
+			{
+				var taken = new HashSet<string>(DataScriptCache.All.Select(data => data.Id));
+
+				if(!taken.Contains(wanted)) return wanted;
+
+				for(var suffix = 2;; suffix++)
+				{
+					var candidate = wanted + "_" + suffix;
+
+					if(!taken.Contains(candidate)) return candidate;
+				}
 			}
 		}
 
@@ -134,7 +157,7 @@
 
 						if(entry == null)
 						{
-							yield return new ArchitectureViolation($"第 {index} 筆是空的", dataSet, "清掉空項目", Rebuild(dataSet));
+							yield return new ArchitectureViolation($"第 {index} 筆是空的", dataSet, "清掉空項目", RemoveEmptyEntries(dataSet));
 
 							continue;
 						}
@@ -163,7 +186,6 @@
 				}
 			}
 
-			// 修復動作在回報當下就綁好目標，按下按鈕時不需要重新掃描。
 			// 直接改清單欄位而不呼叫 DataSet 的方法，因為 DataSet<T> 是泛型，方法反射多一層對不上的風險
 			private static Action Add(ScriptableObject dataSet, SODataBase data)
 			{
@@ -176,13 +198,13 @@
 				};
 			}
 
-			private static Action Rebuild(ScriptableObject dataSet)
+			private static Action RemoveEmptyEntries(ScriptableObject dataSet)
 			{
 				return () =>
 				{
 					if(ListOf(dataSet) is not { } list) return;
 
-					// 只清掉空洞，不整份重掃。重掃會把使用者刻意排除的資產一併抓回來
+					// 清單裡的 null 是資產在編輯器外被刪掉留下的空位。
 					for(var i = list.Count - 1; i >= 0; i--)
 					{
 						if(list[i] == null) list.RemoveAt(i);

@@ -13,15 +13,17 @@
 		/// <remarks>
 		/// 寫成 Validator 而不是欄位上的 <c>ValidateInput</c>，因為只有這條路徑能掛修復按鈕。
 		/// 兩者並存會讓同一件事在 Validator 視窗報兩次，所以欄位上不再標 <c>ValidateInput</c>。
+		/// 取 <c>RootObjectValidator</c> 而非 <c>ValueValidator</c>，後者連巢狀的參照一起驗。
+		/// DataSet 的清單持有每一份資料，那會讓同一筆錯誤在資料本身與 DataSet 上各報一次。
 		/// </remarks>
-		public class DataScriptIdValidator: ValueValidator<SODataBase>
+		public class DataScriptIdValidator: RootObjectValidator<SODataBase>
 		{
 			/// <inheritdoc />
 			protected override void Validate(ValidationResult result)
 			{
 				var data = Value;
 
-				if(data == null || data.IsIdNameLegal()) return;
+				if(data == null || data.IsIdLegal()) return;
 
 				result.AddError("識別碼不得為空，且只能是英數（含減號底線）").WithFix("產生識別碼", () => AssignGuid(data));
 			}
@@ -29,7 +31,7 @@
 			// 識別碼只要求唯一，取不出語意時給 GUID 即可，使用者要可讀的名稱再自行改寫
 			private static void AssignGuid(SODataBase data)
 			{
-				data.IdName = SumorinUtility.GUID.NewGuid();
+				data.Id = SumorinUtility.GUID.NewGuid();
 				EditorUtility.SetDirty(data);
 				AssetDatabase.SaveAssets();
 			}

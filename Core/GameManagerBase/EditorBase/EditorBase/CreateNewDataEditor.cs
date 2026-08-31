@@ -116,8 +116,8 @@ namespace Sumorin.GameManagerBase
 		private void SetNewData()
 		{
 			Data = ScriptableObject.CreateInstance<T>();
-			Data.IdName = GUID.NewGuid();
-			Data.AssetName = DataRootPath.Split('/')[^2] + " - " + Data.IdName;
+			Data.Id = GUID.NewGuid();
+			Data.AssetName = DataRootPath.Split('/')[^2] + " - " + Data.Id;
 		}
 
 		private void CreateDataSet()
@@ -130,7 +130,6 @@ namespace Sumorin.GameManagerBase
 			}
 
 			var newDataSet = ScriptableObject.CreateInstance(dataSetType);
-			// 用集合型別自己的名稱。接在資料型別後面會變成 BuffDataDataSet 這種重複的檔名
 			SumorinEditorUtility.CreateSOData(newDataSet, "Data/Set/" + dataSetType.Name);
 			dataSet = (DataSet<T>)newDataSet;
 			ForceMenuTreeRebuild();

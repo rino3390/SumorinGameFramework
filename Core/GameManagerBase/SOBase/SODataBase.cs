@@ -17,50 +17,33 @@ namespace Sumorin.GameManagerBase
 	public abstract class SODataBase: SerializedScriptableObject, IConfig
 	{
 		/// <summary>
-		/// 識別碼的名稱部分，不含類別前綴
+		/// 資料唯一識別碼，同時是配置的查找鍵
 		/// </summary>
 		/// <remarks>
-		/// 建立資產時預設填入 GUID，可改為可讀的名稱（如 <c>Health</c>）。
-		/// 前綴由 <see cref="Id" /> 自動組上，不在此填寫。
+		/// 建立資產時預設填入 GUID，可改為可讀的識別碼（如 <c>Health</c>）。
+		/// 執行期直接讀本欄位的序列化值，不做任何推導。
+		/// 全專案唯一由 <c>DataScriptIdRule</c> 驗證並提供修復，撞號時可加類別前綴或編號。
 		/// </remarks>
 		[OdinSerialize]
 		[HorizontalGroup(LayoutConst.TopInfoLayout)]
 		[VerticalGroup(LayoutConst.TopInfoLayout + "/1")]
-		[LabelText("ID")]
 		// 屬性與欄位在 Odin 的預設排序不同，三個欄位明確標順序才不會被打散
 		[PropertyOrder(0)]
 		[PropertySpace(10)]
-		public string IdName { get; set; }
-
-		/// <summary>
-		/// 資料唯一識別碼，同時是配置的查找鍵
-		/// </summary>
-		/// <remarks>
-		/// 格式為「類別前綴_識別碼」，前綴取自 <see cref="DataEditorConfigAttribute.DataRoot" /> 的末段。
-		/// 前綴由程式組上而非人工填寫，因此不可能漏帶或打錯。
-		/// 前綴讓不同類別的資料不會撞 Id，<c>ConfigManager</c> 的查找字典全專案共用一份。
-		/// 全專案唯一由 <c>DataScriptIdRule</c> 驗證，改名前請確認沒有其他資產引用舊值。
-		/// </remarks>
-		public string Id => string.IsNullOrEmpty(IdPrefix) ? IdName : IdPrefix + "_" + IdName;
-
-		/// <summary>
-		/// 識別碼的類別前綴，取自 <see cref="DataEditorConfigAttribute.DataRoot" /> 的末段
-		/// </summary>
-		/// <remarks>
-		/// 型別沒有標註 <see cref="DataEditorConfigAttribute" /> 時為空字串，該情況不加前綴。
-		/// </remarks>
-		public string IdPrefix => cachedIdPrefix ??= ResolveIdPrefix();
-
-		private string cachedIdPrefix;
+		public string Id { get; set; }
 
 		/// <summary>
 		/// 資產檔案名稱（僅允許英數字、橫線、底線）
 		/// </summary>
+		/// <remarks>
+		/// 驗證方法以字串指定而非 <c>nameof</c>。本組件在所有平台編譯，而驗證方法僅存在於編輯器，
+		/// <c>nameof</c> 會要求編譯器當場解析，正式建置就會因為找不到方法而失敗。
+		/// </remarks>
 		[HorizontalGroup(LayoutConst.TopInfoLayout)]
 		[VerticalGroup(LayoutConst.TopInfoLayout + "/1")]
 		[LabelText("檔案名稱")]
 		[PropertyOrder(1)]
-		[PropertySpace(10), ValidateInput(nameof(IsAssetNameLegal), "名稱只能為英數（含減號底線）")]
+		[PropertySpace(10), ValidateInput("IsAssetNameLegal", "名稱只能為英數（含減號底線）")]
 		public string AssetName = "";
 
 		/// <summary>
@@ -70,16 +53,27 @@ namespace Sumorin.GameManagerBase
 		[HorizontalGroup(LayoutConst.TopInfoLayout)]
 		[VerticalGroup(LayoutConst.TopInfoLayout + "/1")]
 		[PropertyOrder(2)]
-		[PropertySpace(10, 10), ValidateInput(nameof(IsDataNameLegal), "需要填寫名稱")]
+		[PropertySpace(10, 10), ValidateInput("IsDataNameLegal", "需要填寫名稱")]
 		public LocalizedString DataName;
 
-		private string ResolveIdPrefix()
+	#if UNITY_EDITOR
+		/// <summary>
+		/// 識別碼的類別前綴，取自 <see cref="DataEditorConfigAttribute.DataRoot" /> 的末段
+		/// </summary>
+		/// <remarks>
+		/// 僅供撞號時的修復動作組出新識別碼，不參與 <see cref="Id" /> 的組成。
+		/// 讓執行期的查找鍵去推導編輯器的資料夾路徑太危險，建置時 attribute 可能被 stripping 移除。
+		/// 型別沒有標註該 attribute 時為空字串。
+		/// </remarks>
+		public string IdPrefix
 		{
-			var config = GetType().GetCustomAttribute<DataEditorConfigAttribute>();
-			return config == null ? "" : config.DataRoot.Split('/')[^1];
+			get
+			{
+				var config = GetType().GetCustomAttribute<DataEditorConfigAttribute>();
+				return config == null ? "" : config.DataRoot.Split('/')[^1];
+			}
 		}
 
-	#if UNITY_EDITOR
 		/// <summary>
 		/// 編輯器選單與下拉選單的顯示文字
 		/// </summary>
@@ -100,12 +94,12 @@ namespace Sumorin.GameManagerBase
 		}
 
 		/// <summary>
-		/// 驗證識別碼的名稱部分是否合法
+		/// 驗證識別碼是否合法
 		/// </summary>
 		/// <returns>非空且只含英數則回傳 true</returns>
-		public bool IsIdNameLegal()
+		public bool IsIdLegal()
 		{
-			return !string.IsNullOrWhiteSpace(IdName) && RegexChecking.OnlyEnglishAndNum(IdName);
+			return !string.IsNullOrWhiteSpace(Id) && RegexChecking.OnlyEnglishAndNum(Id);
 		}
 
 		/// <summary>
@@ -132,7 +126,7 @@ namespace Sumorin.GameManagerBase
 		/// <returns>資料合法則回傳 true</returns>
 		public virtual bool IsDataLegal()
 		{
-			return IsIdNameLegal() && IsAssetNameLegal() && IsDataNameLegal();
+			return IsIdLegal() && IsAssetNameLegal() && IsDataNameLegal();
 		}
 	#endif
 	}

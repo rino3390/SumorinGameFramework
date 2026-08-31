@@ -40,7 +40,7 @@ namespace Sumorin.GameManagerBase
 		/// <param name="onDeleted">刪除完成後的回呼</param>
 		public static void OpenWindow(SODataBase soData, Rect rect, Action onDeleted = null)
 		{
-			popupWindow = OdinEditorWindow.InspectObjectInDropDown(new DeletePopUp(soData, onDeleted), rect, 300);
+			popupWindow = OdinEditorWindow.InspectObjectInDropDown(new DeletePopUp(soData, onDeleted), rect, 700);
 		}
 
 		/// <summary>
