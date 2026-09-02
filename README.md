@@ -5,7 +5,7 @@ Unity MVP 架構共用框架，提供 DDD 核心、遊戲資料管理、模組�
 ## 架構優點
 
 - **模組化設計**：透過 Zenject DI 實現鬆耦合，模組可獨立開發與測試
-- **領域驅動設計**：採用 DDD 概念，業務邏輯集中於 Entity，職責分明
+- **領域驅動設計**：採用 DDD 概念，業務邏輯集中於 Controller，Model 為純資料，可用純 NUnit 測試
 - **事件驅動架構**：透過 EventBus 實現跨模組通訊，避免直接依賴
 - **視覺化資料管理**：GameManager 編輯器視窗讓企劃可直接編輯遊戲資料
 - **快速擴展**：Module Installer 提供預製模組（屬性系統、Buff 系統等），一鍵安裝
@@ -55,16 +55,17 @@ https://github.com/rino3390/SumorinGameFramework.git?path=Core
 
 | 模組 | 說明 |
 |------|------|
-| DDDCore | Entity、Repository、EventBus 基礎架構 |
+| DDDCore | Entity、Repository、CommandResult、EventBus 基礎架構 |
+| Presentation | View 管理框架（ViewRegistry、IViewProvider、IBindableView） |
 | GameManager | 遊戲資料管理編輯器視窗 |
-| ModuleInstaller | 可選模組安裝器（屬性、Buff 等系統） |
+| ModuleInstaller | 可選模組安裝器（屬性、Buff、存檔等系統） |
 | SumorinUtility | 通用工具方法與配置存取（ConfigManager） |
 
 ---
 
 ## DDDCore
 
-提供領域驅動設計的基礎架構，包含 Entity、Repository 和 EventBus。
+提供領域驅動設計的基礎架構，包含 Entity、Repository、CommandResult 和 EventBus。
 
 ### Entity
 
@@ -88,21 +89,13 @@ public class Player : Entity
 
 ### Repository
 
-管理 Entity 的儲存庫，支援 CRUD 操作與條件查詢：
+管理 Entity 的儲存庫，支援 CRUD 操作與條件查詢。
+沒有具名查詢需求就直接注入框架的 `IRepository<TEntity>`，不自訂 Repository：
 
 ```csharp
-// 定義 Repository
-public class PlayerRepository : Repository<Player> { }
-
-// 使用方式
-public class PlayerService
+public class PlayerController
 {
-    private readonly IRepository<Player> repository;
-
-    public PlayerService(IRepository<Player> repository)
-    {
-        this.repository = repository;
-    }
+    [Inject] private IRepository<Player> repository;
 
     // 查詢：使用 Find/FindAll，不要先取集合再 LINQ
     public Player FindByName(string name)
@@ -117,32 +110,80 @@ public class PlayerService
 }
 ```
 
+需要具名查詢方法（如 `GetByOwner()`）時，才自訂介面繼承 `IRepository<TEntity>` 再加上該方法。
+刪除用 `DeleteById` / `DeleteAll`。
+
 ### EventBus
 
-自實作事件系統（DDDCore EventBus），支援同步與非同步事件：
+自實作事件系統（DDDCore EventBus），支援同步與非同步事件。
+由 `DDDCoreInstaller` 綁定，發布端注入 `IPublisher`、訂閱端注入 `ISubscriber`：
 
 ```csharp
-// 定義事件
-public struct PlayerLevelUpEvent : IEvent
+// 定義事件：名詞 + 動詞完成式，代表已發生的事實
+public class PlayerLevelUpped : IEvent
 {
     public string PlayerId { get; }
     public int NewLevel { get; }
 
-    public PlayerLevelUpEvent(string playerId, int newLevel)
+    public PlayerLevelUpped(string playerId, int newLevel)
     {
         PlayerId = playerId;
         NewLevel = newLevel;
     }
 }
 
-// 發布事件
-eventBus.Publish(new PlayerLevelUpEvent(player.Id, player.Level));
+// Controller 注入 IPublisher 發布
+publisher.Publish(new PlayerLevelUpped(player.Id, player.Level));
 
-// 訂閱事件（記得在 Dispose 時取消訂閱）
-subscription = eventBus.Subscribe<PlayerLevelUpEvent>(evt =>
+// Flow 注入 ISubscriber 訂閱，回傳 IDisposable，Dispose 時解除
+subscription = subscriber.Subscribe<PlayerLevelUpped>(evt =>
 {
     Debug.Log($"玩家 {evt.PlayerId} 升級到 {evt.NewLevel}");
 });
+```
+
+---
+
+## 配置存取（ConfigManager）
+
+同一份 SO 資產，兩個取用面：Domain 拿數值介面，表現層拿具體 SO。
+`IConfig`、`ConfigSource`、`ConfigManager` 位於 `Sumorin.SumorinUtility`。
+
+```csharp
+// Contract：數值介面，只含數值不含 Unity 型別
+public interface IItemConfig : IConfig
+{
+    int Price { get; }
+}
+
+// DataScript：SO 實作介面，另有資源欄位
+[DataEditorConfig("道具管理", "Data/Items", "道具")]
+public class ItemData : SODataBase, IItemConfig
+{
+    [SerializeField] private int price;
+    [SerializeField] private Sprite icon;
+
+    public int Price => price;
+    public Sprite Icon => icon;
+}
+```
+
+組裝：`DDDCoreInstaller` 綁定 `ConfigManager`，模組 Installer 各自貢獻 `ConfigSource`，遊戲側不自行組裝：
+
+```csharp
+DDDCoreInstaller.Install(Container);
+Container.Bind<ConfigSource>().FromInstance(new(itemDataSet.Datas)).AsCached();
+```
+
+讀取：查找鍵是配置自己的 `Id`（`SODataBase` 提供），數值面與具體 SO 查同一份字典：
+
+```csharp
+// Controller 讀數值面，看不到 SO 型別
+var config = configManager.Get<IItemConfig>(itemId);
+
+// Presenter / View 讀具體 SO，資源欄位直接可用
+var data = configManager.Get<ItemData>(itemId);
+icon.sprite = data.Icon;
 ```
 
 ---
@@ -235,6 +276,7 @@ public class SettingsEditor : GameEditorMenuBase
 | FolderStructure | 標準專案資料夾結構 |
 | Attribute | 屬性系統（HP、MP、攻擊力等） |
 | Buff | Buff/Debuff 系統（支援堆疊、持續時間） |
+| Save | 存檔系統（存檔槽、Repository 轉接層、存檔加密） |
 | GameSetting | 遊戲設定管理（搭配 GameSettingConfig 使用） |
 
 ### 模組依賴
