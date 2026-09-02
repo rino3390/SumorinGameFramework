@@ -1,5 +1,4 @@
-﻿using Sumorin.DDDCore;
-using Sumorin.SumorinUtility;
+﻿using Sumorin.SumorinUtility;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
 using System.Reflection;

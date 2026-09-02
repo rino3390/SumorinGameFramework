@@ -1,6 +1,7 @@
 {
     "name": "Sumorin.DDDCore",
     "references": [
+        "Sumorin.SumorinUtility",
         "UniTask",
         "Zenject"
     ],

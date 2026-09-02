@@ -2,7 +2,8 @@
     "name": "Sumorin.Buff.Contract",
     "references": [
         "Sumorin.Attribute.Contract",
-        "Sumorin.DDDCore"
+        "Sumorin.DDDCore",
+        "Sumorin.SumorinUtility"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

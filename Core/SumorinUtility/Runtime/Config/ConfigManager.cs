@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sumorin.DDDCore
+namespace Sumorin.SumorinUtility
 {
 	/// <summary>
-	///     配置數值的查找入口，只有 Controller 讀取
+	///     配置的查找入口，Controller 取數值介面，Presenter 與 View 取具體 SO
 	/// </summary>
 	/// <remarks>
 	///     不抽介面，全專案只有這一個實作。測試直接 new 一份帶假配置的實例。

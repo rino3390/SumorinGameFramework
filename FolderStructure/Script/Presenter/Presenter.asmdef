@@ -2,6 +2,7 @@
   "name": "Presenter",
   "references": [
     "Sumorin.Presentation",
+    "Sumorin.SumorinUtility",
     "UniRx",
     "UniTask",
     "Utility",

@@ -6,6 +6,7 @@
     "Presenter",
     "Sumorin.DDDCore",
     "Sumorin.Presentation",
+    "Sumorin.SumorinUtility",
     "UniRx",
     "UniTask",
     "Utility",

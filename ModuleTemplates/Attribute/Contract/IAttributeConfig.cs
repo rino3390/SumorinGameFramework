@@ -1,4 +1,4 @@
-using Sumorin.DDDCore;
+using Sumorin.SumorinUtility;
 
 namespace Sumorin.Attribute
 {

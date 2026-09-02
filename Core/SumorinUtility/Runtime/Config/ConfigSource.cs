@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sumorin.DDDCore
+namespace Sumorin.SumorinUtility
 {
 	/// <summary>
 	///     一個模組貢獻給 <see cref="ConfigManager" /> 的配置來源

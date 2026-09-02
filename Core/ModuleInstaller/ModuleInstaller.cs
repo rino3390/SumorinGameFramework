@@ -883,7 +883,7 @@ namespace Sumorin.ModuleInstaller
 				"Script/Flow/Event",
 				"Script/Flow/Tick",
 				"Script/Installer",
-				"Script/Presenter/AssetProvider",
+				"Script/Presenter",
 				"Script/Utility",
 				"Script/View/Behaviour",
 				"Script/View/UI"
@@ -903,8 +903,16 @@ namespace Sumorin.ModuleInstaller
 			// 生成 asmdef 檔案
 			CreateAsmdef("Script/Utility/Utility.asmdef", "Utility", new[] { "UniTask" });
 			CreateAsmdef("Script/ActionHandler/ActionHandler.asmdef", "ActionHandler", new[] { "UniRx", "Utility", "Zenject" });
-			CreateAsmdef("Script/View/View.asmdef", "View", new[] { "ActionHandler", "Sumorin.Presentation", "UniRx", "UniTask", "Utility", "Zenject" });
-			CreateAsmdef("Script/Presenter/Presenter.asmdef", "Presenter", new[] { "Sumorin.Presentation", "UniRx", "UniTask", "Utility", "View", "Zenject" });
+			CreateAsmdef(
+				"Script/View/View.asmdef",
+				"View",
+				new[] { "ActionHandler", "Sumorin.Presentation", "Sumorin.SumorinUtility", "UniRx", "UniTask", "Utility", "Zenject" }
+			);
+			CreateAsmdef(
+				"Script/Presenter/Presenter.asmdef",
+				"Presenter",
+				new[] { "Sumorin.Presentation", "Sumorin.SumorinUtility", "UniRx", "UniTask", "Utility", "View", "Zenject" }
+			);
 			CreateAsmdef(
 				"Script/Flow/Flow.asmdef",
 				"Flow",
@@ -913,7 +921,11 @@ namespace Sumorin.ModuleInstaller
 			CreateAsmdef(
 				"Script/Installer/Installer.asmdef",
 				"Installer",
-				new[] { "ActionHandler", "Flow", "Presenter", "Sumorin.DDDCore", "Sumorin.Presentation", "UniRx", "UniTask", "Utility", "View", "Zenject" }
+				new[]
+				{
+					"ActionHandler", "Flow", "Presenter", "Sumorin.DDDCore", "Sumorin.Presentation", "Sumorin.SumorinUtility", "UniRx", "UniTask", "Utility",
+					"View", "Zenject"
+				}
 			);
 		}
 

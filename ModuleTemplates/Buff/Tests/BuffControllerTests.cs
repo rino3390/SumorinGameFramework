@@ -4,6 +4,7 @@ using NSubstitute;
 using NUnit.Framework;
 using Sumorin.Attribute;
 using Sumorin.DDDCore;
+using Sumorin.SumorinUtility;
 using Zenject;
 
 namespace Sumorin.Buff.Tests

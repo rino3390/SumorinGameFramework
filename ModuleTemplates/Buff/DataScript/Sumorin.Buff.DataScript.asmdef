@@ -3,7 +3,6 @@
     "references": [
         "Sumorin.Buff.Contract",
         "Sumorin.Attribute.Contract",
-        "Sumorin.DDDCore",
         "Sumorin.SOBase",
         "Sumorin.SumorinUtility",
         "Unity.Localization"

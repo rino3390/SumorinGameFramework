@@ -1,7 +1,6 @@
 ﻿{
   "name": "Sumorin.SOBase",
   "references": [
-    "Sumorin.DDDCore",
     "Sumorin.SumorinUtility",
     "Sumorin.SumorinUtility.Editor",
     "Unity.Localization"

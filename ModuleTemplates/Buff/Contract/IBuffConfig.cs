@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Sumorin.Attribute;
-using Sumorin.DDDCore;
+using Sumorin.SumorinUtility;
 
 namespace Sumorin.Buff
 {

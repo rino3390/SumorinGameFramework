@@ -3,6 +3,7 @@
   "references": [
     "ActionHandler",
     "Sumorin.Presentation",
+    "Sumorin.SumorinUtility",
     "UniRx",
     "UniTask",
     "Utility",

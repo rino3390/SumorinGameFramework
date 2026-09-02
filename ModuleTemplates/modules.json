@@ -6,7 +6,7 @@
       "id": "folder-structure",
       "name": "FolderStructure",
       "description": "專案資料夾結構模板，提供標準的 Unity 專案目錄配置",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "dependencies": [],
       "folders": [],
       "files": [
@@ -26,7 +26,6 @@
         "FolderStructure/Script/Flow/Tick/.gitkeep",
         "FolderStructure/Script/Flow/Flow.asmdef",
         "FolderStructure/Script/Installer/Installer.asmdef",
-        "FolderStructure/Script/Presenter/AssetProvider/.gitkeep",
         "FolderStructure/Script/Presenter/Presenter.asmdef",
         "FolderStructure/Script/Utility/Utility.asmdef",
         "FolderStructure/Script/View/Behaviour/.gitkeep",
@@ -38,7 +37,7 @@
       "id": "attribute-system",
       "name": "屬性系統",
       "description": "角色屬性 Domain，提供屬性值計算、修飾器與關聯上下限管理",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "dependencies": [],
       "folders": [
         "ModuleTemplates/Attribute"
@@ -49,7 +48,7 @@
       "id": "buff-system",
       "name": "Buff 系統",
       "description": "Buff Domain，提供生命週期管理、堆疊行為、互斥群組與屬性效果掛卸",
-      "version": "3.0.0",
+      "version": "3.0.1",
       "dependencies": [
         "attribute-system"
       ],

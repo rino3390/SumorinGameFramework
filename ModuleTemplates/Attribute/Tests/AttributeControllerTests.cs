@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using FluentAssertions;
 using NUnit.Framework;
-using Sumorin.DDDCore;
+using Sumorin.SumorinUtility;
 using Zenject;
 
 namespace Sumorin.Attribute.Tests

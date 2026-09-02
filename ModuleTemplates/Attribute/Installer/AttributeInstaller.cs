@@ -1,5 +1,5 @@
 using System;
-using Sumorin.DDDCore;
+using Sumorin.SumorinUtility;
 using Zenject;
 
 namespace Sumorin.Attribute

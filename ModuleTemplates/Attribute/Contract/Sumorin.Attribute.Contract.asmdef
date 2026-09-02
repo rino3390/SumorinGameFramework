@@ -1,7 +1,7 @@
 {
     "name": "Sumorin.Attribute.Contract",
     "references": [
-        "Sumorin.DDDCore"
+        "Sumorin.SumorinUtility"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
