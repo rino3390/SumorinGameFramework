@@ -58,7 +58,7 @@ https://github.com/rino3390/SumorinGameFramework.git?path=Core
 | DDDCore | Entity、Repository、EventBus 基礎架構 |
 | GameManager | 遊戲資料管理編輯器視窗 |
 | ModuleInstaller | 可選模組安裝器（屬性、Buff 等系統） |
-| SumorinUtility | 通用工具方法 |
+| SumorinUtility | 通用工具方法與配置存取（ConfigManager） |
 
 ---
 
