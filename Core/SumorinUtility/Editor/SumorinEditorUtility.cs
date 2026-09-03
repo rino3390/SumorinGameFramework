@@ -121,6 +121,20 @@ namespace Sumorin.SumorinUtility.Editor
 		}
 
 		/// <summary>
+		/// 取得所有繼承指定類型的具體類別，包成 Odin 型別下拉選單項目，供 [TypeFilter] 或 [ValueDropdown] 的 @ 運算式呼叫
+		/// </summary>
+		/// <remarks>
+		/// 顯示名稱只從 <see cref="TypeDropdownNameAttribute" /> 讀，沒有標註就用型別名。
+		/// 不建立實例，實作可以沒有公開建構子，也可以在建構子做事。
+		/// </remarks>
+		/// <typeparam name="T">呼叫端自己的基底類型或介面</typeparam>
+		/// <returns>下拉選單項目，顯示名稱為型別宣告的名稱、值為型別</returns>
+		public static IEnumerable<ValueDropdownItem> TypeDropdown<T>()
+		{
+			return GetDerivedClasses<T>().Select(type => new ValueDropdownItem(type.GetCustomAttribute<TypeDropdownNameAttribute>()?.Name ?? type.Name, type));
+		}
+
+		/// <summary>
 		/// 取得所有標記特定 Attribute 且繼承指定類型的類別
 		/// </summary>
 		/// <typeparam name="TBase">基底類型</typeparam>
