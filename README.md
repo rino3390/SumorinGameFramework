@@ -59,7 +59,7 @@ https://github.com/rino3390/SumorinGameFramework.git?path=Core
 | Presentation | View 管理框架（ViewRegistry、IViewProvider、IBindableView） |
 | GameManager | 遊戲資料管理編輯器視窗 |
 | ModuleInstaller | 可選模組安裝器（屬性、Buff、存檔等系統） |
-| SumorinUtility | 通用工具方法與配置存取（ConfigManager） |
+| SumorinUtility | 通用工具方法、配置存取（ConfigManager）與型別下拉（TypeDropdown） |
 
 ---
 
@@ -185,6 +185,30 @@ var config = configManager.Get<IItemConfig>(itemId);
 var data = configManager.Get<ItemData>(itemId);
 icon.sprite = data.Icon;
 ```
+
+---
+
+## 型別下拉（TypeDropdown）
+
+Inspector 欄位用下拉選擇介面的實作，顯示名稱由型別自己宣告。
+`TypeDropdownNameAttribute` 位於 `Sumorin.SumorinUtility`，欄位所在的組件不需要引用 Editor 組件。
+
+```csharp
+public interface IEffect { }
+
+[TypeDropdownName("添加修改器")]
+public class AddModifier : IEffect { }
+
+public class Heal : IEffect { }   // 沒標註，顯示 Heal
+
+[TypeFilter("@SumorinEditorUtility.TypeDropdown<IEffect>()")]
+public List<IEffect> Effects = new();
+```
+
+顯示名稱只從 attribute 讀，不建立實例，實作可以沒有公開建構子。
+欄位型別是介面，需要多型序列化。
+放在 `SODataBase` 這類 Odin 序列化的物件上直接可用。
+放在一般 `MonoBehaviour` 或 `ScriptableObject` 上要加 `[SerializeReference]`。
 
 ---
 

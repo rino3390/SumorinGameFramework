@@ -3,6 +3,15 @@
 Sumorin Game Framework 的變更紀錄，涵蓋 Core 套件與框架模組。
 版本號以 Core 套件（`Core/package.json`）為準，各模組另有自己的版本（`ModuleTemplates/modules.json`）。
 
+## [0.3.0] - 2026-09-03
+
+### 新功能
+
+- 型別下拉：Inspector 欄位可用下拉選擇介面的實作，顯示名稱由型別自己宣告。
+  實作類別標上 `[TypeDropdownName("顯示名稱")]`，欄位掛 `[TypeFilter("@SumorinEditorUtility.TypeDropdown<IEffect>()")]`。
+  沒有標註的型別顯示型別名。
+  不建立實例，實作可以沒有公開建構子，也可以在建構子做事。
+
 ## [0.2.0] - 2026-09-02
 
 ### 破壞性變更
