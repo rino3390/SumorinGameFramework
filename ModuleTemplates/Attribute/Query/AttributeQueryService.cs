@@ -14,6 +14,12 @@ namespace Sumorin.Attribute
 	#region IAttributeQueryService Members
 		/// <inheritdoc />
 		public int GetValue(string ownerId, string configId) => controller.GetValue(ownerId, configId);
+
+		/// <inheritdoc />
+		public int GetMaxValue(string ownerId, string configId) => controller.GetMaxValue(ownerId, configId);
+
+		/// <inheritdoc />
+		public int GetMinValue(string ownerId, string configId) => controller.GetMinValue(ownerId, configId);
 	#endregion
 
 	#region IAttributeValueService Members

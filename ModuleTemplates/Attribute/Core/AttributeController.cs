@@ -34,12 +34,34 @@ namespace Sumorin.Attribute
 		}
 
 		/// <inheritdoc />
+		public int GetMaxValue(string ownerId, string configId)
+		{
+			return repository.Get(ownerId, configId)?.MaxValue ?? 0;
+		}
+
+		/// <inheritdoc />
+		public int GetMinValue(string ownerId, string configId)
+		{
+			return repository.Get(ownerId, configId)?.MinValue ?? 0;
+		}
+
+		/// <inheritdoc />
 		public CommandResult SetBaseValue(string ownerId, string configId, int value)
 		{
 			var attribute = repository.Get(ownerId, configId);
 			if(attribute == null) return CommandResult.Fail("屬性不存在");
 
 			attribute.SetBaseValue(value);
+			return CommandResult.Ok();
+		}
+
+		/// <inheritdoc />
+		public CommandResult AdjustBaseValue(string ownerId, string configId, int delta)
+		{
+			var attribute = repository.Get(ownerId, configId);
+			if(attribute == null) return CommandResult.Fail("屬性不存在");
+
+			attribute.AdjustBaseValue(delta);
 			return CommandResult.Ok();
 		}
 
@@ -72,7 +94,8 @@ namespace Sumorin.Attribute
 		/// <inheritdoc />
 		public CommandResult AddModifier(string ownerId, ModifyEffectInfo effect, string sourceId, string description = "")
 		{
-			if(string.IsNullOrEmpty(sourceId)) return CommandResult.Fail("來源識別碼不得為空");
+			if(string.IsNullOrEmpty(sourceId)) return CommandResult.Fail("來源 Id 不得為空");
+			if(IsResource(effect.AttributeConfigId)) return CommandResult.Fail($"資源型屬性不接受修改器：{effect.AttributeConfigId}");
 
 			var attribute = repository.Get(ownerId, effect.AttributeConfigId) ?? CreateAttributeInternal(ownerId, effect.AttributeConfigId, 0);
 
@@ -85,6 +108,10 @@ namespace Sumorin.Attribute
 		public CommandResult AddModifiers(string ownerId, List<ModifyEffectInfo> effects, string sourceId, string description = "")
 		{
 			if(effects == null) return CommandResult.Fail("效果列表不得為 null");
+
+			// 先整批檢查再套用，避免前幾筆已掛上、後面才失敗的半套用狀態
+			var resourceTarget = effects.Find(effect => IsResource(effect.AttributeConfigId));
+			if(!string.IsNullOrEmpty(resourceTarget.AttributeConfigId)) return CommandResult.Fail($"資源型屬性不接受修改器：{resourceTarget.AttributeConfigId}");
 
 			foreach(var effect in effects)
 			{
@@ -139,7 +166,7 @@ namespace Sumorin.Attribute
 		/// <inheritdoc />
 		public CommandResult CreateAttribute(string ownerId, string configId, int baseValue)
 		{
-			if(string.IsNullOrEmpty(configId)) return CommandResult.Fail("屬性配置識別碼不得為空");
+			if(string.IsNullOrEmpty(configId)) return CommandResult.Fail("屬性配置 Id 不得為空");
 
 			return CommandResult.Ok(CreateAttributeInternal(ownerId, configId, baseValue).Id);
 		}
@@ -233,6 +260,11 @@ namespace Sumorin.Attribute
 					target.SetMinValue(sourceAttribute.Value);
 				}
 			}
+		}
+
+		private bool IsResource(string configId)
+		{
+			return configs.Get<IAttributeConfig>(configId)?.Kind == AttributeKind.Resource;
 		}
 
 		private int GetRelationValue(string ownerId, string relationConfigId, int defaultValue)

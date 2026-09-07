@@ -15,6 +15,9 @@ namespace Sumorin.Attribute
 		/// <inheritdoc cref="IAttributeController.SetBaseValue" />
 		public CommandResult SetBaseValue(string ownerId, string configId, int value) => controller.SetBaseValue(ownerId, configId, value);
 
+		/// <inheritdoc cref="IAttributeController.AdjustBaseValue" />
+		public CommandResult AdjustBaseValue(string ownerId, string configId, int delta) => controller.AdjustBaseValue(ownerId, configId, delta);
+
 		/// <inheritdoc cref="IAttributeController.SetMinValue" />
 		public CommandResult SetMinValue(string ownerId, string configId, int value) => controller.SetMinValue(ownerId, configId, value);
 

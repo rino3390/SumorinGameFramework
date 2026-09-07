@@ -52,6 +52,29 @@ namespace Sumorin.Attribute.Tests
 		}
 
 		[Test]
+		public void AdjustBaseValue_WithModifierAttached_ChangesBaseValueNotFinalValue()
+		{
+			var attribute = CreateAttribute();
+			attribute.AddModifier(new Modifier("mod-1", ModifyType.Percent, 50, "source-1"));
+
+			attribute.AdjustBaseValue(-30);
+
+			// 若拿最終值 150 去減，基礎值會變 120、最終值 180，Percent 就被烙進基礎值
+			attribute.Should().BeEquivalentTo(new { BaseValue = 70, Value = 105 });
+		}
+
+		[TestCase(int.MaxValue, 1, int.MaxValue, TestName = "加超過 int 上限停在上限")]
+		[TestCase(int.MinValue, -1, int.MinValue, TestName = "減超過 int 下限停在下限")]
+		public void AdjustBaseValue_BeyondIntRange_StopsAtIntBoundary(int baseValue, int delta, int expected)
+		{
+			var attribute = CreateAttribute(baseValue, int.MinValue, int.MaxValue);
+
+			attribute.AdjustBaseValue(delta);
+
+			attribute.BaseValue.Should().Be(expected);
+		}
+
+		[Test]
 		public void SetMinValue_AboveCurrentValue_RaisesValueToMin()
 		{
 			var attribute = CreateAttribute(50);

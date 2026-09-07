@@ -8,6 +8,11 @@ namespace Sumorin.Attribute
 	public interface IAttributeConfig: IConfig
 	{
 		/// <summary>
+		///     屬性種類，資源型不接受修改器
+		/// </summary>
+		AttributeKind Kind { get; }
+
+		/// <summary>
 		///     固定下限
 		/// </summary>
 		int Min { get; }

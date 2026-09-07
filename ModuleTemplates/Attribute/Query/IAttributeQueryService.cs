@@ -7,5 +7,11 @@ namespace Sumorin.Attribute
 	{
 		/// <inheritdoc cref="IAttributeController.GetValue" />
 		int GetValue(string ownerId, string configId);
+
+		/// <inheritdoc cref="IAttributeController.GetMaxValue" />
+		int GetMaxValue(string ownerId, string configId);
+
+		/// <inheritdoc cref="IAttributeController.GetMinValue" />
+		int GetMinValue(string ownerId, string configId);
 	}
 }

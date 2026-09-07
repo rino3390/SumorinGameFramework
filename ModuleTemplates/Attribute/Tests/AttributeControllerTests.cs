@@ -11,22 +11,13 @@ namespace Sumorin.Attribute.Tests
 	{
 		private class FakeAttributeConfig: IAttributeConfig
 		{
-			public string Id { get; }
-			public int Min { get; }
-			public int Max { get; }
-			public string RelationMin { get; }
-			public string RelationMax { get; }
-			public int Ratio { get; }
-
-			public FakeAttributeConfig(string id, int min, int max, string relationMin = "", string relationMax = "", int ratio = 1)
-			{
-				Id = id;
-				Min = min;
-				Max = max;
-				RelationMin = relationMin;
-				RelationMax = relationMax;
-				Ratio = ratio;
-			}
+			public string Id { get; set; }
+			public AttributeKind Kind { get; set; }
+			public int Min { get; set; }
+			public int Max { get; set; }
+			public string RelationMin { get; set; } = "";
+			public string RelationMax { get; set; } = "";
+			public int Ratio { get; set; } = 1;
 		}
 
 		private static readonly ModifyEffectInfo HealthPlus50 = new()
@@ -55,9 +46,9 @@ namespace Sumorin.Attribute.Tests
 		private static List<IConfig> DefaultConfigs() =>
 			new()
 			{
-				new FakeAttributeConfig("Health", 0, 999),
-				new FakeAttributeConfig("Attack", 0, 999),
-				new FakeAttributeConfig("CritRate", 0, 100, ratio: 100)
+				new FakeAttributeConfig { Id = "Health", Min = 0, Max = 999 },
+				new FakeAttributeConfig { Id = "Attack", Min = 0, Max = 999 },
+				new FakeAttributeConfig { Id = "CritRate", Min = 0, Max = 100, Ratio = 100 }
 			};
 
 		[Test]
@@ -99,8 +90,8 @@ namespace Sumorin.Attribute.Tests
 					  );
 		}
 
-		[TestCase(null, TestName = "屬性配置識別碼為 null 時失敗")]
-		[TestCase("", TestName = "屬性配置識別碼為空字串時失敗")]
+		[TestCase(null, TestName = "屬性配置 Id 為 null 時失敗")]
+		[TestCase("", TestName = "屬性配置 Id 為空字串時失敗")]
 		public void CreateAttribute_WithoutConfigId_Fails(string configId)
 		{
 			var controller = CreateController();
@@ -134,6 +125,66 @@ namespace Sumorin.Attribute.Tests
 		}
 
 		[Test]
+		public void AdjustBaseValue_WithExistingAttribute_AddsDeltaToValue()
+		{
+			var controller = CreateController();
+			controller.CreateAttribute("owner-1", "Health", 100);
+
+			controller.AdjustBaseValue("owner-1", "Health", -30).IsSuccess.Should().BeTrue();
+			controller.GetValue("owner-1", "Health").Should().Be(70);
+		}
+
+		[Test]
+		public void AdjustBaseValue_OnUnknownAttribute_Fails()
+		{
+			CreateController().AdjustBaseValue("owner-1", "Health", 1).IsSuccess.Should().BeFalse();
+		}
+
+		[Test]
+		public void GetMaxValue_WithRelationMax_ReturnsBoundaryFromRelation()
+		{
+			var controller = CreateController(
+				new List<IConfig>
+				{
+					new FakeAttributeConfig { Id = "Health", Min = 0, Max = 9999, RelationMax = "MaxHealth" },
+					new FakeAttributeConfig { Id = "MaxHealth", Min = 1, Max = 9999 }
+				}
+			);
+			controller.CreateAttribute("owner-1", "MaxHealth", 100);
+			controller.CreateAttribute("owner-1", "Health", 80);
+
+			controller.GetMaxValue("owner-1", "Health").Should().Be(100);
+		}
+
+		[Test]
+		public void GetMinValue_WithRelationMin_ReturnsBoundaryFromRelation()
+		{
+			var controller = CreateController(
+				new List<IConfig>
+				{
+					new FakeAttributeConfig { Id = "Shield", Min = 0, Max = 9999, RelationMin = "MinShield" },
+					new FakeAttributeConfig { Id = "MinShield", Min = 0, Max = 9999 }
+				}
+			);
+			controller.CreateAttribute("owner-1", "MinShield", 10);
+			controller.CreateAttribute("owner-1", "Shield", 50);
+
+			controller.GetMinValue("owner-1", "Shield").Should().Be(10);
+		}
+
+		[Test]
+		public void GetMaxValue_WithUnknownAttribute_ReturnsZero()
+		{
+			CreateController().GetMaxValue("owner-1", "Health").Should().Be(0);
+		}
+
+		[Test]
+		public void GetMinValue_WithUnknownAttribute_ReturnsZero()
+		{
+			CreateController().GetMinValue("owner-1", "Health").Should().Be(0);
+		}
+
+		[Test]
 		public void SetMinValue_WithoutRelation_UpdatesBoundary()
 		{
 			var controller = CreateController();
@@ -159,8 +210,8 @@ namespace Sumorin.Attribute.Tests
 			var controller = CreateController(
 				new List<IConfig>
 				{
-					new FakeAttributeConfig("Health", 0, 9999, relationMax: "MaxHealth"),
-					new FakeAttributeConfig("MaxHealth", 1, 9999)
+					new FakeAttributeConfig { Id = "Health", Min = 0, Max = 9999, RelationMax = "MaxHealth" },
+					new FakeAttributeConfig { Id = "MaxHealth", Min = 1, Max = 9999 }
 				}
 			);
 			controller.CreateAttribute("owner-1", "MaxHealth", 100);
@@ -176,8 +227,8 @@ namespace Sumorin.Attribute.Tests
 			var controller = CreateController(
 				new List<IConfig>
 				{
-					new FakeAttributeConfig("Shield", 0, 9999, "MinShield"),
-					new FakeAttributeConfig("MinShield", 0, 9999)
+					new FakeAttributeConfig { Id = "Shield", Min = 0, Max = 9999, RelationMin = "MinShield" },
+					new FakeAttributeConfig { Id = "MinShield", Min = 0, Max = 9999 }
 				}
 			);
 			controller.CreateAttribute("owner-1", "MinShield", 10);
@@ -193,8 +244,8 @@ namespace Sumorin.Attribute.Tests
 			var controller = CreateController(
 				new List<IConfig>
 				{
-					new FakeAttributeConfig("Health", 0, 9999, relationMax: "MaxHealth"),
-					new FakeAttributeConfig("MaxHealth", 1, 9999)
+					new FakeAttributeConfig { Id = "Health", Min = 0, Max = 9999, RelationMax = "MaxHealth" },
+					new FakeAttributeConfig { Id = "MaxHealth", Min = 1, Max = 9999 }
 				}
 			);
 			controller.CreateAttribute("owner-1", "Health", 80);
@@ -212,8 +263,8 @@ namespace Sumorin.Attribute.Tests
 			var controller = CreateController(
 				new List<IConfig>
 				{
-					new FakeAttributeConfig("Shield", 0, 9999, "MinShield"),
-					new FakeAttributeConfig("MinShield", 0, 9999)
+					new FakeAttributeConfig { Id = "Shield", Min = 0, Max = 9999, RelationMin = "MinShield" },
+					new FakeAttributeConfig { Id = "MinShield", Min = 0, Max = 9999 }
 				}
 			);
 			controller.CreateAttribute("owner-1", "MinShield", 0);
@@ -256,6 +307,54 @@ namespace Sumorin.Attribute.Tests
 
 			controller.AddModifier("owner-1", HealthPlus50, sourceId).IsSuccess.Should().BeFalse();
 			controller.GetValue("owner-1", "Health").Should().Be(100);
+		}
+
+		[Test]
+		public void AddModifier_OnResourceAttribute_FailsAndKeepsValue()
+		{
+			var controller = CreateController(
+				new List<IConfig> { new FakeAttributeConfig { Id = "Health", Kind = AttributeKind.Resource, Min = 0, Max = 999 } }
+			);
+			controller.CreateAttribute("owner-1", "Health", 100);
+
+			controller.AddModifier("owner-1", HealthPlus50, "source-1").IsSuccess.Should().BeFalse();
+			controller.GetValue("owner-1", "Health").Should().Be(100);
+		}
+
+		[Test]
+		public void AddModifier_WithoutConfig_TreatsAsNumericAndApplies()
+		{
+			var controller = CreateController(new List<IConfig>());
+
+			controller.AddModifier("owner-1", HealthPlus50, "source-1").IsSuccess.Should().BeTrue();
+			controller.GetValue("owner-1", "Health").Should().Be(50);
+		}
+
+		[Test]
+		public void AddModifiers_WithResourceTarget_FailsWithoutApplyingAny()
+		{
+			var controller = CreateController(
+				new List<IConfig>
+				{
+					new FakeAttributeConfig { Id = "Health", Kind = AttributeKind.Resource, Min = 0, Max = 999 },
+					new FakeAttributeConfig { Id = "Attack", Min = 0, Max = 999 }
+				}
+			);
+			controller.CreateAttribute("owner-1", "Attack", 50);
+
+			// 數值型排在前面：逐筆檢查的實作會先套用 Attack 才在 Health 失敗
+			var result = controller.AddModifiers(
+				"owner-1",
+				new List<ModifyEffectInfo>
+				{
+					new() { AttributeConfigId = "Attack", ModifyType = ModifyType.Flat, Value = 10 },
+					HealthPlus50
+				},
+				"buff-1"
+			);
+
+			result.IsSuccess.Should().BeFalse();
+			controller.GetValue("owner-1", "Attack").Should().Be(50);
 		}
 
 		[Test]

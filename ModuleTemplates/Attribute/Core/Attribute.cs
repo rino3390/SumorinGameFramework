@@ -11,7 +11,7 @@ namespace Sumorin.Attribute
 	public class Attribute: Entity, IDisposable
 	{
 		/// <summary>
-		///     基礎值
+		///     基礎值。數值型屬性是修改器套用前的底數，資源型屬性是當前量
 		/// </summary>
 		public int BaseValue { get; private set; }
 
@@ -41,12 +41,12 @@ namespace Sumorin.Attribute
 		public IReadOnlyList<Modifier> Modifiers => modifiers;
 
 		/// <summary>
-		///     屬性配置識別碼
+		///     屬性配置 Id
 		/// </summary>
 		public string ConfigId { get; }
 
 		/// <summary>
-		///     擁有者識別碼
+		///     擁有者 Id
 		/// </summary>
 		public string OwnerId { get; }
 
@@ -56,9 +56,9 @@ namespace Sumorin.Attribute
 		/// <summary>
 		///     建立屬性實例
 		/// </summary>
-		/// <param name="id">唯一識別碼</param>
-		/// <param name="ownerId">擁有者識別碼</param>
-		/// <param name="configId">屬性配置識別碼</param>
+		/// <param name="id">唯一 Id</param>
+		/// <param name="ownerId">擁有者 Id</param>
+		/// <param name="configId">屬性配置 Id</param>
 		/// <param name="baseValue">基礎值</param>
 		/// <param name="minValue">最小值（預設 int.MinValue）</param>
 		/// <param name="maxValue">最大值（預設 int.MaxValue）</param>
@@ -88,6 +88,14 @@ namespace Sumorin.Attribute
 		{
 			BaseValue = value;
 			Refresh();
+		}
+
+		/// <summary>
+		///     增減基礎值，超出 int 範圍時停在極值不繞回
+		/// </summary>
+		public void AdjustBaseValue(int delta)
+		{
+			SetBaseValue((int)Math.Clamp((long)BaseValue + delta, int.MinValue, int.MaxValue));
 		}
 
 		/// <summary>
@@ -140,7 +148,7 @@ namespace Sumorin.Attribute
 		/// </summary>
 		/// <param name="modifyType">修改類型</param>
 		/// <param name="value">修改數值</param>
-		/// <param name="sourceId">來源識別碼</param>
+		/// <param name="sourceId">來源 Id</param>
 		public void RemoveFirstModifier(ModifyType modifyType, int value, string sourceId)
 		{
 			var index = modifiers.FindIndex(m => m.ModifyType == modifyType && m.Value == value && m.SourceId == sourceId);
