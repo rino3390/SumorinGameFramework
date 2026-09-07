@@ -3,6 +3,25 @@
 Sumorin Game Framework 的變更紀錄，涵蓋 Core 套件與框架模組。
 版本號以 Core 套件（`Core/package.json`）為準，各模組另有自己的版本（`ModuleTemplates/modules.json`）。
 
+## [0.4.0] - 2026-09-07
+
+### 新功能
+
+- `LocalizedString` 的 drawer 支援 Odin 序列化的屬性。
+  DataScript 以 `[OdinSerialize]` 宣告的 `LocalizedString` 屬性，與 Unity 序列化欄位用同一套表格選擇與各語言預覽。
+  值尚未建立時直接顯示選擇器，不再出現 Odin 的 Null 框。
+
+### 改進
+
+- `LocalizedString` drawer 改以字串的 Id 引用，改字串 ID 不會讓其他資產的引用失效。
+  舊資產以名稱引用的照常讀取，經 drawer 寫入後自動換成 Id。
+- 同一個字串被多個欄位引用時，在其中一個欄位改字串 ID，其他欄位的下拉文字同步更新。
+- 屬性系統（3.0.0）與 Buff 系統（4.0.0）的配置資產改為 Odin 序列化屬性直接實作 `I{X}Config`。
+  序列化格式改變，升主版號。
+- 屬性系統（3.0.0）：配置加上屬性種類，資源型屬性拒絕 Modifier。
+  新增 `AdjustBaseValue` 直接增減基礎值，與 `GetMaxValue`／`GetMinValue` 上下限查詢。
+- 屬性種類、Buff 生命週期與重複獲得時行為的下拉選單顯示中文名稱。
+
 ## [0.3.0] - 2026-09-03
 
 ### 新功能
