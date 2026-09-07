@@ -105,8 +105,8 @@ namespace Sumorin.Save
 
 		private static CommandResult ValidateSlotId(string slotId)
 		{
-			if(string.IsNullOrEmpty(slotId)) return CommandResult.Fail("存檔槽識別碼不得為空");
-			if(slotId == SaveSlot.GlobalId) return CommandResult.Fail($"不可使用保留識別碼：{SaveSlot.GlobalId}");
+			if(string.IsNullOrEmpty(slotId)) return CommandResult.Fail("存檔槽 Id 不得為空");
+			if(slotId == SaveSlot.GlobalId) return CommandResult.Fail($"不可使用保留 Id：{SaveSlot.GlobalId}");
 
 			return CommandResult.Ok();
 		}

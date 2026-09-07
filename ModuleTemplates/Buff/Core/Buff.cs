@@ -20,17 +20,17 @@ namespace Sumorin.Buff
 		public IBuffConfig Config { get; }
 
 		/// <summary>
-		///     Buff 配置識別碼，同時是配置的查找鍵
+		///     Buff 配置 Id，同時是配置的查找鍵
 		/// </summary>
 		public string ConfigId => Config.Id;
 
 		/// <summary>
-		///     剩餘時效（秒或回合數）
+		///     剩餘時間（秒或回合數）
 		/// </summary>
 		public float RemainingLifetime => remainingLifetime.Value;
 
 		/// <summary>
-		///     剩餘時效的值面，Tick 期間每幀更新且不產生配置
+		///     剩餘時間的值，Tick 期間每幀更新且不產生額外記憶體
 		/// </summary>
 		public IReadOnlyReactiveProperty<float> Lifetime => remainingLifetime;
 
@@ -44,17 +44,17 @@ namespace Sumorin.Buff
 		public int StackCount => StackRecords.Count;
 
 		/// <summary>
-		///     當前層數的值面
+		///     當前層數的值
 		/// </summary>
 		public IReadOnlyReactiveProperty<int> Stack => stackCount;
 
 		/// <summary>
-		///     擁有者識別碼
+		///     擁有者 Id
 		/// </summary>
 		public string OwnerId { get; }
 
 		/// <summary>
-		///     來源識別碼（施加者）
+		///     來源 Id（施加者）
 		/// </summary>
 		public string SourceId { get; }
 
@@ -75,10 +75,10 @@ namespace Sumorin.Buff
 		/// <summary>
 		///     建立 Buff
 		/// </summary>
-		/// <param name="id">唯一識別碼</param>
+		/// <param name="id">唯一 Id</param>
 		/// <param name="config">Buff 配置</param>
-		/// <param name="ownerId">擁有者識別碼</param>
-		/// <param name="sourceId">來源識別碼</param>
+		/// <param name="ownerId">擁有者 Id</param>
+		/// <param name="sourceId">來源 Id</param>
 		/// <exception cref="ArgumentNullException">config 為 null 時拋出</exception>
 		/// <exception cref="ArgumentException">config.Id、ownerId 或 sourceId 為 null 或空字串時拋出</exception>
 		public Buff(string id, IBuffConfig config, string ownerId, string sourceId): base(id)
@@ -125,7 +125,7 @@ namespace Sumorin.Buff
 	#endregion
 
 		/// <summary>
-		///     刷新時效至配置值，Permanent 類型不受影響
+		///     重置時間至配置值，Permanent 類型不受影響
 		/// </summary>
 		public void RefreshLifetime()
 		{

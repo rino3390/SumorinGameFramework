@@ -11,7 +11,7 @@ namespace Sumorin.Save
 		/// <summary>
 		///     把存檔槽範圍的參與者資料寫入指定存檔槽
 		/// </summary>
-		/// <param name="slotId">存檔槽識別碼</param>
+		/// <param name="slotId">存檔槽 Id</param>
 		/// <param name="description">存檔描述</param>
 		/// <remarks>回傳即代表快照完成，狀態已序列化交付存取媒介。</remarks>
 		CommandResult Save(string slotId, string description);
@@ -19,13 +19,13 @@ namespace Sumorin.Save
 		/// <summary>
 		///     載入指定存檔槽，並發出 <see cref="GameLoaded" />
 		/// </summary>
-		/// <param name="slotId">存檔槽識別碼</param>
+		/// <param name="slotId">存檔槽 Id</param>
 		CommandResult Load(string slotId);
 
 		/// <summary>
 		///     刪除指定存檔槽
 		/// </summary>
-		/// <param name="slotId">存檔槽識別碼</param>
+		/// <param name="slotId">存檔槽 Id</param>
 		CommandResult Delete(string slotId);
 
 		/// <summary>

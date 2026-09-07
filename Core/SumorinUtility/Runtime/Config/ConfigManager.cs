@@ -17,7 +17,7 @@ namespace Sumorin.SumorinUtility
 		///     建立 ConfigManager
 		/// </summary>
 		/// <remarks>
-		///     查找鍵取自配置自己的 <see cref="IConfig.Id" />，不另外指定，鍵與配置識別碼因此不會分歧。
+		///     查找鍵取自配置自己的 <see cref="IConfig.Id" />，不另外指定，鍵與配置 Id 因此不會分歧。
 		/// </remarks>
 		/// <param name="configs">配置清單，由 Installer 從 DataScript 讀出</param>
 		public ConfigManager(IEnumerable<IConfig> configs)
@@ -29,7 +29,7 @@ namespace Sumorin.SumorinUtility
 		///     取得指定 id 的配置
 		/// </summary>
 		/// <typeparam name="TConfig">配置介面型別</typeparam>
-		/// <param name="id">配置識別碼</param>
+		/// <param name="id">配置 Id</param>
 		/// <returns>配置內容，id 不存在或型別不符時回傳 null</returns>
 		public TConfig Get<TConfig>(string id) where TConfig: class, IConfig
 		{
@@ -39,7 +39,7 @@ namespace Sumorin.SumorinUtility
 		}
 
 		/// <summary>
-		///     取得指定型別的所有配置及其識別碼
+		///     取得指定型別的所有配置及其 Id
 		/// </summary>
 		/// <typeparam name="TConfig">配置介面型別</typeparam>
 		/// <returns>符合型別的所有配置，沒有時回傳空集合</returns>

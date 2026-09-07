@@ -78,8 +78,8 @@ namespace Sumorin.Buff.Tests
 			act.Should().ThrowExactly<ArgumentNullException>().WithParameterName("config");
 		}
 
-		[TestCase(null, TestName = "配置識別碼為 null")]
-		[TestCase("", TestName = "配置識別碼為空字串")]
+		[TestCase(null, TestName = "配置 Id 為 null")]
+		[TestCase("", TestName = "配置 Id 為空字串")]
 		public void Constructor_WithMissingConfigId_Throws(string configId)
 		{
 			Action act = () => _ = new Buff("buff-1", new FakeBuffConfig(id: configId), "owner-1", "source-1");

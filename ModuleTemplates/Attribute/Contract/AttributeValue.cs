@@ -11,7 +11,7 @@ namespace Sumorin.Attribute
 	public struct AttributeValue
 	{
 		/// <summary>
-		///     目標屬性的配置識別碼
+		///     目標屬性的配置 Id
 		/// </summary>
 		[FormerlySerializedAs("ConfigId")]
 		// 不加 Required，理由同 ModifyEffectInfo.AttributeConfigId

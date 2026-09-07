@@ -22,7 +22,7 @@
 
 				foreach(var data in DataScriptCache.All)
 				{
-					// 識別碼本身是否合法由 DataScriptIdValidator 檢查，這裡只管跨資產的唯一性
+					// Id 本身是否合法由 DataScriptIdValidator 檢查，這裡只管跨資產的唯一性
 					if(!data.IsIdLegal()) continue;
 
 					if(!byId.TryGetValue(data.Id, out var owners))
@@ -67,7 +67,7 @@
 				};
 			}
 
-			// 想要的識別碼被佔用時往後編號。已用識別碼是有限集合，迴圈必然終止
+			// 想要的 Id 被佔用時往後編號。已用 Id 是有限集合，迴圈必然終止
 			private static string Vacant(string wanted)
 			{
 				var taken = new HashSet<string>(DataScriptCache.All.Select(data => data.Id));

@@ -11,17 +11,17 @@ namespace Sumorin.Buff
 	public class BuffRemoved: IEvent
 	{
 		/// <summary>
-		///     Buff 識別碼
+		///     Buff Id
 		/// </summary>
 		public string BuffId { get; }
 
 		/// <summary>
-		///     擁有者識別碼
+		///     擁有者 Id
 		/// </summary>
 		public string OwnerId { get; }
 
 		/// <summary>
-		///     Buff 配置識別碼
+		///     Buff 配置 Id
 		/// </summary>
 		public string ConfigId { get; }
 
@@ -33,9 +33,9 @@ namespace Sumorin.Buff
 		/// <summary>
 		///     建立 Buff 移除事實
 		/// </summary>
-		/// <param name="buffId">Buff 識別碼</param>
-		/// <param name="ownerId">擁有者識別碼</param>
-		/// <param name="configId">Buff 配置識別碼</param>
+		/// <param name="buffId">Buff Id</param>
+		/// <param name="ownerId">擁有者 Id</param>
+		/// <param name="configId">Buff 配置 Id</param>
 		/// <param name="reason">移除原因</param>
 		public BuffRemoved(string buffId, string ownerId, string configId, BuffRemoveReason reason)
 		{

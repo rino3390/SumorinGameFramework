@@ -13,7 +13,7 @@ namespace Sumorin.Save
 	///     每個存檔槽對應一個資料夾，內含中繼資料檔與資料檔。
 	///     存檔槽與全域槽放在不同的根目錄，全域槽不會出現在列舉結果。
 	///     當場寫入不轉背景，命令回傳時檔案已落盤。
-	///     存檔槽識別碼含檔案系統不接受的字元時回傳失敗，不自行清洗。
+	///     存檔槽 Id 含檔案系統不接受的字元時回傳失敗，不自行清洗。
 	/// </remarks>
 	public class LocalFileSaveStorage: ISaveStorage
 	{
@@ -139,7 +139,7 @@ namespace Sumorin.Save
 		}
 	#endregion
 
-		// ponytail: 只擋檔名層級的非法輸入，槽識別碼由誰輸入是專案層的事，不在此清洗
+		// ponytail: 只擋檔名層級的非法輸入，槽 Id 由誰輸入是專案層的事，不在此清洗
 		private static bool IsValidSlotId(string slotId)
 		{
 			if(string.IsNullOrEmpty(slotId)) return false;

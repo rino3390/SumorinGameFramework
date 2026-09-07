@@ -5,7 +5,7 @@ namespace Sumorin.Save
 	/// </summary>
 	/// <remarks>
 	///     實作必須掛上值面型別的轉換器，讓值面欄位落地為純值而非其內部結構。
-	///     例如音效頻道落地為識別碼、音量、靜音三個純值。
+	///     例如音效頻道落地為 Id、音量、靜音三個純值。
 	///     實體必須能由序列化資料還原，還原方式由實作決定。
 	/// </remarks>
 	public interface ISerializer

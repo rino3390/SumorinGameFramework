@@ -26,7 +26,7 @@ namespace Sumorin.Attribute.Tests
 		}
 
 		[TestCase("owner-3", "Health", TestName = "擁有者不存在回傳 null")]
-		[TestCase("owner-1", "Defense", TestName = "屬性配置識別碼不存在回傳 null")]
+		[TestCase("owner-1", "Defense", TestName = "屬性配置 Id 不存在回傳 null")]
 		[TestCase("owner-2", "Attack", TestName = "擁有者存在但無該屬性回傳 null")]
 		public void Get_WithUnmatchedOwnerOrName_ReturnsNull(string ownerId, string configId)
 		{

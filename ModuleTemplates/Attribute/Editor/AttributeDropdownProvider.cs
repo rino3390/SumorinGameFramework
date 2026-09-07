@@ -20,9 +20,9 @@ namespace Sumorin.Attribute
 		public static IEnumerable<ValueDropdownItem> GetAttributes() => GetAttributes("");
 
 		/// <summary>
-		/// 取得所有已定義的屬性（排除指定識別碼）
+		/// 取得所有已定義的屬性（排除指定 Id）
 		/// </summary>
-		/// <param name="excludeId">要排除的屬性識別碼，為空字串時不過濾</param>
+		/// <param name="excludeId">要排除的屬性 Id，為空字串時不過濾</param>
 		public static IEnumerable<ValueDropdownItem> GetAttributes(string excludeId)
 		{
 			var items = SumorinEditorUtility.FindAssets<AttributeData>()

@@ -10,7 +10,7 @@
 	public class Modifier
 	{
 		/// <summary>
-		/// 修改器的唯一識別碼
+		/// 修改器的唯一 Id
 		/// </summary>
 		public string Id { get; }
 
@@ -25,7 +25,7 @@
 		public int Value { get; }
 
 		/// <summary>
-		/// 來源識別碼（如裝備 Id、Buff Id），用於批次移除同來源的所有 Modifier
+		/// 來源 Id（如裝備 Id、Buff Id），用於批次移除同來源的所有 Modifier
 		/// </summary>
 		public string SourceId { get; }
 
@@ -37,10 +37,10 @@
 		/// <summary>
 		/// 建立修改器
 		/// </summary>
-		/// <param name="id">唯一識別碼</param>
+		/// <param name="id">唯一 Id</param>
 		/// <param name="modifyType">修改類型</param>
 		/// <param name="value">修改數值</param>
-		/// <param name="sourceId">來源識別碼</param>
+		/// <param name="sourceId">來源 Id</param>
 		/// <param name="description">描述（選填）</param>
 		/// <exception cref="System.ArgumentException">當 id 或 sourceId 為 null 或空字串時拋出</exception>
 		public Modifier(string id, ModifyType modifyType, int value, string sourceId, string description = "")

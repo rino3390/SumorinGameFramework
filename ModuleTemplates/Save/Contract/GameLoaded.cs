@@ -9,14 +9,14 @@ namespace Sumorin.Save
 	public class GameLoaded: IEvent
 	{
 		/// <summary>
-		///     載入的存檔槽識別碼
+		///     載入的存檔槽 Id
 		/// </summary>
 		public string SlotId { get; }
 
 		/// <summary>
 		///     建立載入完成事實
 		/// </summary>
-		/// <param name="slotId">存檔槽識別碼</param>
+		/// <param name="slotId">存檔槽 Id</param>
 		public GameLoaded(string slotId)
 		{
 			SlotId = slotId;

@@ -26,7 +26,7 @@ namespace Sumorin.Save
 		/// <summary>
 		///     建立存檔資訊
 		/// </summary>
-		/// <param name="slotId">存檔槽識別碼</param>
+		/// <param name="slotId">存檔槽 Id</param>
 		/// <param name="savedAt">存檔時間</param>
 		/// <param name="description">存檔描述</param>
 		public SaveSlotInfo(string slotId, DateTime savedAt, string description)

@@ -8,12 +8,12 @@ namespace Sumorin.Buff
 	public readonly struct BuffInfo: IEquatable<BuffInfo>
 	{
 		/// <summary>
-		///     Buff 識別碼
+		///     Buff Id
 		/// </summary>
 		public string BuffId { get; }
 
 		/// <summary>
-		///     Buff 配置識別碼
+		///     Buff 配置 Id
 		/// </summary>
 		public string ConfigId { get; }
 
@@ -35,8 +35,8 @@ namespace Sumorin.Buff
 		/// <summary>
 		///     建立 Buff 狀態快照
 		/// </summary>
-		/// <param name="buffId">Buff 識別碼</param>
-		/// <param name="configId">Buff 配置識別碼</param>
+		/// <param name="buffId">Buff Id</param>
+		/// <param name="configId">Buff 配置 Id</param>
 		/// <param name="stackCount">當前層數</param>
 		/// <param name="lifetimeType">生命週期類型</param>
 		/// <param name="remainingLifetime">剩餘時效</param>

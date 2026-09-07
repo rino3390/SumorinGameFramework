@@ -52,7 +52,7 @@ namespace Sumorin.Buff
 		/// <inheritdoc />
 		public CommandResult AddBuff(string ownerId, string configId, string sourceId)
 		{
-			if(string.IsNullOrEmpty(ownerId)) return CommandResult.Fail("擁有者識別碼不得為空");
+			if(string.IsNullOrEmpty(ownerId)) return CommandResult.Fail("擁有者 Id 不得為空");
 
 			var config = configs.Get<IBuffConfig>(configId);
 			if(config == null) return CommandResult.Fail($"找不到 Buff 配置：{configId}");

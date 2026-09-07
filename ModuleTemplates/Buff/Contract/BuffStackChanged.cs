@@ -8,17 +8,17 @@ namespace Sumorin.Buff
 	public class BuffStackChanged: IEvent
 	{
 		/// <summary>
-		///     Buff 識別碼
+		///     Buff Id
 		/// </summary>
 		public string BuffId { get; }
 
 		/// <summary>
-		///     擁有者識別碼
+		///     擁有者 Id
 		/// </summary>
 		public string OwnerId { get; }
 
 		/// <summary>
-		///     Buff 配置識別碼
+		///     Buff 配置 Id
 		/// </summary>
 		public string ConfigId { get; }
 
@@ -35,9 +35,9 @@ namespace Sumorin.Buff
 		/// <summary>
 		///     建立 Buff 層數變化事實
 		/// </summary>
-		/// <param name="buffId">Buff 識別碼</param>
-		/// <param name="ownerId">擁有者識別碼</param>
-		/// <param name="configId">Buff 配置識別碼</param>
+		/// <param name="buffId">Buff Id</param>
+		/// <param name="ownerId">擁有者 Id</param>
+		/// <param name="configId">Buff 配置 Id</param>
 		/// <param name="oldStack">變化前層數</param>
 		/// <param name="newStack">變化後層數</param>
 		public BuffStackChanged(string buffId, string ownerId, string configId, int oldStack, int newStack)

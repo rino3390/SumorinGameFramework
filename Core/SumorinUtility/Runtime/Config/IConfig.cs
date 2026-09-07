@@ -11,7 +11,7 @@ namespace Sumorin.SumorinUtility
 	public interface IConfig
 	{
 		/// <summary>
-		///     配置識別碼，全專案唯一
+		///     配置 Id，全專案唯一
 		/// </summary>
 		string Id { get; }
 	}

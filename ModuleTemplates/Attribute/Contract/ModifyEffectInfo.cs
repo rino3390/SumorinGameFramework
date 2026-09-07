@@ -11,10 +11,10 @@ namespace Sumorin.Attribute
 	public struct ModifyEffectInfo
 	{
 		/// <summary>
-		///     目標屬性的配置識別碼
+		///     目標屬性的配置 Id
 		/// </summary>
 		[FormerlySerializedAs("ConfigId")]
-		// 不加 Required。值取自屬性資產的 Id，屬性沒填識別碼時這裡自然是空的
+		// 不加 Required。值取自屬性資產的 Id，屬性沒填 Id 時這裡自然是空的
 		// 那時 DataScriptIdRule 已經在報同一件事並提供修復，這裡再報一次只是重複
 		[LabelText("目標屬性")]
 		[ValueDropdown("@Sumorin.Attribute.AttributeDropdownProvider.GetAttributes()")]

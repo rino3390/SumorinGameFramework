@@ -101,9 +101,9 @@ namespace Sumorin.Save.Tests
 			result.FailureReason.Should().NotBeNullOrEmpty();
 		}
 
-		[TestCase(null, TestName = "存檔槽識別碼為 null 回傳失敗")]
-		[TestCase("", TestName = "存檔槽識別碼為空字串回傳失敗")]
-		[TestCase(SaveSlot.GlobalId, TestName = "以保留識別碼存檔回傳失敗")]
+		[TestCase(null, TestName = "存檔槽 Id 為 null 回傳失敗")]
+		[TestCase("", TestName = "存檔槽 Id 為空字串回傳失敗")]
+		[TestCase(SaveSlot.GlobalId, TestName = "以保留 Id 存檔回傳失敗")]
 		public void Save_WithInvalidSlotId_FailsWithoutTouchingStorage(string slotId)
 		{
 			var controller = CreateController(CreateParticipant("progress", 0, false, "progress-data"));
@@ -201,9 +201,9 @@ namespace Sumorin.Save.Tests
 			publisher.DidNotReceive().Publish(Arg.Any<GameLoaded>());
 		}
 
-		[TestCase(null, TestName = "載入 null 識別碼回傳失敗")]
-		[TestCase("", TestName = "載入空字串識別碼回傳失敗")]
-		[TestCase(SaveSlot.GlobalId, TestName = "以保留識別碼載入回傳失敗")]
+		[TestCase(null, TestName = "載入 null Id 回傳失敗")]
+		[TestCase("", TestName = "載入空字串 Id 回傳失敗")]
+		[TestCase(SaveSlot.GlobalId, TestName = "以保留 Id 載入回傳失敗")]
 		public void Load_WithInvalidSlotId_FailsWithoutTouchingStorage(string slotId)
 		{
 			var controller = CreateController(CreateParticipant("progress", 0, false, "progress-data"));
@@ -236,9 +236,9 @@ namespace Sumorin.Save.Tests
 			result.IsSuccess.Should().BeFalse();
 		}
 
-		[TestCase(null, TestName = "刪除 null 識別碼回傳失敗")]
-		[TestCase("", TestName = "刪除空字串識別碼回傳失敗")]
-		[TestCase(SaveSlot.GlobalId, TestName = "刪除保留識別碼回傳失敗")]
+		[TestCase(null, TestName = "刪除 null Id 回傳失敗")]
+		[TestCase("", TestName = "刪除空字串 Id 回傳失敗")]
+		[TestCase(SaveSlot.GlobalId, TestName = "刪除保留 Id 回傳失敗")]
 		public void Delete_WithInvalidSlotId_FailsWithoutTouchingStorage(string slotId)
 		{
 			var controller = CreateController();

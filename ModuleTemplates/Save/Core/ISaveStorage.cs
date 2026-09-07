@@ -8,14 +8,14 @@ namespace Sumorin.Save
 	/// <remarks>
 	///     落盤時機由實作決定，可當場寫入或轉背景。
 	///     採背景寫入的實作必須自行保證後續讀取拿得到尚未落盤的最新資料。
-	///     全域槽與存檔槽建議分開存放，全域槽的識別碼為 <see cref="SaveSlot.GlobalId" />。
+	///     全域槽與存檔槽建議分開存放，全域槽的 Id 為 <see cref="SaveSlot.GlobalId" />。
 	/// </remarks>
 	public interface ISaveStorage
 	{
 		/// <summary>
 		///     寫入一個存檔槽
 		/// </summary>
-		/// <param name="info">中繼資料，寫入哪一個存檔槽由其識別碼決定</param>
+		/// <param name="info">中繼資料，寫入哪一個存檔槽由其 Id 決定</param>
 		/// <param name="data">以存檔鍵為索引的參與者資料</param>
 		/// <returns>寫入是否成功</returns>
 		bool Save(SaveSlotInfo info, IReadOnlyDictionary<string, string> data);
@@ -23,14 +23,14 @@ namespace Sumorin.Save
 		/// <summary>
 		///     讀取一個存檔槽
 		/// </summary>
-		/// <param name="slotId">存檔槽識別碼</param>
+		/// <param name="slotId">存檔槽 Id</param>
 		/// <returns>以存檔鍵為索引的參與者資料，存檔槽不存在時回傳 null</returns>
 		IReadOnlyDictionary<string, string> Load(string slotId);
 
 		/// <summary>
 		///     刪除一個存檔槽
 		/// </summary>
-		/// <param name="slotId">存檔槽識別碼</param>
+		/// <param name="slotId">存檔槽 Id</param>
 		/// <returns>刪除是否成功，存檔槽不存在時回傳 false</returns>
 		bool Delete(string slotId);
 

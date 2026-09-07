@@ -16,10 +16,10 @@ namespace Sumorin.GameManagerBase
 	public abstract class SODataBase: SerializedScriptableObject, IConfig
 	{
 		/// <summary>
-		/// 資料唯一識別碼，同時是配置的查找鍵
+		/// 資料唯一 Id，同時是配置的查找鍵
 		/// </summary>
 		/// <remarks>
-		/// 建立資產時預設填入 GUID，可改為可讀的識別碼（如 <c>Health</c>）。
+		/// 建立資產時預設填入 GUID，可改為可讀的 Id（如 <c>Health</c>）。
 		/// 執行期直接讀本欄位的序列化值，不做任何推導。
 		/// 全專案唯一由 <c>DataScriptIdRule</c> 驗證並提供修復，撞號時可加類別前綴或編號。
 		/// </remarks>
@@ -57,10 +57,10 @@ namespace Sumorin.GameManagerBase
 
 	#if UNITY_EDITOR
 		/// <summary>
-		/// 識別碼的類別前綴，取自 <see cref="DataEditorConfigAttribute.DataRoot" /> 的末段
+		/// Id 的類別前綴，取自 <see cref="DataEditorConfigAttribute.DataRoot" /> 的末段
 		/// </summary>
 		/// <remarks>
-		/// 僅供撞號時的修復動作組出新識別碼，不參與 <see cref="Id" /> 的組成。
+		/// 僅供撞號時的修復動作組出新 Id，不參與 <see cref="Id" /> 的組成。
 		/// 讓執行期的查找鍵去推導編輯器的資料夾路徑太危險，建置時 attribute 可能被 stripping 移除。
 		/// 型別沒有標註該 attribute 時為空字串。
 		/// </remarks>
@@ -93,7 +93,7 @@ namespace Sumorin.GameManagerBase
 		}
 
 		/// <summary>
-		/// 驗證識別碼是否合法
+		/// 驗證 Id 是否合法
 		/// </summary>
 		/// <returns>非空且只含英數則回傳 true</returns>
 		public bool IsIdLegal()
