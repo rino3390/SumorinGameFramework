@@ -69,7 +69,7 @@ https://github.com/rino3390/SumorinGameFramework.git?path=Core
 
 ### Entity
 
-所有領域實體的基底類別，提供唯一識別碼：
+所有領域實體的基底類別，提供唯一 Id：
 
 ```csharp
 public class Player : Entity
@@ -156,15 +156,12 @@ public interface IItemConfig : IConfig
     int Price { get; }
 }
 
-// DataScript：SO 實作介面，另有資源欄位
+// DataScript：SO 以 Odin 序列化屬性直接實作介面，另有資源屬性
 [DataEditorConfig("道具管理", "Data/Items", "道具")]
 public class ItemData : SODataBase, IItemConfig
 {
-    [SerializeField] private int price;
-    [SerializeField] private Sprite icon;
-
-    public int Price => price;
-    public Sprite Icon => icon;
+    [OdinSerialize] public int    Price { get; private set; }
+    [OdinSerialize] public Sprite Icon  { get; private set; }
 }
 ```
 

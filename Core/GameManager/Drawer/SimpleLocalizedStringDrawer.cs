@@ -20,6 +20,8 @@ namespace Sumorin.GameManager
 	/// 簡化版 LocalizedString Drawer
 	/// 複製 Unity Localization 的繪製邏輯，但隱藏 FallbackState、WaitForCompletion、LocalVariables
 	/// </summary>
+	// 排到 Odin 內建 null drawer 前面，Odin 序列化的 null 值才會進到這裡，比照 Odin 的 AssetReferenceDrawer
+	[DrawerPriority(0, 1, 0)]
 	public class SimpleLocalizedStringDrawer: OdinValueDrawer<LocalizedString>
 	{
 		private static class Styles
@@ -38,12 +40,27 @@ namespace Sumorin.GameManager
 		private static StringTableCollection[] tableCollections;
 		private static Texture tableWindowIcon;
 
+		// HideAndDontSave 的物件會活過 domain reload，drawer 又沒有釋放時機，reload 前統一銷毀
+		private static readonly List<SerializedObject> proxyObjects = new();
+
 		// 每個 property 的狀態
 		private int selectedTableIndex = -1;
 		private StringTableCollection selectedCollection;
 		private SharedTableData.SharedTableEntry selectedEntry;
-		private GUIContent fieldLabel;
 		private GUIContent entryNameLabel;
+
+		// 下拉文字以表名與 key 為快取鍵，同一個 entry 被別的欄位改名時才會跟著失效
+		private GUIContent fieldLabel;
+		private string fieldLabelCollection;
+		private string fieldLabelKey;
+
+		// Odin 序列化的成員沒有 SerializedProperty，借代理物件讓既有繪製邏輯照跑。
+		// synced 三個欄位記錄上次與資產對齊的實例與內容，用來判斷代理上有沒有尚未寫回的編輯
+		private LocalizedStringProxy proxy;
+		private SerializedObject proxyObject;
+		private LocalizedString syncedValue;
+		private TableReference syncedTable;
+		private TableEntryReference syncedEntry;
 
 		protected override void Initialize()
 		{
@@ -87,11 +104,11 @@ namespace Sumorin.GameManager
 		{
 			var odinProperty = this.Property;
 			var unityProperty = odinProperty.Tree.GetUnityPropertyForPath(odinProperty.Path, out _);
+			var useProxy = unityProperty == null;
 
-			if(unityProperty == null)
+			if(useProxy)
 			{
-				this.CallNextDrawer(label);
-				return;
+				unityProperty = GetProxyProperty();
 			}
 
 			// 初始化狀態
@@ -120,6 +137,65 @@ namespace Sumorin.GameManager
 				DrawTableDetails(unityProperty);
 				EditorGUI.indentLevel--;
 			}
+
+			if(useProxy)
+			{
+				WriteBackFromProxy();
+			}
+		}
+
+		private SerializedProperty GetProxyProperty()
+		{
+			if(proxy == null)
+			{
+				proxy = ScriptableObject.CreateInstance<LocalizedStringProxy>();
+				proxy.hideFlags = HideFlags.HideAndDontSave;
+				proxyObject = new(proxy);
+				proxyObjects.Add(proxyObject);
+			}
+
+			var current = ValueEntry.SmartValue;
+
+			// 資產端換了實例（undo、redo）才重新對齊，否則保留代理上尚未寫回的編輯。
+			// 選擇器的回呼在繪製之外才套用到代理，這段不能每幀都用資產值蓋掉。
+			// 代理拿的是複本，共用實例會讓編輯就地改到資產，Odin 記 undo 時讀到的就已經是新值。
+			// 資產為 null 時只在代理上建值，使用者真的選了字串才寫回，單純點開不會把資產標髒
+			if(!ReferenceEquals(current, syncedValue) || proxy.Value == null)
+			{
+				proxy.Value = current == null ? new() : Clone(current);
+				SnapshotSynced(current, proxy.Value);
+			}
+
+			proxyObject.Update();
+			return proxyObject.FindProperty(nameof(LocalizedStringProxy.Value));
+		}
+
+		// 選擇器內部的 undo 記在代理物件上，資產端的 undo 由 Odin 在寫回時另外記一筆
+		private void WriteBackFromProxy()
+		{
+			var edited = proxy.Value;
+			if(edited.TableReference.Equals(syncedTable) && edited.TableEntryReference.Equals(syncedEntry)) return;
+
+			// 多選時每個目標各拿一份複本，不然所有資產會指向同一個實例
+			for(var i = 0; i < ValueEntry.ValueCount; i++)
+			{
+				ValueEntry.Values[i] = Clone(edited);
+			}
+
+			ValueEntry.Values.ForceMarkDirty();
+			SnapshotSynced(ValueEntry.SmartValue, edited);
+		}
+
+		private static LocalizedString Clone(LocalizedString source)
+		{
+			return (LocalizedString)Sirenix.Serialization.SerializationUtility.CreateCopy(source);
+		}
+
+		private void SnapshotSynced(LocalizedString assetValue, LocalizedString proxyValue)
+		{
+			syncedValue = assetValue;
+			syncedTable = proxyValue.TableReference;
+			syncedEntry = proxyValue.TableEntryReference;
 		}
 
 		private void InitializeState(SerializedProperty property)
@@ -130,14 +206,13 @@ namespace Sumorin.GameManager
 			if(tableRefProp == null || entryRefProp == null) return;
 
 			var tableNameProp = tableRefProp.FindPropertyRelative("m_TableCollectionName");
-			var entryKeyProp = entryRefProp.FindPropertyRelative("m_Key");
 
 			if(tableNameProp == null) return;
 
+			// 每幀從序列化值重新解析，undo／redo 之後才不會殘留舊的選取
 			var tableName = tableNameProp.stringValue;
 
-			// 找到對應的 Table Collection
-			if(selectedCollection == null || selectedTableIndex < 0)
+			if(selectedCollection == null || selectedCollection.TableCollectionName != tableName)
 			{
 				selectedCollection = null;
 				selectedTableIndex = 0;
@@ -156,16 +231,24 @@ namespace Sumorin.GameManager
 				}
 			}
 
-			// 找到對應的 Entry
-			if(selectedEntry == null && selectedCollection != null && entryKeyProp != null)
-			{
-				var entryKey = entryKeyProp.stringValue;
+			selectedEntry = selectedCollection == null ? null : FindEntry(selectedCollection.SharedData, entryRefProp);
+		}
 
-				if(!string.IsNullOrEmpty(entryKey))
-				{
-					selectedEntry = selectedCollection.SharedData.GetEntry(entryKey);
-				}
-			}
+		// 引用以 Id 為主，改名不會失效。舊資產只有 key 名稱，讀得到就沿用，下次寫入時換成 Id
+		private static SharedTableData.SharedTableEntry FindEntry(SharedTableData sharedData, SerializedProperty entryRefProp)
+		{
+			var id = entryRefProp.FindPropertyRelative("m_KeyId").longValue;
+			if(id != 0) return sharedData.GetEntry(id);
+
+			var key = entryRefProp.FindPropertyRelative("m_Key").stringValue;
+			return string.IsNullOrEmpty(key) ? null : sharedData.GetEntry(key);
+		}
+
+		private static void WriteEntry(SerializedProperty property, SharedTableData.SharedTableEntry entry)
+		{
+			var entryRefProp = property.FindPropertyRelative("m_TableEntryReference");
+			entryRefProp.FindPropertyRelative("m_KeyId").longValue = entry?.Id ?? 0;
+			entryRefProp.FindPropertyRelative("m_Key").stringValue = "";
 		}
 
 		/// <summary>
@@ -185,23 +268,23 @@ namespace Sumorin.GameManager
 
 		private GUIContent GetFieldLabel()
 		{
-			if(fieldLabel != null) return fieldLabel;
+			var collection = selectedCollection?.TableCollectionName;
+			var key = selectedEntry?.Key;
+			if(fieldLabel != null && fieldLabelCollection == collection && fieldLabelKey == key) return fieldLabel;
 
-			var icon = EditorGUIUtility.ObjectContent(null, typeof(string));
+			fieldLabelCollection = collection;
+			fieldLabelKey = key;
+			var icon = EditorGUIUtility.ObjectContent(null, typeof(string)).image;
 
-			if(selectedCollection != null && selectedEntry != null)
+			if(collection == null || key == null)
 			{
-				var key = selectedEntry.Key;
-				var eol = key.IndexOf('\n');
-				if(eol > 0) key = key.Substring(0, eol);
-
-				fieldLabel = new GUIContent($"{selectedCollection.TableCollectionName}/{key}", icon.image);
-			}
-			else
-			{
-				fieldLabel = new GUIContent("無字串", icon.image);
+				fieldLabel = new("無字串", icon);
+				return fieldLabel;
 			}
 
+			var eol = key.IndexOf('\n');
+			var firstLine = eol > 0 ? key[..eol] : key;
+			fieldLabel = new($"{collection}/{firstLine}", icon);
 			return fieldLabel;
 		}
 
@@ -233,11 +316,9 @@ namespace Sumorin.GameManager
 
 				selectedCollection = selected.Collection;
 				selectedEntry = selected.SharedEntry;
-				fieldLabel = null;
 
 				// 更新 SerializedProperty
 				var tableRefProp = property.FindPropertyRelative("m_TableReference");
-				var entryRefProp = property.FindPropertyRelative("m_TableEntryReference");
 
 				if(tableRefProp != null)
 				{
@@ -249,16 +330,7 @@ namespace Sumorin.GameManager
 					}
 				}
 
-				if(entryRefProp != null)
-				{
-					var entryKeyProp = entryRefProp.FindPropertyRelative("m_Key");
-
-					if(entryKeyProp != null)
-					{
-						entryKeyProp.stringValue = selectedEntry.Key;
-					}
-				}
-
+				WriteEntry(property, selectedEntry);
 				property.serializedObject.ApplyModifiedProperties();
 
 				// 更新選擇的 index
@@ -291,7 +363,6 @@ namespace Sumorin.GameManager
 				selectedTableIndex = newSelectedIndex;
 				selectedCollection = tableCollections[newSelectedIndex];
 				selectedEntry = null;
-				fieldLabel = null;
 
 				// 更新 property
 				var tableRefProp = property.FindPropertyRelative("m_TableReference");
@@ -306,19 +377,7 @@ namespace Sumorin.GameManager
 					}
 				}
 
-				// 清除 entry
-				var entryRefProp = property.FindPropertyRelative("m_TableEntryReference");
-
-				if(entryRefProp != null)
-				{
-					var entryKeyProp = entryRefProp.FindPropertyRelative("m_Key");
-
-					if(entryKeyProp != null)
-					{
-						entryKeyProp.stringValue = "";
-					}
-				}
-
+				WriteEntry(property, null);
 				property.serializedObject.ApplyModifiedProperties();
 			}
 
@@ -345,7 +404,7 @@ namespace Sumorin.GameManager
 						if(showMethod != null && selectedCollection != null)
 						{
 							TableReference tableRef = selectedCollection.TableCollectionName;
-							TableEntryReference entryRef = selectedEntry != null ? (TableEntryReference)selectedEntry.Key : default;
+							TableEntryReference entryRef = selectedEntry != null ? (TableEntryReference)selectedEntry.Id : default;
 							showMethod.Invoke(null, new object[] { tableRef, entryRef });
 						}
 					}
@@ -380,21 +439,7 @@ namespace Sumorin.GameManager
 						EditorUtility.SetDirty(keys);
 
 						selectedEntry = entry;
-						fieldLabel = null;
-
-						// 更新 property
-						var entryRefProp = property.FindPropertyRelative("m_TableEntryReference");
-
-						if(entryRefProp != null)
-						{
-							var entryKeyProp = entryRefProp.FindPropertyRelative("m_Key");
-
-							if(entryKeyProp != null)
-							{
-								entryKeyProp.stringValue = entry.Key;
-							}
-						}
-
+						WriteEntry(property, entry);
 						property.serializedObject.ApplyModifiedProperties();
 					}
 				}
@@ -493,9 +538,6 @@ namespace Sumorin.GameManager
 					}
 
 					EditorUtility.SetDirty(table);
-
-					// 值變更後讓欄位 label 的主要語言預覽重新計算
-					fieldLabel = null;
 				}
 
 				// Smart String 燈泡圖示 - 使用 Odin 的 SdfIcons
@@ -547,21 +589,9 @@ namespace Sumorin.GameManager
 					EditorUtility.SetDirty(sharedData);
 					entryNameLabel = new GUIContent(Styles.EntryName);
 
-					// 更新 property
-					var entryRefProp = property.FindPropertyRelative("m_TableEntryReference");
-
-					if(entryRefProp != null)
-					{
-						var entryKeyProp = entryRefProp.FindPropertyRelative("m_Key");
-
-						if(entryKeyProp != null)
-						{
-							entryKeyProp.stringValue = newKey;
-						}
-					}
-
+					// 舊資產以 key 名稱引用，改名時順便換成 Id
+					WriteEntry(property, selectedEntry);
 					property.serializedObject.ApplyModifiedProperties();
-					fieldLabel = null;
 				}
 				else
 				{
@@ -572,6 +602,31 @@ namespace Sumorin.GameManager
 					);
 				}
 			}
+		}
+
+		[InitializeOnLoadMethod]
+		private static void DestroyProxiesBeforeReload()
+		{
+			AssemblyReloadEvents.beforeAssemblyReload += () =>
+			{
+				foreach(var serializedProxy in proxyObjects)
+				{
+					var target = serializedProxy.targetObject;
+					serializedProxy.Dispose();
+
+					if(target != null)
+					{
+						UnityEngine.Object.DestroyImmediate(target);
+					}
+				}
+
+				proxyObjects.Clear();
+			};
+		}
+
+		private class LocalizedStringProxy: ScriptableObject
+		{
+			public LocalizedString Value;
 		}
 	}
 

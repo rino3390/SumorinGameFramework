@@ -1,3 +1,5 @@
+using Sirenix.OdinInspector;
+
 namespace Sumorin.Buff
 {
 	/// <summary>
@@ -8,21 +10,25 @@ namespace Sumorin.Buff
 		/// <summary>
 		///     獨立存在，各自計時
 		/// </summary>
+		[LabelText("獨立存在")]
 		Independent,
 
 		/// <summary>
-		///     刷新時效，層數不變
+		///     重置時間，層數不變
 		/// </summary>
+		[LabelText("重置時間")]
 		RefreshDuration,
 
 		/// <summary>
-		///     增加層數，同時刷新時效
+		///     增加層數，同時重置時間
 		/// </summary>
+		[LabelText("增加層數")]
 		IncreaseStack,
 
 		/// <summary>
-		///     覆蓋舊的
+		///     取代舊的
 		/// </summary>
+		[LabelText("取代")]
 		Replace
 	}
 }

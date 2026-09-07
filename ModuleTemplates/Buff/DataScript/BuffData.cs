@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
+using Sirenix.Serialization;
 using Sumorin.Attribute;
 using Sumorin.GameManagerBase;
 using UnityEngine;
@@ -16,77 +17,68 @@ namespace Sumorin.Buff
 	[DataEditorConfig("Buff 資料", "Data/Buff", "Buff")]
 	public class BuffData: IconIncludedData, IBuffConfig
 	{
-		[SerializeField]
-		[FormerlySerializedAs("LifetimeType")]
+		/// <inheritdoc />
+		[OdinSerialize]
 		[HorizontalGroup("LifetimeType")]
 		[LabelText("生命週期")]
-		private LifetimeType lifetimeType;
+		public LifetimeType LifetimeType { get; private set; }
 
-		[SerializeField]
-		[FormerlySerializedAs("Lifetime")]
+		/// <inheritdoc />
+		[OdinSerialize]
 		[HorizontalGroup("LifetimeType")]
 		[HideLabel]
-		[HideIf("lifetimeType", LifetimeType.Permanent)]
-		[SuffixLabel("@lifetimeType == Sumorin.Buff.LifetimeType.TimeBased ? \"秒\" : \"回合\"", Overlay = true)]
-		private float lifetime;
+		[HideIf("LifetimeType", LifetimeType.Permanent)]
+		[SuffixLabel("$LifetimeSuffix", Overlay = true)]
+		public float Lifetime { get; private set; }
 
-		[SerializeField]
-		[FormerlySerializedAs("StackBehavior")]
+		/// <inheritdoc />
+		[OdinSerialize]
 		[HorizontalGroup("Stack")]
 		[LabelText("重複獲得時行為")]
-		private StackBehavior stackBehavior;
+		public StackBehavior StackBehavior { get; private set; }
 
+		// MaxStack 是推導值、Effects 與 Tags 對外只給唯讀檢視，無法直接序列化介面屬性，留欄位轉發。
+		// Odin 預設把欄位排在屬性前面，這三個欄位標順序才不會跑到最上面
 		[SerializeField]
 		[FormerlySerializedAs("MaxStack")]
 		[HorizontalGroup("Stack")]
-		[ShowIf("stackBehavior", StackBehavior.IncreaseStack)]
+		[ShowIf("StackBehavior", StackBehavior.IncreaseStack)]
 		[MinValue(1)]
 		[LabelText("疊層上限")]
+		[PropertyOrder(1)]
 		private int maxStack = 1;
 
-		[SerializeField]
-		[FormerlySerializedAs("MutualExclusionGroup")]
+		/// <inheritdoc />
+		[OdinSerialize]
 		[HorizontalGroup("MutualExclusion")]
-		[LabelText("互斥群組"), Tooltip("同群組內的 Buff 會互斥（同時存在會替換掉優先級低的 Buff），空字串表示無互斥群組")]
-		private string mutualExclusionGroup;
+		[LabelText("互斥群組"), PropertyTooltip("同群組內的 Buff 會互斥（同時存在會替換掉優先級低的 Buff），空字串表示無互斥群組")]
+		public string MutualExclusionGroup { get; private set; }
 
-		[SerializeField]
-		[FormerlySerializedAs("Priority")]
+		/// <inheritdoc />
+		[OdinSerialize]
 		[HorizontalGroup("MutualExclusion")]
 		[LabelText("優先級")]
-		[ShowIf("@!string.IsNullOrEmpty(mutualExclusionGroup)")]
-		private int priority;
+		[ShowIf("@!string.IsNullOrEmpty(MutualExclusionGroup)")]
+		public int Priority { get; private set; }
 
-		[SerializeField]
-		[LabelText("時效到期時移除全部層數"), Tooltip("關閉時，時效到期只移除一層並重置時效")]
-		private bool removeAllOnExpire;
+		/// <inheritdoc />
+		[OdinSerialize]
+		[LabelText("時效到期時移除全部層數"), PropertyTooltip("關閉時，時效到期只移除一層並重置時效")]
+		public bool RemoveAllOnExpire { get; private set; }
 
 		[SerializeField]
 		[FormerlySerializedAs("Effects")]
 		[LabelText("效果")]
+		[PropertyOrder(1)]
 		private List<ModifyEffectInfo> effects = new();
 
 		[SerializeField]
 		[LabelText("標籤"), Tooltip("供依標籤批次移除使用，如 Debuff、DoT、Movement")]
+		[PropertyOrder(1)]
 		private List<string> tags = new();
 
 		/// <inheritdoc />
-		public LifetimeType LifetimeType => lifetimeType;
-
-		/// <inheritdoc />
-		public float Lifetime => lifetime;
-
-		/// <inheritdoc />
-		public StackBehavior StackBehavior => stackBehavior;
-
-		/// <inheritdoc />
-		public int MaxStack => stackBehavior == StackBehavior.IncreaseStack ? maxStack : -1;
-
-		/// <inheritdoc />
-		public string MutualExclusionGroup => mutualExclusionGroup;
-
-		/// <inheritdoc />
-		public int Priority => priority;
+		public int MaxStack => StackBehavior == StackBehavior.IncreaseStack ? maxStack : -1;
 
 		/// <inheritdoc />
 		public IReadOnlyList<ModifyEffectInfo> Effects => effects;
@@ -94,7 +86,7 @@ namespace Sumorin.Buff
 		/// <inheritdoc />
 		public IReadOnlyList<string> Tags => tags;
 
-		/// <inheritdoc />
-		public bool RemoveAllOnExpire => removeAllOnExpire;
+		// 成員與型別同名為 LifetimeType，Odin 字串運算式可能解析錯邊，後綴改由屬性提供
+		private string LifetimeSuffix => LifetimeType == LifetimeType.TimeBased ? "秒" : "回合";
 	}
 }
