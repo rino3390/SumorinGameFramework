@@ -4,8 +4,8 @@
         "Sumorin.Attribute.Contract",
         "Sumorin.DDDCore",
         "Sumorin.SumorinUtility",
-        "UniRx",
-        "Zenject"
+        "R3.Unity",
+        "VContainer"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

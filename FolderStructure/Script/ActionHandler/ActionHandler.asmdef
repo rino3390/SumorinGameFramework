@@ -1,9 +1,9 @@
 {
     "name": "ActionHandler",
     "references": [
-        "UniRx",
+        "R3.Unity",
         "Utility",
-        "Zenject"
+        "VContainer"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

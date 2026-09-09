@@ -5,12 +5,13 @@ using NUnit.Framework;
 using Sumorin.Attribute;
 using Sumorin.DDDCore;
 using Sumorin.SumorinUtility;
-using Zenject;
+using Sumorin.TestFramework;
+using VContainer;
 
 namespace Sumorin.Buff.Tests
 {
 	[TestFixture]
-	public class BuffControllerTests: ZenjectUnitTestFixture
+	public class BuffControllerTests: VContainerUnitTestFixture
 	{
 		private BuffRepository repository;
 		private IPublisher publisher;
@@ -27,11 +28,12 @@ namespace Sumorin.Buff.Tests
 
 		private BuffController CreateController(List<IConfig> configs = null)
 		{
-			Container.Bind<IBuffRepository>().FromInstance(repository);
-			Container.Bind<IPublisher>().FromInstance(publisher);
-			Container.Bind<IAttributeController>().FromInstance(attributeController);
-			Container.Bind<ConfigManager>().FromInstance(new ConfigManager(configs ?? DefaultConfigs()));
-			return Container.Instantiate<BuffController>();
+			Builder.RegisterInstance<IBuffRepository>(repository);
+			Builder.RegisterInstance(publisher);
+			Builder.RegisterInstance(attributeController);
+			Builder.RegisterInstance(new ConfigManager(configs ?? DefaultConfigs()));
+			Builder.Register<BuffController>(Lifetime.Singleton);
+			return Container.Resolve<BuffController>();
 		}
 
 		private static List<IConfig> DefaultConfigs() =>
@@ -332,11 +334,11 @@ namespace Sumorin.Buff.Tests
 			var controller = CreateController();
 			var buffId = controller.AddBuff("owner-1", "Poison", "source-1").Value;
 			var observed = controller.ObserveStackCount(buffId);
-			observed.Value.Should().Be(1);
+			observed.CurrentValue.Should().Be(1);
 
 			controller.AdjustStack(buffId, 1);
 
-			observed.Value.Should().Be(2);
+			observed.CurrentValue.Should().Be(2);
 		}
 
 		[Test]
@@ -345,11 +347,11 @@ namespace Sumorin.Buff.Tests
 			var controller = CreateController();
 			var buffId = controller.AddBuff("owner-1", "Poison", "source-1").Value;
 			var observed = controller.ObserveLifetime(buffId);
-			observed.Value.Should().Be(10f);
+			observed.CurrentValue.Should().Be(10f);
 
 			controller.TickTime(3f);
 
-			observed.Value.Should().Be(7f);
+			observed.CurrentValue.Should().Be(7f);
 		}
 
 		[TestCase(TestName = "訂閱不存在的 Buff 回傳 null")]

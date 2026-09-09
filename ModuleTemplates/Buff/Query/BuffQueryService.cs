@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using UniRx;
-using Zenject;
+using R3;
+using VContainer;
 
 namespace Sumorin.Buff
 {
@@ -22,10 +22,10 @@ namespace Sumorin.Buff
 
 	#region IBuffValueService Members
 		/// <inheritdoc />
-		public IReadOnlyReactiveProperty<int> ObserveStackCount(string buffId) => controller.ObserveStackCount(buffId);
+		public ReadOnlyReactiveProperty<int> ObserveStackCount(string buffId) => controller.ObserveStackCount(buffId);
 
 		/// <inheritdoc />
-		public IReadOnlyReactiveProperty<float> ObserveLifetime(string buffId) => controller.ObserveLifetime(buffId);
+		public ReadOnlyReactiveProperty<float> ObserveLifetime(string buffId) => controller.ObserveLifetime(buffId);
 	#endregion
 	}
 }

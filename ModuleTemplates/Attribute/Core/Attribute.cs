@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using R3;
 using Sumorin.DDDCore;
-using UniRx;
 
 namespace Sumorin.Attribute
 {
@@ -33,7 +33,7 @@ namespace Sumorin.Attribute
 		/// <summary>
 		///     當前值快照，值變化時發出
 		/// </summary>
-		public IReadOnlyReactiveProperty<AttributeValueInfo> Current => current;
+		public ReadOnlyReactiveProperty<AttributeValueInfo> Current => current;
 
 		/// <summary>
 		///     所有修改器（唯讀）

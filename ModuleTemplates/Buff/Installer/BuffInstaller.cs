@@ -1,39 +1,48 @@
 using System;
 using Sumorin.SumorinUtility;
-using Zenject;
+using VContainer;
+using VContainer.Unity;
 
 namespace Sumorin.Buff
 {
 	/// <summary>
-	///     Buff 系統的 Zenject Installer
+	///     Buff 系統的 Installer
 	/// </summary>
 	/// <remarks>
-	///     安裝時傳入 <see cref="BuffDataSet" />，本 Installer 把其中的配置綁成一個 <see cref="ConfigSource" />。
-	///     <see cref="ConfigManager" /> 由 <c>DDDCoreInstaller</c> 綁定，解析時收集所有來源，遊戲側不需自行組裝。
+	///     建立時傳入 <see cref="BuffDataSet" />，本 Installer 把其中的配置註冊成一個 <see cref="ConfigSource" />。
+	///     <see cref="ConfigManager" /> 由 <c>DDDCoreInstaller</c> 註冊，解析時收集所有來源，遊戲側不需自行組裝。
 	///     <see cref="BuffData" /> 已實作 <see cref="IBuffConfig" />，直接作為配置內容使用。
-	///     Buff 相依 Attribute，組裝根須先安裝 <c>AttributeInstaller</c>。
+	///     Buff 相依 Attribute，組裝根須一併安裝 <c>AttributeInstaller</c>。
 	/// </remarks>
-	public class BuffInstaller: Installer<BuffDataSet, BuffInstaller>
+	public class BuffInstaller: IInstaller
 	{
 		private readonly BuffDataSet dataSet;
 
 		public BuffInstaller(BuffDataSet dataSet)
 		{
-			this.dataSet = dataSet ? dataSet : throw new ArgumentNullException(nameof(dataSet), "安裝 Buff 系統需要指定 BuffDataSet");
+			if(dataSet == null)
+			{
+				throw new ArgumentNullException(nameof(dataSet), "安裝 Buff 系統需要指定 BuffDataSet");
+			}
+
+			this.dataSet = dataSet;
 		}
 
-		public override void InstallBindings()
+	#region IInstaller Members
+		/// <inheritdoc />
+		public void Install(IContainerBuilder builder)
 		{
-			Container.Bind<ConfigSource>().FromInstance(new(dataSet.Datas)).AsCached();
+			// 不用 RegisterInstance：它是 Singleton，VContainer 把同型別的 Singleton 重複註冊視為衝突，多個模組各註冊一個來源就會炸。
+			// Scoped 的重複註冊會被收成集合，ConfigManager 才解析得到全部來源
+			builder.Register(_ => new ConfigSource(dataSet.Datas), Lifetime.Scoped);
 
-			Container.Bind<IBuffRepository>().To<BuffRepository>().AsSingle();
-			Container.Bind<IBuffController>().To<BuffController>().AsSingle();
+			builder.Register<IBuffRepository, BuffRepository>(Lifetime.Singleton);
+			builder.Register<IBuffController, BuffController>(Lifetime.Singleton);
 
-			Container.Bind<BuffCommandService>().AsSingle();
+			builder.Register<BuffCommandService>(Lifetime.Singleton);
 
-			Container.Bind<BuffQueryService>().AsSingle();
-			Container.Bind<IBuffValueService>().To<BuffQueryService>().FromResolve();
-			Container.Bind<IBuffQueryService>().To<BuffQueryService>().FromResolve();
+			builder.Register<BuffQueryService>(Lifetime.Singleton).AsSelf().As<IBuffValueService, IBuffQueryService>();
 		}
+	#endregion
 	}
 }

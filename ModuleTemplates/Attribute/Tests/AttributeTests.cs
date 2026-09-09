@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using FluentAssertions;
 using NUnit.Framework;
-using UniRx;
+using R3;
 
 namespace Sumorin.Attribute.Tests
 {

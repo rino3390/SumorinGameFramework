@@ -8,7 +8,7 @@
 	using UnityEditor;
 	using UnityEditor.Compilation;
 	using UnityEngine;
-	using Zenject;
+	using VContainer;
 
 	namespace Sumorin.ArchitectureValidator
 	{
@@ -257,7 +257,7 @@
 			}
 
 			/// <summary>
-			///     列出型別上所有由 Zenject 注入的相依型別（欄位、屬性、建構子參數、注入方法參數）
+			///     列出型別上所有由容器注入的相依型別（欄位、屬性、建構子參數、注入方法參數）
 			/// </summary>
 			/// <param name="type">要檢查的型別</param>
 			/// <returns>注入點名稱與相依型別</returns>
@@ -507,7 +507,7 @@
 				return result;
 			}
 
-			// ponytail: 用「以點分隔的最後一段」比對，避免 IReadOnlyReactivePropertyEx 那類「開頭相符」的誤判蔓延到 assembly 名
+			// ponytail: 用「以點分隔的最後一段」比對，避免 ReadOnlyReactivePropertyEx 那類「開頭相符」的誤判蔓延到 assembly 名
 			private static bool MatchesSegment(string assemblyName, string segment)
 			{
 				if(assemblyName == segment) return true;

@@ -1,38 +1,47 @@
 using System;
 using Sumorin.SumorinUtility;
-using Zenject;
+using VContainer;
+using VContainer.Unity;
 
 namespace Sumorin.Attribute
 {
 	/// <summary>
-	///     屬性系統的 Zenject Installer
+	///     屬性系統的 Installer
 	/// </summary>
 	/// <remarks>
-	///     安裝時傳入 <see cref="AttributeDataSet" />，本 Installer 把其中的配置綁成一個 <see cref="ConfigSource" />。
-	///     <see cref="ConfigManager" /> 由 <c>DDDCoreInstaller</c> 綁定，解析時收集所有來源，遊戲側不需自行組裝。
+	///     建立時傳入 <see cref="AttributeDataSet" />，本 Installer 把其中的配置註冊成一個 <see cref="ConfigSource" />。
+	///     <see cref="ConfigManager" /> 由 <c>DDDCoreInstaller</c> 註冊，解析時收集所有來源，遊戲側不需自行組裝。
 	///     查找鍵取自 <see cref="AttributeData" /> 自己的 Id，Installer 不另外指定。
 	/// </remarks>
-	public class AttributeInstaller: Installer<AttributeDataSet, AttributeInstaller>
+	public class AttributeInstaller: IInstaller
 	{
 		private readonly AttributeDataSet dataSet;
 
 		public AttributeInstaller(AttributeDataSet dataSet)
 		{
-			this.dataSet = dataSet ? dataSet : throw new ArgumentNullException(nameof(dataSet), "安裝屬性系統需要指定 AttributeDataSet");
+			if(dataSet == null)
+			{
+				throw new ArgumentNullException(nameof(dataSet), "安裝屬性系統需要指定 AttributeDataSet");
+			}
+
+			this.dataSet = dataSet;
 		}
 
-		public override void InstallBindings()
+	#region IInstaller Members
+		/// <inheritdoc />
+		public void Install(IContainerBuilder builder)
 		{
-			Container.Bind<ConfigSource>().FromInstance(new(dataSet.Datas)).AsCached();
+			// 不用 RegisterInstance：它是 Singleton，VContainer 把同型別的 Singleton 重複註冊視為衝突，多個模組各註冊一個來源就會炸。
+			// Scoped 的重複註冊會被收成集合，ConfigManager 才解析得到全部來源
+			builder.Register(_ => new ConfigSource(dataSet.Datas), Lifetime.Scoped);
 
-			Container.Bind<IAttributeRepository>().To<AttributeRepository>().AsSingle();
-			Container.Bind<IAttributeController>().To<AttributeController>().AsSingle();
+			builder.Register<IAttributeRepository, AttributeRepository>(Lifetime.Singleton);
+			builder.Register<IAttributeController, AttributeController>(Lifetime.Singleton);
 
-			Container.Bind<AttributeCommandService>().AsSingle();
+			builder.Register<AttributeCommandService>(Lifetime.Singleton);
 
-			Container.Bind<AttributeQueryService>().AsSingle();
-			Container.Bind<IAttributeValueService>().To<AttributeQueryService>().FromResolve();
-			Container.Bind<IAttributeQueryService>().To<AttributeQueryService>().FromResolve();
+			builder.Register<AttributeQueryService>(Lifetime.Singleton).AsSelf().As<IAttributeValueService, IAttributeQueryService>();
 		}
+	#endregion
 	}
 }

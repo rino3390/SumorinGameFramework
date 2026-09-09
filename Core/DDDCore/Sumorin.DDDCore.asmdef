@@ -3,7 +3,7 @@
     "references": [
         "Sumorin.SumorinUtility",
         "UniTask",
-        "Zenject"
+        "VContainer"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

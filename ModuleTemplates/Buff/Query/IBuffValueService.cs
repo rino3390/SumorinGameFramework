@@ -1,4 +1,4 @@
-using UniRx;
+using R3;
 
 namespace Sumorin.Buff
 {
@@ -12,9 +12,9 @@ namespace Sumorin.Buff
 	public interface IBuffValueService
 	{
 		/// <inheritdoc cref="IBuffController.ObserveStackCount" />
-		IReadOnlyReactiveProperty<int> ObserveStackCount(string buffId);
+		ReadOnlyReactiveProperty<int> ObserveStackCount(string buffId);
 
 		/// <inheritdoc cref="IBuffController.ObserveLifetime" />
-		IReadOnlyReactiveProperty<float> ObserveLifetime(string buffId);
+		ReadOnlyReactiveProperty<float> ObserveLifetime(string buffId);
 	}
 }

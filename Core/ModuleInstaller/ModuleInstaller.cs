@@ -902,29 +902,29 @@ namespace Sumorin.ModuleInstaller
 
 			// 生成 asmdef 檔案
 			CreateAsmdef("Script/Utility/Utility.asmdef", "Utility", new[] { "UniTask" });
-			CreateAsmdef("Script/ActionHandler/ActionHandler.asmdef", "ActionHandler", new[] { "UniRx", "Utility", "Zenject" });
+			CreateAsmdef("Script/ActionHandler/ActionHandler.asmdef", "ActionHandler", new[] { "R3.Unity", "Utility", "VContainer" });
 			CreateAsmdef(
 				"Script/View/View.asmdef",
 				"View",
-				new[] { "ActionHandler", "Sumorin.Presentation", "Sumorin.SumorinUtility", "UniRx", "UniTask", "Utility", "Zenject" }
+				new[] { "ActionHandler", "R3.Unity", "Sumorin.Presentation", "Sumorin.SumorinUtility", "UniTask", "Utility", "VContainer" }
 			);
 			CreateAsmdef(
 				"Script/Presenter/Presenter.asmdef",
 				"Presenter",
-				new[] { "Sumorin.Presentation", "Sumorin.SumorinUtility", "UniRx", "UniTask", "Utility", "View", "Zenject" }
+				new[] { "R3.Unity", "Sumorin.Presentation", "Sumorin.SumorinUtility", "UniTask", "Utility", "VContainer", "View" }
 			);
 			CreateAsmdef(
 				"Script/Flow/Flow.asmdef",
 				"Flow",
-				new[] { "ActionHandler", "Presenter", "Sumorin.DDDCore", "UniRx", "UniTask", "Utility", "Zenject" }
+				new[] { "ActionHandler", "Presenter", "R3.Unity", "Sumorin.DDDCore", "UniTask", "Utility", "VContainer" }
 			);
 			CreateAsmdef(
 				"Script/Installer/Installer.asmdef",
 				"Installer",
 				new[]
 				{
-					"ActionHandler", "Flow", "Presenter", "Sumorin.DDDCore", "Sumorin.Presentation", "Sumorin.SumorinUtility", "UniRx", "UniTask", "Utility",
-					"View", "Zenject"
+					"ActionHandler", "Flow", "Presenter", "R3.Unity", "Sumorin.DDDCore", "Sumorin.Presentation", "Sumorin.SumorinUtility", "UniTask", "Utility",
+					"VContainer", "View"
 				}
 			);
 		}

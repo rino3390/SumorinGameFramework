@@ -3,9 +3,9 @@
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Reflection;
+	using R3;
 	using Sumorin.DDDCore;
-	using UniRx;
-	using Zenject;
+	using VContainer.Unity;
 
 	namespace Sumorin.ArchitectureValidator
 	{
@@ -17,7 +17,7 @@
 			/// <inheritdoc />
 			public IEnumerable<ArchitectureViolation> FindViolations()
 			{
-				// Installer 不豁免。它的豁免只到「引用 Flow assembly 並在 InstallBindings 裡綁定」為止，
+				// Installer 不豁免。它的豁免只到「引用 Flow assembly 並在 Install 裡註冊」為止，
 				// 綁定不經過注入點所以本來就掃不到。真的寫 [Inject] 取得 Flow，那就是容器把 Flow 交給別人了
 				foreach(var type in SumorinArchitecture.Types)
 				{
@@ -37,7 +37,7 @@
 		}
 
 		/// <summary>
-		///     QueryService 禁止出現事件流成員，只有精確的 IReadOnlyReactiveProperty&lt;T&gt; 屬於值面白名單
+		///     QueryService 禁止出現事件流成員，只有精確的 ReadOnlyReactiveProperty&lt;T&gt; 屬於值面白名單
 		/// </summary>
 		public class QueryServiceMustNotExposeEventStreamRule: IArchitectureRule
 		{
@@ -52,11 +52,11 @@
 					{
 						if(!IsEventStream(memberType)) continue;
 
-						// 白名單是泛型定義精確相等，不是可指派：ReactiveProperty<T> 可寫，用 IsAssignableFrom 會誤放行
-						if(SumorinArchitecture.IsGenericDefinition(memberType, typeof(IReadOnlyReactiveProperty<>))) continue;
+						// 白名單是泛型定義精確相等，不是可指派：ReactiveProperty<T> 繼承自它且可寫，用 IsAssignableFrom 會誤放行
+						if(SumorinArchitecture.IsGenericDefinition(memberType, typeof(ReadOnlyReactiveProperty<>))) continue;
 
 						yield return new ArchitectureViolation(
-							$"{type.FullName}.{member} 的型別 «{memberType.Name}» 是事件流。QueryService 只能暴露 IReadOnlyReactiveProperty<T> 值面，事件一律走 DomainEvent",
+							$"{type.FullName}.{member} 的型別 «{memberType.Name}» 是事件流。QueryService 只能暴露 ReadOnlyReactiveProperty<T> 值面，事件一律走 DomainEvent",
 							SumorinArchitecture.ScriptOf(type),
 							0,
 							member
@@ -90,7 +90,12 @@
 			private static bool IsEventStream(Type type)
 			{
 				if(type == null || type == typeof(void)) return false;
-				if(SumorinArchitecture.IsGenericDefinition(type, typeof(IObservable<>))) return true;
+
+				// R3 的 Observable<T> 是類別不是介面，要沿基底類別鏈找；System.IObservable<T> 仍是介面，另外掃一次
+				for(var current = type; current != null; current = current.BaseType)
+				{
+					if(SumorinArchitecture.IsGenericDefinition(current, typeof(Observable<>))) return true;
+				}
 
 				return type.GetInterfaces().Any(i => SumorinArchitecture.IsGenericDefinition(i, typeof(IObservable<>)));
 			}
@@ -184,7 +189,7 @@
 				{
 					foreach(var (lineNumber, line) in SumorinArchitecture.CodeLines(file))
 					{
-						// 只抓泛型呼叫形式，那是 EventBus 的簽名。UniRx 的 observable.Subscribe(...) 是非泛型呼叫，
+						// 只抓泛型呼叫形式，那是 EventBus 的簽名。R3 的 observable.Subscribe(...) 是非泛型呼叫，
 						// View 訂閱 I{Domain}ValueService 的值面成員正是它的日常工作，不在此列
 						if(line.IndexOf("Subscribe<", StringComparison.Ordinal) < 0 && line.IndexOf("SubscribeAsync<", StringComparison.Ordinal) < 0) continue;
 

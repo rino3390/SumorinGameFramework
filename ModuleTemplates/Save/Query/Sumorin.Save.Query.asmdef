@@ -3,7 +3,7 @@
     "references": [
         "Sumorin.Save",
         "Sumorin.Save.Contract",
-        "Zenject"
+        "VContainer"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

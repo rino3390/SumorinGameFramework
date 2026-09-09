@@ -2,12 +2,13 @@ using System.Collections.Generic;
 using FluentAssertions;
 using NUnit.Framework;
 using Sumorin.SumorinUtility;
-using Zenject;
+using Sumorin.TestFramework;
+using VContainer;
 
 namespace Sumorin.Attribute.Tests
 {
 	[TestFixture]
-	public class AttributeControllerTests: ZenjectUnitTestFixture
+	public class AttributeControllerTests: VContainerUnitTestFixture
 	{
 		private class FakeAttributeConfig: IAttributeConfig
 		{
@@ -38,9 +39,10 @@ namespace Sumorin.Attribute.Tests
 
 		private AttributeController CreateController(List<IConfig> configs = null)
 		{
-			Container.Bind<IAttributeRepository>().FromInstance(repository);
-			Container.Bind<ConfigManager>().FromInstance(new ConfigManager(configs ?? DefaultConfigs()));
-			return Container.Instantiate<AttributeController>();
+			Builder.RegisterInstance<IAttributeRepository>(repository);
+			Builder.RegisterInstance(new ConfigManager(configs ?? DefaultConfigs()));
+			Builder.Register<AttributeController>(Lifetime.Singleton);
+			return Container.Resolve<AttributeController>();
 		}
 
 		private static List<IConfig> DefaultConfigs() =>
@@ -476,7 +478,7 @@ namespace Sumorin.Attribute.Tests
 			var controller = CreateController();
 			controller.CreateAttribute("owner-1", "Health", 100);
 
-			controller.ObserveAttribute("owner-1", "Health").Value.Should().Be(new AttributeValueInfo(100, 0, 999));
+			controller.ObserveAttribute("owner-1", "Health").CurrentValue.Should().Be(new AttributeValueInfo(100, 0, 999));
 		}
 
 		[Test]

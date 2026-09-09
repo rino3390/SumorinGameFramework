@@ -3,8 +3,8 @@
     "references": [
         "Sumorin.Buff",
         "Sumorin.Buff.Contract",
-        "UniRx",
-        "Zenject"
+        "R3.Unity",
+        "VContainer"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -4,10 +4,10 @@
         "ActionHandler",
         "Presenter",
         "Sumorin.DDDCore",
-        "UniRx",
+        "R3.Unity",
         "UniTask",
         "Utility",
-        "Zenject"
+        "VContainer"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

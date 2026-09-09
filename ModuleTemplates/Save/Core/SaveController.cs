@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sumorin.DDDCore;
-using Zenject;
 
 namespace Sumorin.Save
 {
@@ -22,11 +21,11 @@ namespace Sumorin.Save
 		/// <summary>
 		///     建立存檔 Controller
 		/// </summary>
-		/// <param name="participants">所有已註冊的參與者</param>
+		/// <param name="participants">所有已註冊的參與者，沒有任何參與者時容器給空集合</param>
 		/// <param name="storage">存取媒介</param>
 		/// <param name="publisher">事件發布者</param>
 		/// <exception cref="InvalidOperationException">存檔鍵重複時拋出</exception>
-		public SaveController([InjectOptional] List<ISaveParticipant> participants, ISaveStorage storage, IPublisher publisher)
+		public SaveController(IReadOnlyList<ISaveParticipant> participants, ISaveStorage storage, IPublisher publisher)
 		{
 			this.participants = participants ?? new List<ISaveParticipant>();
 			this.storage = storage;

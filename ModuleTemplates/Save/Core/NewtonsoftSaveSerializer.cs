@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using Newtonsoft.Json;
-using UniRx;
+using R3;
 
 namespace Sumorin.Save
 {
@@ -49,7 +49,7 @@ namespace Sumorin.Save
 	}
 
 	/// <summary>
-	///     值面型別的轉換器，讓 <see cref="IReadOnlyReactiveProperty{T}" /> 欄位落地為純值
+	///     值面型別的轉換器，讓 <see cref="ReadOnlyReactiveProperty{T}" /> 欄位落地為純值
 	/// </summary>
 	internal class ValueFacetConverter: JsonConverter
 	{
@@ -65,8 +65,8 @@ namespace Sumorin.Save
 				return;
 			}
 
-			var facetType = typeof(IReadOnlyReactiveProperty<>).MakeGenericType(valueType);
-			serializer.Serialize(writer, facetType.GetProperty("Value")?.GetValue(value), valueType);
+			var facetType = typeof(ReadOnlyReactiveProperty<>).MakeGenericType(valueType);
+			serializer.Serialize(writer, facetType.GetProperty("CurrentValue")?.GetValue(value), valueType);
 		}
 
 		/// <inheritdoc />
@@ -83,13 +83,18 @@ namespace Sumorin.Save
 			valueType = null;
 			if(type == null) return false;
 
-			var facet = IsValueFacet(type) ? type : type.GetInterfaces().FirstOrDefault(IsValueFacet);
-			if(facet == null) return false;
+			// 值面是類別，ReactiveProperty<T> 與自訂子類都沿基底類別鏈找得到
+			for(var current = type; current != null; current = current.BaseType)
+			{
+				if(!IsValueFacet(current)) continue;
 
-			valueType = facet.GetGenericArguments()[0];
-			return true;
+				valueType = current.GetGenericArguments()[0];
+				return true;
+			}
+
+			return false;
 		}
 
-		private static bool IsValueFacet(Type type) => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IReadOnlyReactiveProperty<>);
+		private static bool IsValueFacet(Type type) => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ReadOnlyReactiveProperty<>);
 	}
 }

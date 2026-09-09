@@ -4,7 +4,7 @@
         "Sumorin.Attribute",
         "Sumorin.Attribute.Contract",
         "Sumorin.DDDCore",
-        "Zenject"
+        "VContainer"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

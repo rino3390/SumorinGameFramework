@@ -1,4 +1,4 @@
-using UniRx;
+using R3;
 
 namespace Sumorin.Attribute
 {
@@ -8,6 +8,6 @@ namespace Sumorin.Attribute
 	public interface IAttributeValueService
 	{
 		/// <inheritdoc cref="IAttributeController.ObserveAttribute" />
-		IReadOnlyReactiveProperty<AttributeValueInfo> ObserveAttribute(string ownerId, string configId);
+		ReadOnlyReactiveProperty<AttributeValueInfo> ObserveAttribute(string ownerId, string configId);
 	}
 }

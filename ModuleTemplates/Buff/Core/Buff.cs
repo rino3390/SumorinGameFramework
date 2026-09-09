@@ -1,6 +1,7 @@
 using System;
+using ObservableCollections;
+using R3;
 using Sumorin.DDDCore;
-using UniRx;
 
 namespace Sumorin.Buff
 {
@@ -32,7 +33,7 @@ namespace Sumorin.Buff
 		/// <summary>
 		///     剩餘時間的值，Tick 期間每幀更新且不產生額外記憶體
 		/// </summary>
-		public IReadOnlyReactiveProperty<float> Lifetime => remainingLifetime;
+		public ReadOnlyReactiveProperty<float> Lifetime => remainingLifetime;
 
 		/// <summary>
 		///     當前層數
@@ -46,7 +47,7 @@ namespace Sumorin.Buff
 		/// <summary>
 		///     當前層數的值
 		/// </summary>
-		public IReadOnlyReactiveProperty<int> Stack => stackCount;
+		public ReadOnlyReactiveProperty<int> Stack => stackCount;
 
 		/// <summary>
 		///     擁有者 Id
@@ -61,12 +62,12 @@ namespace Sumorin.Buff
 		/// <summary>
 		///     層數紀錄，供 Controller 訂閱增減以掛卸 Modifier
 		/// </summary>
-		public ReactiveCollection<StackRecord> StackRecords { get; } = new();
+		public ObservableList<StackRecord> StackRecords { get; } = new();
 
 		/// <summary>
 		///     Buff 過期時發出
 		/// </summary>
-		public IObservable<Unit> OnExpired => expired;
+		public Observable<Unit> OnExpired => expired;
 
 		private readonly Subject<Unit> expired = new();
 		private readonly ReactiveProperty<float> remainingLifetime = new();
@@ -120,7 +121,6 @@ namespace Sumorin.Buff
 			expired.Dispose();
 			remainingLifetime.Dispose();
 			stackCount.Dispose();
-			StackRecords.Dispose();
 		}
 	#endregion
 

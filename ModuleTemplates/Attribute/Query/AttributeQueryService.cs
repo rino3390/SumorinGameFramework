@@ -1,5 +1,5 @@
-using UniRx;
-using Zenject;
+using R3;
+using VContainer;
 
 namespace Sumorin.Attribute
 {
@@ -24,8 +24,7 @@ namespace Sumorin.Attribute
 
 	#region IAttributeValueService Members
 		/// <inheritdoc />
-		public IReadOnlyReactiveProperty<AttributeValueInfo> ObserveAttribute(string ownerId, string configId) =>
-			controller.ObserveAttribute(ownerId, configId);
+		public ReadOnlyReactiveProperty<AttributeValueInfo> ObserveAttribute(string ownerId, string configId) => controller.ObserveAttribute(ownerId, configId);
 	#endregion
 	}
 }

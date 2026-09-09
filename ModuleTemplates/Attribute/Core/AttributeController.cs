@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
+using R3;
 using Sumorin.DDDCore;
 using Sumorin.SumorinUtility;
-using UniRx;
-using Zenject;
+using VContainer;
 
 namespace Sumorin.Attribute
 {
@@ -22,7 +22,7 @@ namespace Sumorin.Attribute
 
 	#region IAttributeController Members
 		/// <inheritdoc />
-		public IReadOnlyReactiveProperty<AttributeValueInfo> ObserveAttribute(string ownerId, string configId)
+		public ReadOnlyReactiveProperty<AttributeValueInfo> ObserveAttribute(string ownerId, string configId)
 		{
 			return repository.Get(ownerId, configId)?.Current;
 		}

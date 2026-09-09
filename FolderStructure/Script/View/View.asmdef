@@ -4,10 +4,10 @@
     "ActionHandler",
     "Sumorin.Presentation",
     "Sumorin.SumorinUtility",
-    "UniRx",
+    "R3.Unity",
     "UniTask",
     "Utility",
-    "Zenject"
+    "VContainer"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

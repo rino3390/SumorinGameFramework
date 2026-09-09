@@ -1,6 +1,6 @@
 using System.Collections.Generic;
+using R3;
 using Sumorin.DDDCore;
-using UniRx;
 
 namespace Sumorin.Attribute
 {
@@ -15,7 +15,7 @@ namespace Sumorin.Attribute
 		/// <param name="ownerId">擁有者 Id</param>
 		/// <param name="configId">屬性配置 Id</param>
 		/// <returns>屬性值快照，訂閱時立即收到現值；屬性不存在時回傳 null</returns>
-		IReadOnlyReactiveProperty<AttributeValueInfo> ObserveAttribute(string ownerId, string configId);
+		ReadOnlyReactiveProperty<AttributeValueInfo> ObserveAttribute(string ownerId, string configId);
 
 		/// <summary>
 		///     取得屬性值

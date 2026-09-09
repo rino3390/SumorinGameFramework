@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using Zenject;
+using VContainer;
 
 namespace Sumorin.Save
 {

@@ -1,5 +1,5 @@
 using Sumorin.DDDCore;
-using Zenject;
+using VContainer;
 
 namespace Sumorin.Buff
 {

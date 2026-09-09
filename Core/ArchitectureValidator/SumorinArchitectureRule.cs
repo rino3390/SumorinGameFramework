@@ -96,7 +96,7 @@
 			[LabelText("Flow 無人注入")]
 			public bool FlowMustNotBeInjected = true;
 
-			/// <summary>QueryService 只暴露 IReadOnlyReactiveProperty&lt;T&gt; 值面</summary>
+			/// <summary>QueryService 只暴露 ReadOnlyReactiveProperty&lt;T&gt; 值面</summary>
 			[ToggleLeft]
 			[BoxGroup("程式結構")]
 			[LabelText("QueryService 無事件流成員")]

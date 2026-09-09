@@ -6,7 +6,7 @@
         "Sumorin.Save.Command",
         "Sumorin.Save.Query",
         "Sumorin.DDDCore",
-        "Zenject"
+        "VContainer"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

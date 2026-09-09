@@ -1,7 +1,7 @@
 using FluentAssertions;
 using NUnit.Framework;
+using R3;
 using Sumorin.DDDCore;
-using UniRx;
 
 namespace Sumorin.Save.Tests
 {
@@ -40,7 +40,7 @@ namespace Sumorin.Save.Tests
 						  Name = "Poison"
 					  }
 				  );
-			result.Stack.Value.Should().Be(3);
+			result.Stack.CurrentValue.Should().Be(3);
 		}
 
 		[Test]
@@ -50,7 +50,7 @@ namespace Sumorin.Save.Tests
 
 			var result = serializer.Deserialize<FacetParameterEntity>(data);
 
-			result.Stack.Value.Should().Be(3);
+			result.Stack.CurrentValue.Should().Be(3);
 		}
 
 		[TestCase(null, TestName = "null 回傳 null")]
@@ -66,7 +66,7 @@ namespace Sumorin.Save.Tests
 	{
 		public string Name { get; }
 
-		public IReadOnlyReactiveProperty<int> Stack => stack;
+		public ReadOnlyReactiveProperty<int> Stack => stack;
 
 		private readonly ReactiveProperty<int> stack;
 
@@ -79,9 +79,9 @@ namespace Sumorin.Save.Tests
 
 	internal class FacetParameterEntity: Entity
 	{
-		public IReadOnlyReactiveProperty<int> Stack { get; }
+		public ReadOnlyReactiveProperty<int> Stack { get; }
 
-		public FacetParameterEntity(string id, IReadOnlyReactiveProperty<int> stack): base(id)
+		public FacetParameterEntity(string id, ReadOnlyReactiveProperty<int> stack): base(id)
 		{
 			Stack = stack;
 		}

@@ -3,8 +3,8 @@
     "references": [
         "Sumorin.Attribute",
         "Sumorin.Attribute.Contract",
-        "UniRx",
-        "Zenject"
+        "R3.Unity",
+        "VContainer"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

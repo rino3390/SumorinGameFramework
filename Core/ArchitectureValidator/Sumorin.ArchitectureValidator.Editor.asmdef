@@ -6,8 +6,8 @@
     "Sumorin.Presentation",
     "Sumorin.SOBase",
     "Sumorin.SumorinUtility",
-    "UniRx",
-    "Zenject"
+    "R3.Unity",
+    "VContainer"
   ],
   "includePlatforms": [
     "Editor"

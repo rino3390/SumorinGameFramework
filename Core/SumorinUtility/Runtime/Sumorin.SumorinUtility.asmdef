@@ -1,7 +1,7 @@
 ﻿{
   "name": "Sumorin.SumorinUtility",
   "references": [
-    "UniRx",
+    "R3.Unity",
     "Unity.Localization"
   ],
   "includePlatforms": [],

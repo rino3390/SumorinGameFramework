@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
+using ObservableCollections;
+using R3;
 using Sumorin.Attribute;
-using UniRx;
 
 namespace Sumorin.Buff.Tests
 {
@@ -367,13 +368,13 @@ namespace Sumorin.Buff.Tests
 			buff.AdjustStack(2);
 			var onExpired = Substitute.For<Action<Unit>>();
 			buff.OnExpired.Subscribe(onExpired);
-			var onReset = Substitute.For<Action<Unit>>();
+			var onReset = Substitute.For<Action<CollectionResetEvent<StackRecord>>>();
 			buff.StackRecords.ObserveReset().Subscribe(onReset);
 
 			buff.ClearStacks();
 
 			buff.StackCount.Should().Be(0);
-			onReset.Received(1).Invoke(Arg.Any<Unit>());
+			onReset.Received(1).Invoke(Arg.Any<CollectionResetEvent<StackRecord>>());
 			onExpired.DidNotReceive().Invoke(Arg.Any<Unit>());
 		}
 	}

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
+using R3;
 using Sumorin.DDDCore;
-using UniRx;
 
 namespace Sumorin.Buff
 {
@@ -14,14 +14,14 @@ namespace Sumorin.Buff
 		/// </summary>
 		/// <param name="buffId">Buff Id</param>
 		/// <returns>層數值面，Buff 不存在時回傳 null</returns>
-		IReadOnlyReactiveProperty<int> ObserveStackCount(string buffId);
+		ReadOnlyReactiveProperty<int> ObserveStackCount(string buffId);
 
 		/// <summary>
 		///     訂閱 Buff 的剩餘時效
 		/// </summary>
 		/// <param name="buffId">Buff Id</param>
 		/// <returns>剩餘時效值面，Buff 不存在時回傳 null</returns>
-		IReadOnlyReactiveProperty<float> ObserveLifetime(string buffId);
+		ReadOnlyReactiveProperty<float> ObserveLifetime(string buffId);
 
 		/// <summary>
 		///     取得 Buff 狀態快照

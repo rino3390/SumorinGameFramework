@@ -3,11 +3,11 @@
   "references": [
     "Sumorin.Presentation",
     "Sumorin.SumorinUtility",
-    "UniRx",
+    "R3.Unity",
     "UniTask",
     "Utility",
     "View",
-    "Zenject"
+    "VContainer"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

@@ -9,7 +9,7 @@
     "Sumorin.DDDCore",
     "Sumorin.SumorinUtility",
     "Sumorin.SOBase",
-    "Zenject"
+    "VContainer"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

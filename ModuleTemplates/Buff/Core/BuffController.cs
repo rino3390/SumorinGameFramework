@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ObservableCollections;
+using R3;
 using Sumorin.Attribute;
 using Sumorin.DDDCore;
 using Sumorin.SumorinUtility;
-using UniRx;
-using Zenject;
+using VContainer;
 
 namespace Sumorin.Buff
 {
@@ -31,10 +32,10 @@ namespace Sumorin.Buff
 
 	#region IBuffController Members
 		/// <inheritdoc />
-		public IReadOnlyReactiveProperty<int> ObserveStackCount(string buffId) => repository.Get(buffId)?.Stack;
+		public ReadOnlyReactiveProperty<int> ObserveStackCount(string buffId) => repository.Get(buffId)?.Stack;
 
 		/// <inheritdoc />
-		public IReadOnlyReactiveProperty<float> ObserveLifetime(string buffId) => repository.Get(buffId)?.Lifetime;
+		public ReadOnlyReactiveProperty<float> ObserveLifetime(string buffId) => repository.Get(buffId)?.Lifetime;
 
 		/// <inheritdoc />
 		public BuffInfo? GetBuffInfo(string buffId)

@@ -4,7 +4,7 @@ Unity MVP 架構共用框架，提供 DDD 核心、遊戲資料管理、模組�
 
 ## 架構優點
 
-- **模組化設計**：透過 Zenject DI 實現鬆耦合，模組可獨立開發與測試
+- **模組化設計**：透過 VContainer DI 實現鬆耦合，模組可獨立開發與測試
 - **領域驅動設計**：採用 DDD 概念，業務邏輯集中於 Controller，Model 為純資料，可用純 NUnit 測試
 - **事件驅動架構**：透過 EventBus 實現跨模組通訊，避免直接依賴
 - **視覺化資料管理**：GameManager 編輯器視窗讓企劃可直接編輯遊戲資料
@@ -18,25 +18,41 @@ Unity MVP 架構共用框架，提供 DDD 核心、遊戲資料管理、模組�
 
 | 套件 | 安裝方式 |
 |------|----------|
-| Zenject | OpenUPM 或 Asset Store |
+| VContainer | OpenUPM |
 | DoTween | Asset Store |
-| UniRx | OpenUPM |
+| R3 | UnityNuGet registry 裝核心 dll，Git URL 裝 Unity 橋接 |
+| ObservableCollections | UnityNuGet registry |
 | UniTask | OpenUPM |
 | Odin Inspector | Asset Store（付費） |
 | Unity Localization | Package Manager |
+| NSubstitute（測試用） | UnityNuGet registry，原本隨 Zenject 附帶 |
 
-### OpenUPM 配置範例
+### 套件來源配置
 
-在 `ProjectSettings > Package Manager` 中加入：
+在 `ProjectSettings > Package Manager` 中加入兩個 scoped registry：
 
 ```json
-"name": "OpenUPM",
-"url": "https://package.openupm.com",
-"scopes": [
-    "com.svermeulen.extenject",
-    "com.cysharp.unitask",
-    "com.neuecc.unirx"
-]
+{
+    "name": "OpenUPM",
+    "url": "https://package.openupm.com",
+    "scopes": ["com.cysharp.unitask", "jp.hadashikick.vcontainer"]
+},
+{
+    "name": "UnityNuGet",
+    "url": "https://unitynuget-registry.openupm.com",
+    "scopes": ["org.nuget"]
+}
+```
+
+`Packages/manifest.json` 的依賴：
+
+```json
+"com.cysharp.r3": "https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity#1.3.1",
+"com.cysharp.unitask": "2.5.10",
+"jp.hadashikick.vcontainer": "1.19.0",
+"org.nuget.nsubstitute": "6.2.0",
+"org.nuget.observablecollections.r3": "3.3.4",
+"org.nuget.r3": "1.3.1"
 ```
 
 ![image-20260203204628877](https://github.com/rino3390/SumorinGameFramework/blob/main/img/2.png)
@@ -116,7 +132,7 @@ public class PlayerController
 ### EventBus
 
 自實作事件系統（DDDCore EventBus），支援同步與非同步事件。
-由 `DDDCoreInstaller` 綁定，發布端注入 `IPublisher`、訂閱端注入 `ISubscriber`：
+由 `DDDCoreInstaller` 註冊，發布端注入 `IPublisher`、訂閱端注入 `ISubscriber`：
 
 ```csharp
 // 定義事件：名詞 + 動詞完成式，代表已發生的事實
@@ -165,11 +181,17 @@ public class ItemData : SODataBase, IItemConfig
 }
 ```
 
-組裝：`DDDCoreInstaller` 綁定 `ConfigManager`，模組 Installer 各自貢獻 `ConfigSource`，遊戲側不自行組裝：
+組裝：`DDDCoreInstaller` 註冊 `ConfigManager`，模組 Installer 各自貢獻 `ConfigSource`，遊戲側不自行組裝：
 
 ```csharp
-DDDCoreInstaller.Install(Container);
-Container.Bind<ConfigSource>().FromInstance(new(itemDataSet.Datas)).AsCached();
+new DDDCoreInstaller().Install(builder);
+builder.Register(_ => new ConfigSource(itemDataSet.Datas), Lifetime.Scoped);   // 不能用 RegisterInstance，同型別 Singleton 重複註冊會衝突
+```
+
+`Lifetime.Scoped` 的重複註冊 VContainer 會收成集合，`ConfigManager` 解析 `IEnumerable<ConfigSource>` 就拿得到全部來源。
+`RegisterInstance` 是 Singleton，第二個模組註冊時會拋出 `Conflict implementation type`。
+
+```csharp
 ```
 
 讀取：查找鍵是配置自己的 `Id`（`SODataBase` 提供），數值面與具體 SO 查同一份字典：

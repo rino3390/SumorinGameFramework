@@ -8,9 +8,8 @@
         "Sumorin.DDDCore",
         "Sumorin.TestFramework",
         "Sumorin.SumorinUtility",
-        "UniRx",
-        "Zenject",
-        "Zenject-TestFramework"
+        "R3.Unity",
+        "VContainer"
     ],
     "includePlatforms": [
         "Editor"
@@ -21,7 +20,8 @@
     "precompiledReferences": [
         "nunit.framework.dll",
         "FluentAssertions.dll",
-        "NSubstitute.dll"
+        "NSubstitute.dll",
+        "R3.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [
