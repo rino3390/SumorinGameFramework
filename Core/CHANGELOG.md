@@ -3,6 +3,36 @@
 Sumorin Game Framework 的變更紀錄，涵蓋 Core 套件與框架模組。
 版本號以 Core 套件（`Core/package.json`）為準，各模組另有自己的版本（`ModuleTemplates/modules.json`）。
 
+## [0.5.0] - 2026-09-10
+
+### 破壞性變更
+
+- DI 由 Zenject 改為 VContainer，響應式由 UniRx 改為 R3，可觀察集合改用 ObservableCollections。
+  既有專案要更換套件、asmdef 引用與 `using`，套件來源配置見 README。
+- `DDDCoreInstaller` 與各模組 Installer 改為實作 VContainer 的 `IInstaller`。
+  呼叫方式改為 `new DDDCoreInstaller().Install(builder)`。
+  需要資產的模組由建構子傳入 DataSet，例如 `new BuffInstaller(buffDataSet)`。
+- 值面型別由 `IReadOnlyReactiveProperty<T>` 改為 R3 的 `ReadOnlyReactiveProperty<T>`。
+  讀現值改用 `CurrentValue`，`Value` 只有可寫的 `ReactiveProperty<T>` 才有。
+- `ConfigSource` 要用 `Lifetime.Scoped` 的工廠註冊，不能用 `RegisterInstance`。
+  VContainer 把同型別的 Singleton 重複註冊視為衝突，裝第二個模組時會拋 `Conflict implementation type`。
+- `PooledViewProvider` 建構子改收 prefab、閒置實例的父物件與預載數量。
+  不再由外部提供物件池。
+- 存檔系統（2.0.0）的加密包裝改以工廠註冊，不再用裝飾器。
+  參與者註冊的輔助方法改名為 `RegisterRepositoryParticipant` 與 `RegisterStateParticipant`，改掛在 `IContainerBuilder` 上。
+- Buff 系統（5.0.0）的 `StackRecords` 改為 ObservableCollections 的 `ObservableList`。
+  `ObserveReset` 的事件型別改為 `CollectionResetEvent<T>`。
+- 測試基類 `ZenjectUnitTestFixture` 改為 `VContainerUnitTestFixture`，namespace 改為 `Sumorin.TestFramework`。
+  註冊走 `Builder`，首次取用 `Container` 時才建置，之後的註冊不生效。
+- NSubstitute 不再隨 Zenject 附帶，改由 UnityNuGet 的 `org.nuget.nsubstitute` 提供。
+- 模組版本：FolderStructure 2.0.0、屬性系統 4.0.0、Buff 系統 5.0.0、存檔系統 2.0.0。
+
+### 改進
+
+- `PooledViewProvider` 建立時可預載指定數量的實例，歸還時收回池的父物件底下。
+- 架構驗證器的「一事實恰一 Flow 訂閱」與「View 不得引用 QueryService」兩條規則改讀編譯後的 IL。
+  靠型別推導的 `Subscribe(handler)`、藏在 lambda 裡的訂閱與型別別名都能命中，不再被原始碼掃描漏掉。
+
 ## [0.4.0] - 2026-09-07
 
 ### 新功能
