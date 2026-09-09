@@ -4,6 +4,9 @@
   "displayName": "Sumorin Game Framework Core",
   "description": "Unity MVP 架構共用框架，提供 DDD 核心、遊戲資料管理、通用工具等功能。",
   "unity": "6000.3",
+  "dependencies": {
+    "com.unity.nuget.mono-cecil": "1.11.6"
+  },
   "documentationUrl": "",
   "changelogUrl": "",
   "licensesUrl": "",
