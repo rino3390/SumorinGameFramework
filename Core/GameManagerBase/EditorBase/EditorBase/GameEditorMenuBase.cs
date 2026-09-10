@@ -52,7 +52,7 @@ namespace Sumorin.GameManagerBase
 
 			initialized = true;
 			OnInitialize();
-			MenuTree = BuildMenuTree();
+			MenuTree = BuildTreeWithFirstSelected();
 		}
 
 		/// <summary>
@@ -60,8 +60,23 @@ namespace Sumorin.GameManagerBase
 		/// </summary>
 		public void ForceMenuTreeRebuild()
 		{
-			MenuTree = BuildMenuTree();
+			MenuTree = BuildTreeWithFirstSelected();
 			MenuTreeRebuilt?.Invoke();
+		}
+
+		/// <summary>
+		/// 建立選單樹並選取第一個項目
+		/// </summary>
+		/// <remarks>
+		/// 宿主視窗重建時若樹上沒有選取，會拿上一頁的選取路徑來比對：
+		/// 找不到就整頁空白，同名的則全被選中。建完先選第一項，宿主看到已有選取便不再比對。
+		/// </remarks>
+		private OdinMenuTree BuildTreeWithFirstSelected()
+		{
+			var tree = BuildMenuTree();
+			tree?.EnumerateTree().FirstOrDefault(item => item.Value != null)?.Select();
+
+			return tree;
 		}
 
 		public override string ToString() => TabName;
