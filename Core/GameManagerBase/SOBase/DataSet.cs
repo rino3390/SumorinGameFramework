@@ -1,9 +1,9 @@
 ﻿#if UNITY_EDITOR
-	using Sumorin.SumorinUtility.Editor;
-	using UnityEditor;
-#endif
-#if UNITY_EDITOR && !ODIN_VALIDATOR
+	using Sirenix.OdinInspector.Editor;
 	using Sirenix.Utilities.Editor;
+	using Sumorin.SumorinUtility.Editor;
+	using System.IO;
+	using UnityEditor;
 #endif
 	using Sirenix.OdinInspector;
 	using Sumorin.SumorinUtility;
@@ -38,10 +38,11 @@
 			#endif
 				CustomAddFunction = "CreateNewData",
 				CustomRemoveElementFunction = "DeleteData",
+				ListElementLabelName = "@Sumorin.GameManagerBase.OdinMenuTreeExtension.GetDisplayName(this) + \"：\"",
 				DraggableItems = false,
 				NumberOfItemsPerPage = 20
 			)]
-			[InlineEditor(InlineEditorObjectFieldModes.Hidden)]
+			[InlineEditor(InlineEditorObjectFieldModes.Foldout)]
 			[Searchable]
 			[UniqueList(nameof(SODataBase.Id), "Id重複")]
 			public List<T> Datas = new();
@@ -71,25 +72,20 @@
 
 		#if UNITY_EDITOR
 			/// <summary>
-			/// 清單按下新增時建立一份資產並回傳（Editor 專用）
+			/// 清單按下新增時開啟名稱輸入彈窗，確認後才建立資產並加入清單（Editor 專用）
 			/// </summary>
 			/// <remarks>
-			/// 資產路徑取自 <see cref="DataEditorConfigAttribute.DataRoot" />，沒有標註該 attribute 的型別不建立資產。
+			/// 資產路徑取自 <see cref="DataEditorConfigAttribute.DataRoot" />，沒有標註該 attribute 的型別不開彈窗。
+			/// 回傳 void 讓 Odin 不自行加入元素，加入由彈窗確認後的 <see cref="AddData" /> 負責。
 			/// <c>CustomAddFunction</c> 以字串指定而非 <c>nameof</c>，本方法僅存在於編輯器，字串在正式建置不會參與編譯。
 			/// </remarks>
-			/// <returns>建立好的資產，無法建立時回傳 null</returns>
-			private T CreateNewData()
+			private void CreateNewData()
 			{
 				var config = typeof(T).GetCustomAttribute<DataEditorConfigAttribute>();
 
-				if(config == null) return null;
+				if(config == null) return;
 
-				var data = CreateInstance<T>();
-				data.Id = SumorinUtility.GUID.NewGuid();
-				data.AssetName = config.DataRoot.Split('/')[^1] + " - " + data.Id;
-				SumorinEditorUtility.CreateSOData(data, config.DataRoot + "/" + data.AssetName);
-
-				return data;
+				CreateDataPopUp.Open(this, config);
 			}
 
 			/// <summary>
@@ -157,6 +153,72 @@
 				var dataSet = SumorinEditorUtility.FindAsset<DataSet<T>>();
 
 				return dataSet.Datas.Select(data => new ValueDropdownItem(data.EditorLabel, data.Id));
+			}
+
+			/// <summary>
+			/// 新增資料的名稱輸入彈窗，輸入的名稱同時作為 Id 與檔案名稱（Editor 專用）
+			/// </summary>
+			private class CreateDataPopUp
+			{
+				private const float Width = 400f;
+
+				[Title("$title")]
+				[LabelText("名稱")]
+				[ValidateInput(nameof(IsNameLegal), "只能用英數（含減號底線），且不得與現有的 Id、檔名重複")]
+				public string Name = "";
+
+				private static OdinEditorWindow popupWindow;
+
+				private readonly DataSet<T> owner;
+				private readonly DataEditorConfigAttribute config;
+				private readonly string title;
+
+				private string AssetPath => config.DataRoot + "/" + Name;
+
+				private CreateDataPopUp(DataSet<T> owner, DataEditorConfigAttribute config)
+				{
+					this.owner = owner;
+					this.config = config;
+					title = "新增" + config.DataTypeLabel;
+				}
+
+				/// <summary>
+				/// 在清單標題列下方開啟彈窗，右緣貼齊標題列右緣（加號按鈕所在）
+				/// </summary>
+				/// <remarks>
+				/// 本方法在加號按鈕的點擊分支內被呼叫，此時事件已被按鈕吃掉（Used），
+				/// <c>GUILayoutUtility.GetLastRect</c> 只會回 (0,0,1,1) 的假矩形，改讀目前版面群組（標題列）的矩形。
+				/// Odin 把彈窗左上角貼在傳入矩形的左下角，所以把矩形往左推一個彈窗寬度，右緣就對齊標題列。
+				/// </remarks>
+				/// <param name="owner">確認後要加入的資料集合</param>
+				/// <param name="config">提供資產路徑與型別標籤</param>
+				public static void Open(DataSet<T> owner, DataEditorConfigAttribute config)
+				{
+					var toolbarRect = GUIHelper.GetCurrentLayoutRect();
+
+					// ponytail: 左緣以目前 GUI 群組的原點為下限，群組本身一定在視窗內；視窗窄於彈窗時右緣會脫離標題列
+					var anchor = new Rect(Mathf.Max(0f, toolbarRect.xMax - Width), toolbarRect.y, Width, toolbarRect.height);
+					popupWindow = OdinEditorWindow.InspectObjectInDropDown(new CreateDataPopUp(owner, config), anchor, Width);
+				}
+
+				[Button("建立"), EnableIf(nameof(IsNameLegal))]
+				private void Create()
+				{
+					var data = CreateInstance<T>();
+					data.Id = Name;
+					data.AssetName = Name;
+					SumorinEditorUtility.CreateSOData(data, AssetPath);
+					owner.AddData(data);
+					popupWindow.Close();
+				}
+
+				private bool IsNameLegal()
+				{
+					return !string.IsNullOrEmpty(Name)
+						   && RegexChecking.OnlyEnglishAndNum(Name)
+						   && !owner.Datas.Any(data => data != null && (data.Id == Name || data.AssetName == Name))
+						   && !File.Exists("Assets/" + AssetPath + ".asset");
+				}
 			}
 		#endif
 		}

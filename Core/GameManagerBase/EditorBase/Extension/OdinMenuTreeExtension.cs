@@ -57,6 +57,18 @@ namespace Sumorin.GameManagerBase
 		}
 
 		/// <summary>
+		/// 資料在編輯器內的顯示名稱，取 DataName 主要語言的翻譯值，未設定時退回 AssetName
+		/// </summary>
+		/// <param name="data">資料</param>
+		/// <returns>顯示名稱</returns>
+		public static string GetDisplayName(SODataBase data)
+		{
+			var displayName = data.DataName.IsNullOrEmpty() ? null : ResolveDataName(data.DataName);
+
+			return string.IsNullOrEmpty(displayName) ? data.AssetName : displayName;
+		}
+
+		/// <summary>
 		/// 以資料的本地化顯示名稱（DataName）作為選單名稱，未設定時保留原檔名；
 		/// 掛 OnDrawItem 每次重繪重算，DataName 變更後即時反映。
 		/// </summary>
@@ -70,37 +82,40 @@ namespace Sumorin.GameManagerBase
 				if(data.DataName.IsNullOrEmpty()) return;
 
 				var displayName = ResolveDataName(data.DataName);
+
 				if(!string.IsNullOrEmpty(displayName))
 				{
 					menuItem.Name = displayName;
 				}
 			}
 
-			Apply();                              // 初始名稱（搜尋／首次顯示）
-			menuItem.OnDrawItem += _ => Apply();  // 每次重繪即時更新
+			Apply();                             // 初始名稱（搜尋／首次顯示）
+			menuItem.OnDrawItem += _ => Apply(); // 每次重繪即時更新
 		}
 
 		/// <summary>
-		/// 解析 DataName 在主要語言下的顯示文字；無翻譯值時退回字串表 entry key
+		/// 解析 DataName 在主要語言下的顯示文字；無翻譯值時退回字串表 entry key，找不到字串表或 entry 時回傳 null
 		/// </summary>
 		/// <param name="dataName">本地化顯示名稱</param>
 		/// <returns>主要語言翻譯值，無則回傳 entry key</returns>
 		private static string ResolveDataName(LocalizedString dataName)
 		{
-			var key = dataName.TableEntryReference.Key;
 			var collection = LocalizationEditorSettings.GetStringTableCollection(dataName.TableReference);
 
-			if(collection == null) return key;
+			// 從 Inspector 選的 entry 是以 Id 參照，TableEntryReference.Key 會是 null，要經 SharedData 反查
+			var entry = collection?.SharedData.GetEntryFromReference(dataName.TableEntryReference);
+
+			if(entry == null) return null;
 
 			// 編輯選單時沒有 active locale，改取專案主要語言（無則退回第一個語言）
 			var locale = (LocalizationSettings.HasSettings ? LocalizationSettings.ProjectLocale : null)
 						 ?? LocalizationEditorSettings.GetLocales()?.FirstOrDefault();
 
-			if(locale == null) return key;
+			if(locale == null) return entry.Key;
 
-			var value = (collection.GetTable(locale.Identifier) as StringTable)?.GetEntry(key)?.Value;
+			var value = (collection.GetTable(locale.Identifier) as StringTable)?.GetEntry(entry.Id)?.Value;
 
-			return string.IsNullOrEmpty(value) ? key : value;
+			return string.IsNullOrEmpty(value) ? entry.Key : value;
 		}
 
 		/// <summary>
