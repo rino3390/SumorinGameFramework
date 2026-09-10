@@ -20,6 +20,7 @@ namespace Sumorin.GameManager
 	{
 		private GameManagerTabSetting tabSetting;
 		private const int MaxButtonsPerRow = 5;
+		private const float TabHeight = 30f;
 
 		private GameEditorMenuBase menu;
 		private bool needsMenuRebuild;
@@ -173,9 +174,10 @@ namespace Sumorin.GameManager
 				}
 
 				var tabMenu = GetOrCreateMenu(tab.CorrespondingWindowType);
-				EditorGUILayout.BeginVertical(GUILayout.MaxHeight(30));
+				// 只給上限時，頁面內容一長 IMGUI 會把這個群組壓到子元素的最小高度，所以上下限都鎖死
+				EditorGUILayout.BeginVertical(GUILayout.Height(TabHeight));
 
-				if(SirenixEditorGUI.SDFIconButton(tabMenu.TabName, 5f, tab.TabIcon))
+				if(SirenixEditorGUI.SDFIconButton(tabMenu.TabName, TabHeight, tab.TabIcon))
 				{
 					SwitchMenu(tab.CorrespondingWindowType);
 				}
