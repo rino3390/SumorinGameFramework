@@ -334,4 +334,7 @@ public class SettingsEditor : GameEditorMenuBase
 
 將頁籤新增至`GameManager > Tab`中，開啟會自動生成`GameManager > GameSettingConfig`，可自行配置「遊戲設定」頁籤中要顯示的子頁籤。
 
+子頁籤以清單列出該型別的全部資料，每筆可摺疊，標題為顯示名稱。
+按下新增會先輸入名稱，該名稱同時作為 Id 與檔案名稱，只能用英數與減號底線。
+
 ![](https://github.com/rino3390/SumorinGameFramework/blob/main/img/3.png)
