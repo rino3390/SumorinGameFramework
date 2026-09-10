@@ -86,12 +86,40 @@ namespace Sumorin.GameManager
 			EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
 			GUILayout.FlexibleSpace();
 
+			if(SumorinEditorUtility.ToolbarButtonWithIcon("匯出 CSV", SdfIconType.BoxArrowUp))
+			{
+				ExportCsv();
+			}
+
+			if(SumorinEditorUtility.ToolbarButtonWithIcon("匯入 CSV", SdfIconType.BoxArrowInDown))
+			{
+				ImportCsv();
+			}
+
 			if(SumorinEditorUtility.ToolbarButtonWithIcon("多語系設定", SdfIconType.Translate))
 			{
 				SumorinLocalizationEditorWindow.OpenFromMenu();
 			}
 
 			EditorGUILayout.EndHorizontal();
+		}
+
+		private void ExportCsv()
+		{
+			var folder = EditorUtility.OpenFolderPanel("匯出 CSV", "", "");
+			if(string.IsNullOrEmpty(folder)) return;
+
+			var count = DataCsv.Export(folder);
+			EditorUtility.DisplayDialog("匯出完成", $"已寫出 {count} 份 CSV\n{folder}", "確定");
+		}
+
+		private void ImportCsv()
+		{
+			var folder = EditorUtility.OpenFolderPanel("匯入 CSV", "", "");
+			if(string.IsNullOrEmpty(folder)) return;
+
+			CsvImportReportWindow.Open(DataCsv.Import(folder));
+			needsMenuRebuild = true;
 		}
 
 		/// <summary>
