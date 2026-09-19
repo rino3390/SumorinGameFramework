@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Sirenix.OdinInspector;
+using Sirenix.Utilities;
+using UnityEditor;
 using UnityEngine;
 
 namespace Sumorin.GameManagerBase
@@ -27,7 +29,7 @@ namespace Sumorin.GameManagerBase
 		/// 已選筆數的顯示文字
 		/// </summary>
 		[ShowInInspector, DisplayAsString, HideLabel]
-		[HorizontalGroup("Select", Width = 90)]
+		[HorizontalGroup("Select", Width = 120)]
 		[PropertyOrder(1)]
 		public string SelectedSummary => $"已選 {SelectedCount} / {ImportableCount}";
 
@@ -128,19 +130,21 @@ namespace Sumorin.GameManagerBase
 			/// <summary>
 			/// 是否匯入，不能匯入的檔案勾了也不會處理
 			/// </summary>
-			[TableColumnWidth(50, false), LabelText("匯入"), EnableIf(nameof(CanImport))]
+			// TableList 的欄位標題只取成員名稱，LabelText 改不到標題、反而畫進每一格；包成群組後標題改用群組名稱
+			[VerticalGroup("匯入"), HideLabel, TableColumnWidth(50, false), EnableIf(nameof(CanImport))]
+			[CustomValueDrawer(nameof(DrawCenteredToggle))]
 			public bool Selected;
 
 			/// <summary>
 			/// CSV 檔名
 			/// </summary>
-			[DisplayAsString, LabelText("檔名")]
+			[VerticalGroup("檔名"), HideLabel, DisplayAsString]
 			public string FileName;
 
 			/// <summary>
 			/// 對應資料型別的頁籤名稱，對不上時是說明文字
 			/// </summary>
-			[DisplayAsString, LabelText("對應頁籤")]
+			[VerticalGroup("對應頁籤"), HideLabel, DisplayAsString]
 			public string TabName;
 
 			/// <summary>
@@ -154,6 +158,13 @@ namespace Sumorin.GameManagerBase
 			/// </summary>
 			[HideInInspector]
 			public string FilePath;
+
+			private static bool DrawCenteredToggle(bool value, GUIContent label)
+			{
+				var rect = EditorGUILayout.GetControlRect();
+
+				return EditorGUI.Toggle(rect.AlignCenterX(EditorStyles.toggle.CalcSize(GUIContent.none).x), value);
+			}
 		}
 	}
 }
