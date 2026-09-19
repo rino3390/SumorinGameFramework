@@ -115,11 +115,25 @@ namespace Sumorin.GameManager
 
 		private void ImportCsv()
 		{
-			var folder = EditorUtility.OpenFolderPanel("匯入 CSV", "", "");
+			var folder = EditorUtility.OpenFolderPanel("選擇放 CSV 的資料夾", "", "");
 			if(string.IsNullOrEmpty(folder)) return;
 
-			CsvImportReportWindow.Open(DataCsv.Import(folder));
-			needsMenuRebuild = true;
+			var selection = new CsvImportSelection(folder);
+
+			if(selection.Entries.Count == 0)
+			{
+				CsvImportReportWindow.Open(new CsvImportReport());
+				return;
+			}
+
+			CsvImportListWindow.Open(
+				selection,
+				() =>
+				{
+					needsMenuRebuild = true;
+					Repaint();
+				}
+			);
 		}
 
 		/// <summary>

@@ -21,6 +21,11 @@ namespace Sumorin.GameManagerBase
 	/// </remarks>
 	public static class DataCsv
 	{
+		/// <summary>
+		/// 檔名對不上任何資料型別時的說明文字
+		/// </summary>
+		public const string UnknownTypeLabel = "找不到對應的資料型別";
+
 		private static readonly MethodInfo ExportMethod = typeof(DataCsv).GetMethod(nameof(ExportType), BindingFlags.NonPublic | BindingFlags.Static);
 		private static readonly MethodInfo ImportMethod = typeof(DataCsv).GetMethod(nameof(ImportFile), BindingFlags.NonPublic | BindingFlags.Static);
 
@@ -54,40 +59,51 @@ namespace Sumorin.GameManagerBase
 		}
 
 		/// <summary>
-		/// 讀取資料夾內全部 CSV，以檔名對應所有掛 <see cref="DataEditorConfigAttribute" /> 的型別寫回
+		/// 列出資料夾內的 CSV 檔，依檔名排序
 		/// </summary>
 		/// <param name="folder">來源資料夾</param>
-		/// <returns>匯入結果</returns>
-		public static CsvImportReport Import(string folder)
+		/// <returns>CSV 檔的完整路徑</returns>
+		public static List<string> FindCsvFiles(string folder)
 		{
-			return Import(folder, DataTypes());
+			// Windows 的 *.csv 也會撈到 .csvx 之類的副檔名，再比對一次
+			return Directory.GetFiles(folder, "*.csv")
+							.Where(path => string.Equals(Path.GetExtension(path), ".csv", StringComparison.OrdinalIgnoreCase))
+							.OrderBy(path => Path.GetFileName(path), StringComparer.Ordinal)
+							.ToList();
 		}
 
 		/// <summary>
-		/// 讀取資料夾內全部 CSV，以檔名對應指定型別寫回
+		/// 以檔名找出對應的資料型別
 		/// </summary>
-		/// <param name="folder">來源資料夾</param>
+		/// <param name="filePath">CSV 檔路徑</param>
+		/// <param name="dataTypes">可對應的資料型別</param>
+		/// <returns>型別名稱與檔名相同的型別，對不上時為 null</returns>
+		public static Type FindType(string filePath, IEnumerable<Type> dataTypes)
+		{
+			var typeName = Path.GetFileNameWithoutExtension(filePath);
+
+			return dataTypes.FirstOrDefault(type => type.Name == typeName);
+		}
+
+		/// <summary>
+		/// 匯入指定的 CSV 檔，以檔名對應指定型別寫回
+		/// </summary>
+		/// <param name="filePaths">要匯入的 CSV 檔路徑，依此順序處理</param>
 		/// <param name="dataTypes">可對應的資料型別</param>
 		/// <returns>匯入結果</returns>
-		public static CsvImportReport Import(string folder, IEnumerable<Type> dataTypes)
+		public static CsvImportReport Import(IEnumerable<string> filePaths, IEnumerable<Type> dataTypes)
 		{
 			var types = dataTypes.ToList();
 			var report = new CsvImportReport();
 
-			// Windows 的 *.csv 也會撈到 .csvx 之類的副檔名，再比對一次
-			var files = Directory.GetFiles(folder, "*.csv")
-								 .Where(path => string.Equals(Path.GetExtension(path), ".csv", StringComparison.OrdinalIgnoreCase))
-								 .OrderBy(path => Path.GetFileName(path), StringComparer.Ordinal);
-
-			foreach(var path in files)
+			foreach(var path in filePaths)
 			{
 				var file = report.Add(Path.GetFileName(path));
-				var typeName = Path.GetFileNameWithoutExtension(path);
-				var type = types.FirstOrDefault(t => t.Name == typeName);
+				var type = FindType(path, types);
 
 				if(type == null)
 				{
-					file.WholeFileProblem = "找不到對應的資料型別，已略過";
+					file.WholeFileProblem = $"{UnknownTypeLabel}，已略過";
 					continue;
 				}
 
@@ -107,7 +123,11 @@ namespace Sumorin.GameManagerBase
 			return report;
 		}
 
-		private static List<Type> DataTypes()
+		/// <summary>
+		/// 所有掛 <see cref="DataEditorConfigAttribute" /> 的資料型別，與頁籤下拉同一來源
+		/// </summary>
+		/// <returns>資料型別清單</returns>
+		public static List<Type> DataTypes()
 		{
 			return SumorinEditorUtility.GetTypesWithAttribute<SODataBase, DataEditorConfigAttribute>();
 		}

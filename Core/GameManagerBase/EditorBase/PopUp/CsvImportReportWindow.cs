@@ -20,7 +20,7 @@ namespace Sumorin.GameManagerBase
 		{
 			var window = GetWindow<CsvImportReportWindow>(true, "CSV 匯入結果");
 			window.text = report.ToString();
-			window.minSize = new Vector2(480, 320);
+			window.minSize = new(480, 320);
 			window.Show();
 		}
 	}
