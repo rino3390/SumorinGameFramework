@@ -37,7 +37,8 @@ namespace Sumorin.GameManagerBase
 		[ShowInInspector]
 		[TableList(IsReadOnly = true, AlwaysExpanded = true, ShowPaging = false)]
 		[PropertyOrder(2)]
-		public List<Entry> Entries { get; }
+		// setter 不能拿掉：Odin 把沒有 setter 的屬性判為唯讀，整張表的勾選框會一起停用
+		public List<Entry> Entries { get; private set; }
 
 		/// <summary>
 		/// 對得上資料型別、可以匯入的檔案數
