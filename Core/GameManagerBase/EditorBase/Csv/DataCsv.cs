@@ -275,29 +275,11 @@ namespace Sumorin.GameManagerBase
 
 		private static void SyncAssetName<T>(T data, string assetName, int rowNumber, CsvImportReport.FileReport file) where T: SODataBase
 		{
-			var path = AssetDatabase.GetAssetPath(data);
-			var currentName = Path.GetFileNameWithoutExtension(path);
+			var currentName = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(data));
 
-			if(currentName != assetName)
-			{
-				var targetPath = path[..(path.LastIndexOf('/') + 1)] + assetName + ".asset";
+			if(data.TryRenameAsset(assetName, out var error)) return;
 
-				if(File.Exists(targetPath))
-				{
-					file.Problems.Add($"第 {rowNumber} 列 AssetName：{assetName} 已有同名檔，維持 {currentName}");
-					return;
-				}
-
-				var error = AssetDatabase.RenameAsset(path, assetName);
-
-				if(!string.IsNullOrEmpty(error))
-				{
-					file.Problems.Add($"第 {rowNumber} 列 AssetName：{error}，維持 {currentName}");
-					return;
-				}
-			}
-
-			data.AssetName = assetName;
+			file.Problems.Add($"第 {rowNumber} 列 AssetName：{error}，維持 {currentName}");
 		}
 
 		private static DataSet<T> FindOrCreateDataSet<T>() where T: SODataBase

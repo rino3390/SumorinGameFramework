@@ -69,8 +69,8 @@ namespace Sumorin.GameManagerBase
 		}
 
 		/// <summary>
-		/// 以資料的本地化顯示名稱（DataName）作為選單名稱，未設定時保留原檔名；
-		/// 掛 OnDrawItem 每次重繪重算，DataName 變更後即時反映。
+		/// 以資料的本地化顯示名稱（DataName）作為選單名稱，未設定時退回 AssetName；
+		/// 掛 OnDrawItem 每次重繪重算，DataName 與檔名變更後即時反映。
 		/// </summary>
 		/// <param name="menuItem">選單項目</param>
 		private static void UseDataNameAsMenuName(OdinMenuItem menuItem)
@@ -79,10 +79,9 @@ namespace Sumorin.GameManagerBase
 
 			void Apply()
 			{
-				if(data.DataName.IsNullOrEmpty()) return;
+				var displayName = GetDisplayName(data);
 
-				var displayName = ResolveDataName(data.DataName);
-
+				// 兩個名稱都空著時保留 Odin 建樹時取的檔名，否則選單會出現點不出東西的空白項目
 				if(!string.IsNullOrEmpty(displayName))
 				{
 					menuItem.Name = displayName;

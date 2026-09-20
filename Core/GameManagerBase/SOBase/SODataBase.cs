@@ -3,6 +3,11 @@ using Sirenix.OdinInspector;
 using Sirenix.Serialization;
 using System.Reflection;
 using UnityEngine.Localization;
+#if UNITY_EDITOR
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+#endif
 
 namespace Sumorin.GameManagerBase
 {
@@ -35,7 +40,8 @@ namespace Sumorin.GameManagerBase
 		/// 資產檔案名稱（僅允許英數字、橫線、底線）
 		/// </summary>
 		/// <remarks>
-		/// 驗證方法以字串指定而非 <c>nameof</c>。本組件在所有平台編譯，而驗證方法僅存在於編輯器，
+		/// 值與資產檔名永遠一致，改名由欄位下方的確認按鈕發起，見 <see cref="TryRenameAsset" />。
+		/// 驗證與繪製方法以字串指定而非 <c>nameof</c>。本組件在所有平台編譯，而這些方法僅存在於編輯器，
 		/// <c>nameof</c> 會要求編譯器當場解析，正式建置就會因為找不到方法而失敗。
 		/// </remarks>
 		[HorizontalGroup(LayoutConst.TopInfoLayout)]
@@ -43,6 +49,8 @@ namespace Sumorin.GameManagerBase
 		[LabelText("檔案名稱")]
 		[PropertyOrder(1)]
 		[PropertySpace(10), ValidateInput("IsAssetNameLegal", "名稱只能為英數（含減號底線）")]
+		[OnInspectorGUI("NameAssetNameField", "DrawRenameUi")]
+		[OnInspectorInit("ClearRenameError")]
 		public string AssetName = "";
 
 		/// <summary>
@@ -92,6 +100,85 @@ namespace Sumorin.GameManagerBase
 			}
 		}
 
+		// 清單模式一頁會畫出多筆資產，控制項名稱帶上實例才分得出焦點在哪一筆的欄位
+		private string AssetNameControlName => "SODataBase.AssetName." + GetInstanceID();
+
+		private string CurrentFileName => Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(this));
+
+		/// <remarks>
+		/// 在 Project 視窗直接改檔名也會讓值與檔名不同，那不算改名流程的開始，所以要求欄位先被編輯過。
+		/// </remarks>
+		private bool HasPendingRename => assetNameFieldEdited && !string.IsNullOrEmpty(CurrentFileName) && CurrentFileName != AssetName;
+
+		private string renameError;
+		private Rect renameButtonsRect;
+
+		/// <remarks>
+		/// 以值的變化判斷使用者編輯過欄位，不看焦點。焦點名稱能不能抓到取決於 Odin 把
+		/// <see cref="GUI.SetNextControlName" /> 套到哪個控制項，按鈕該不該出現不押在這件事上。
+		/// </remarks>
+		private bool assetNameFieldEdited;
+
+		/// <remarks>
+		/// null 代表還沒繪製過，首次只記錄現值。否則從磁碟讀進來的名稱會被當成使用者剛打的字。
+		/// </remarks>
+		private string lastSeenAssetName;
+
+		/// <remarks>
+		/// 失焦自動還原只在確認抓得到欄位焦點之後才啟用。<see cref="GUI.SetNextControlName" /> 若被
+		/// 別的控制項吃掉，焦點名稱永遠對不上，此時寧可只留還原按鈕，也不要每幀把使用者正在打的字還原掉。
+		/// </remarks>
+		private bool assetNameFieldFocused;
+
+		/// <summary>
+		/// 把資產檔名改為指定名稱，並同步 <see cref="AssetName" />
+		/// </summary>
+		/// <param name="newName">新檔名，不含副檔名</param>
+		/// <param name="error">失敗原因，成功時為 null</param>
+		/// <returns>改名成功或檔名本來就相符則回傳 true</returns>
+		/// <remarks>
+		/// 編輯器的確認按鈕與 CSV 匯入共用這條路徑，檔名規則才不會兩邊各走一套。
+		/// </remarks>
+		public bool TryRenameAsset(string newName, out string error)
+		{
+			error = null;
+			var path = AssetDatabase.GetAssetPath(this);
+
+			if(string.IsNullOrEmpty(path))
+			{
+				error = "資產尚未存檔";
+				return false;
+			}
+
+			if(string.IsNullOrWhiteSpace(newName) || !RegexChecking.OnlyEnglishAndNum(newName))
+			{
+				error = "名稱只能為英數";
+				return false;
+			}
+
+			if(Path.GetFileNameWithoutExtension(path) != newName)
+			{
+				if(File.Exists(path[..(path.LastIndexOf('/') + 1)] + newName + ".asset"))
+				{
+					error = "檔名已存在";
+					return false;
+				}
+
+				var renameFailure = AssetDatabase.RenameAsset(path, newName);
+
+				if(!string.IsNullOrEmpty(renameFailure))
+				{
+					error = renameFailure;
+					return false;
+				}
+			}
+
+			AssetName = newName;
+			EditorUtility.SetDirty(this);
+
+			return true;
+		}
+
 		/// <summary>
 		/// 驗證 Id 是否合法
 		/// </summary>
@@ -117,6 +204,113 @@ namespace Sumorin.GameManagerBase
 		private bool IsDataNameLegal()
 		{
 			return !DataName.IsNullOrEmpty();
+		}
+
+		private void ClearRenameError()
+		{
+			renameError = null;
+		}
+
+		private void NameAssetNameField()
+		{
+			if(lastSeenAssetName == null)
+			{
+				lastSeenAssetName = AssetName;
+			}
+			else if(AssetName != lastSeenAssetName)
+			{
+				lastSeenAssetName = AssetName;
+				assetNameFieldEdited = true;
+				renameError = null;
+			}
+
+			GUI.SetNextControlName(AssetNameControlName);
+		}
+
+		private void DrawRenameUi()
+		{
+			if(!HasPendingRename)
+			{
+				// 值與檔名一致就是這輪改名的終點，旗標留著會讓之後在 Project 視窗改檔名也冒出按鈕
+				assetNameFieldEdited = false;
+
+				if(!string.IsNullOrEmpty(renameError))
+				{
+					EditorGUILayout.HelpBox(renameError, MessageType.Error);
+				}
+
+				return;
+			}
+
+			DrawRenameButtons();
+			RevertOnFocusLost();
+		}
+
+		private void DrawRenameButtons()
+		{
+			var rect = EditorGUILayout.BeginHorizontal();
+
+			// Layout 事件算不出 rect，只有重繪那幀的值可信
+			if(Event.current.type == EventType.Repaint)
+			{
+				renameButtonsRect = rect;
+			}
+
+			using(new EditorGUI.DisabledScope(!IsAssetNameLegal()))
+			{
+				if(GUILayout.Button("確認"))
+				{
+					ConfirmRename();
+				}
+			}
+
+			if(GUILayout.Button("還原"))
+			{
+				RevertRename();
+			}
+
+			EditorGUILayout.EndHorizontal();
+		}
+
+		private void RevertOnFocusLost()
+		{
+			if(GUI.GetNameOfFocusedControl() == AssetNameControlName)
+			{
+				assetNameFieldFocused = true;
+				return;
+			}
+
+			if(!assetNameFieldFocused) return;
+
+			// 按到按鈕的當下欄位就失焦，按鈕的點擊要等到放開滑鼠才成立，這時還原會讓確認按不到東西
+			if(renameButtonsRect.Contains(Event.current.mousePosition)) return;
+
+			RevertRename();
+		}
+
+		private void ConfirmRename()
+		{
+			if(!TryRenameAsset(AssetName, out var error))
+			{
+				renameError = error;
+				AssetName = CurrentFileName;
+			}
+
+			EndRename();
+		}
+
+		private void RevertRename()
+		{
+			AssetName = CurrentFileName;
+			renameError = null;
+			EndRename();
+		}
+
+		private void EndRename()
+		{
+			assetNameFieldEdited = false;
+			assetNameFieldFocused = false;
+			lastSeenAssetName = AssetName;
 		}
 
 		/// <summary>
