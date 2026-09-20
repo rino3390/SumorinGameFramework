@@ -1,0 +1,22 @@
+{
+  "name": "Sumorin.Gm",
+  "references": [
+    "Sumorin.Gm.Contract",
+    "Sumorin.Gm.View",
+    "Sumorin.Gm.Presenter",
+    "Sumorin.DDDCore",
+    "Sumorin.SumorinUtility",
+    "VContainer"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [
+    "UNITY_EDITOR || DEVELOPMENT_BUILD"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

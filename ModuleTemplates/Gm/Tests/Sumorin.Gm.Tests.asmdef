@@ -1,0 +1,31 @@
+{
+  "name": "Sumorin.Gm.Tests",
+  "references": [
+    "Sumorin.Gm",
+    "Sumorin.Gm.Contract",
+    "Sumorin.Gm.View",
+    "Sumorin.Gm.Presenter",
+    "Sumorin.DDDCore",
+    "Sumorin.TestFramework",
+    "Sumorin.SumorinUtility",
+    "UnityEngine.UI",
+    "VContainer"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll",
+    "FluentAssertions.dll",
+    "NSubstitute.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

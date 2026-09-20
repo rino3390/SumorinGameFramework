@@ -1,0 +1,19 @@
+{
+  "name": "Sumorin.Gm.View",
+  "references": [
+    "Sumorin.Gm.Contract",
+    "Sumorin.SumorinUtility",
+    "UnityEngine.UI"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [
+    "UNITY_EDITOR || DEVELOPMENT_BUILD"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

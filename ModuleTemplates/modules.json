@@ -69,6 +69,18 @@
       "files": []
     },
     {
+      "id": "gm-panel",
+      "name": "GM 面板",
+      "description": "開發用的 GM 操作面板，程式生成不需資產，只在 Editor 與 Development Build 編譯",
+      "version": "1.0.0",
+      "dependencies": [],
+      "installPath": "Script",
+      "folders": [
+        "ModuleTemplates/Gm"
+      ],
+      "files": []
+    },
+    {
       "id": "game-setting",
       "name": "GameSetting",
       "description": "遊戲設定模組，提供 Editor 工具來管理遊戲設定檔",
