@@ -102,6 +102,8 @@ namespace Sumorin.GameManagerBase
 		}
 
 		private static readonly Color PendingRenameColor = new(1f, 0.85f, 0.45f);
+		private static readonly Color ConfirmButtonColor = new(0.55f, 1f, 0.55f);
+		private static readonly Color RevertButtonColor = new(1f, 0.55f, 0.55f);
 
 		private Color AssetNameFieldColor => HasPendingRename ? PendingRenameColor : Color.white;
 
@@ -257,19 +259,31 @@ namespace Sumorin.GameManagerBase
 				renameButtonsRect = rect;
 			}
 
+			var originalBackground = GUI.backgroundColor;
+			var originalColor = GUI.color;
+
+			// 欄位的 GUIColor 會一路套到這裡，不歸零按鈕就會是琥珀色疊上綠紅的濁色
+			GUI.color = Color.white;
+
 			using(new EditorGUI.DisabledScope(!IsAssetNameLegal()))
 			{
+				GUI.backgroundColor = ConfirmButtonColor;
+
 				if(GUILayout.Button("確認"))
 				{
 					ConfirmRename();
 				}
 			}
 
+			GUI.backgroundColor = RevertButtonColor;
+
 			if(GUILayout.Button("還原"))
 			{
 				RevertRename();
 			}
 
+			GUI.backgroundColor = originalBackground;
+			GUI.color = originalColor;
 			EditorGUILayout.EndHorizontal();
 		}
 
@@ -308,6 +322,10 @@ namespace Sumorin.GameManagerBase
 
 		private void EndRename()
 		{
+			// 只改值不夠，游標留在欄位裡就還是編輯狀態，接著打字又會進入未確認
+			GUIUtility.keyboardControl = 0;
+			EditorGUIUtility.editingTextField = false;
+
 			assetNameFieldEdited = false;
 			lastSeenAssetName = AssetName;
 		}
