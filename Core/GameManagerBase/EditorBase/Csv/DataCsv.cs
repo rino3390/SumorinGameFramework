@@ -277,7 +277,7 @@ namespace Sumorin.GameManagerBase
 		{
 			var currentName = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(data));
 
-			if(data.TryRenameAsset(assetName, out var error)) return;
+			if(AssetRenamer.TryRename(data, assetName, out var error)) return;
 
 			file.Problems.Add($"第 {rowNumber} 列 AssetName：{error}，維持 {currentName}");
 		}
