@@ -49,8 +49,9 @@ namespace Sumorin.GameManagerBase
 		[LabelText("檔案名稱")]
 		[PropertyOrder(1)]
 		[PropertySpace(10), ValidateInput("IsAssetNameLegal", "名稱只能為英數（含減號底線）")]
-		[OnInspectorGUI("NameAssetNameField", "DrawRenameUi")]
+		[OnInspectorGUI("TrackAssetNameEdit", "DrawRenameUi")]
 		[OnInspectorInit("ClearRenameError")]
+		[GUIColor("AssetNameFieldColor")]
 		public string AssetName = "";
 
 		/// <summary>
@@ -100,8 +101,9 @@ namespace Sumorin.GameManagerBase
 			}
 		}
 
-		// 清單模式一頁會畫出多筆資產，控制項名稱帶上實例才分得出焦點在哪一筆的欄位
-		private string AssetNameControlName => "SODataBase.AssetName." + GetInstanceID();
+		private static readonly Color PendingRenameColor = new(1f, 0.85f, 0.45f);
+
+		private Color AssetNameFieldColor => HasPendingRename ? PendingRenameColor : Color.white;
 
 		private string CurrentFileName => Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(this));
 
@@ -112,10 +114,11 @@ namespace Sumorin.GameManagerBase
 
 		private string renameError;
 		private Rect renameButtonsRect;
+		private Rect assetNameFieldRect;
 
 		/// <remarks>
-		/// 以值的變化判斷使用者編輯過欄位，不看焦點。焦點名稱能不能抓到取決於 Odin 把
-		/// <see cref="GUI.SetNextControlName" /> 套到哪個控制項，按鈕該不該出現不押在這件事上。
+		/// 以值的變化判斷使用者編輯過欄位，不看鍵盤焦點。
+		/// 焦點抓不抓得到取決於 Odin 怎麼畫這個欄位，按鈕該不該出現不押在這件事上。
 		/// </remarks>
 		private bool assetNameFieldEdited;
 
@@ -123,12 +126,6 @@ namespace Sumorin.GameManagerBase
 		/// null 代表還沒繪製過，首次只記錄現值。否則從磁碟讀進來的名稱會被當成使用者剛打的字。
 		/// </remarks>
 		private string lastSeenAssetName;
-
-		/// <remarks>
-		/// 失焦自動還原只在確認抓得到欄位焦點之後才啟用。<see cref="GUI.SetNextControlName" /> 若被
-		/// 別的控制項吃掉，焦點名稱永遠對不上，此時寧可只留還原按鈕，也不要每幀把使用者正在打的字還原掉。
-		/// </remarks>
-		private bool assetNameFieldFocused;
 
 		/// <summary>
 		/// 把資產檔名改為指定名稱，並同步 <see cref="AssetName" />
@@ -211,7 +208,7 @@ namespace Sumorin.GameManagerBase
 			renameError = null;
 		}
 
-		private void NameAssetNameField()
+		private void TrackAssetNameEdit()
 		{
 			if(lastSeenAssetName == null)
 			{
@@ -223,12 +220,16 @@ namespace Sumorin.GameManagerBase
 				assetNameFieldEdited = true;
 				renameError = null;
 			}
-
-			GUI.SetNextControlName(AssetNameControlName);
 		}
 
 		private void DrawRenameUi()
 		{
+			// append 的起點就接在欄位後面，這裡的 last rect 是剛畫完的 AssetName 欄位
+			if(Event.current.type == EventType.Repaint)
+			{
+				assetNameFieldRect = GUILayoutUtility.GetLastRect();
+			}
+
 			if(!HasPendingRename)
 			{
 				// 值與檔名一致就是這輪改名的終點，旗標留著會讓之後在 Project 視窗改檔名也冒出按鈕
@@ -243,7 +244,7 @@ namespace Sumorin.GameManagerBase
 			}
 
 			DrawRenameButtons();
-			RevertOnFocusLost();
+			RevertOnClickOutside();
 		}
 
 		private void DrawRenameButtons()
@@ -272,18 +273,17 @@ namespace Sumorin.GameManagerBase
 			EditorGUILayout.EndHorizontal();
 		}
 
-		private void RevertOnFocusLost()
+		/// <remarks>
+		/// 以點擊落點判斷離開，不看鍵盤焦點。Odin 重建欄位的 drawer 時焦點名稱會短暫對不上，
+		/// 拿焦點當依據會在使用者還在打字時就把值還原掉。
+		/// </remarks>
+		private void RevertOnClickOutside()
 		{
-			if(GUI.GetNameOfFocusedControl() == AssetNameControlName)
-			{
-				assetNameFieldFocused = true;
-				return;
-			}
+			if(Event.current.type != EventType.MouseDown) return;
 
-			if(!assetNameFieldFocused) return;
+			var mouse = Event.current.mousePosition;
 
-			// 按到按鈕的當下欄位就失焦，按鈕的點擊要等到放開滑鼠才成立，這時還原會讓確認按不到東西
-			if(renameButtonsRect.Contains(Event.current.mousePosition)) return;
+			if(assetNameFieldRect.Contains(mouse) || renameButtonsRect.Contains(mouse)) return;
 
 			RevertRename();
 		}
@@ -309,7 +309,6 @@ namespace Sumorin.GameManagerBase
 		private void EndRename()
 		{
 			assetNameFieldEdited = false;
-			assetNameFieldFocused = false;
 			lastSeenAssetName = AssetName;
 		}
 
