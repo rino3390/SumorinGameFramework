@@ -20,7 +20,11 @@ namespace Sumorin.Gm
 		private const int SortingOrder = 30000;
 		private const float ScreenMargin = 12f;
 		private const float ToastMaxWidth = 360f;
-		private const float ToastRise = 24f;
+		private const float ToastRise = 20f;
+		private const float ToastSecondsPerCharacter = 0.05f;
+		private const float ToastMinSeconds = 0.3f;
+		private const float ToastMaxSeconds = 1.8f;
+		private const float ToastFadeStart = 0.6f;
 		private const float EventSystemCheckInterval = 0.5f;
 
 		private static readonly Vector2 PreferredPanelSize = new(760f, 560f);
@@ -268,7 +272,7 @@ namespace Sumorin.Gm
 			toast.anchoredPosition = Vector2.zero;
 
 			// 「已執行」這類短訊息一閃而過，失敗原因較長時停久一點才讀得完
-			var duration = Mathf.Clamp(0.6f + message.Length * 0.08f, 1.2f, 4f);
+			var duration = Mathf.Clamp(message.Length * ToastSecondsPerCharacter, ToastMinSeconds, ToastMaxSeconds);
 			toastRoutine = StartCoroutine(FloatAway(duration));
 		}
 
@@ -281,7 +285,7 @@ namespace Sumorin.Gm
 			{
 				var progress = elapsed / duration;
 				toast.anchoredPosition = start + new Vector2(0f, ToastRise * progress);
-				toastGroup.alpha = progress < 0.7f ? 1f : 1f - (progress - 0.7f) / 0.3f;
+				toastGroup.alpha = progress < ToastFadeStart ? 1f : 1f - (progress - ToastFadeStart) / (1f - ToastFadeStart);
 				yield return null;
 			}
 
