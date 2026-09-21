@@ -16,16 +16,16 @@ Unity MVP 架構共用框架，提供 DDD 核心、遊戲資料管理、模組�
 
 本套件需要以下依賴，請先安裝：
 
-| 套件 | 安裝方式 |
-|------|----------|
-| VContainer | OpenUPM |
-| DoTween | Asset Store |
-| R3 | UnityNuGet registry 裝核心 dll，Git URL 裝 Unity 橋接 |
-| ObservableCollections | UnityNuGet registry |
-| UniTask | OpenUPM |
-| Odin Inspector | Asset Store（付費） |
-| Unity Localization | Package Manager |
-| NSubstitute（測試用） | UnityNuGet registry，原本隨 Zenject 附帶 |
+| 套件                  | 安裝方式                                              |
+|-----------------------|-------------------------------------------------------|
+| VContainer            | OpenUPM                                               |
+| DoTween               | Asset Store                                           |
+| R3                    | UnityNuGet registry 裝核心 dll，Git URL 裝 Unity 橋接 |
+| ObservableCollections | UnityNuGet registry                                   |
+| UniTask               | OpenUPM                                               |
+| Odin Inspector        | Asset Store（付費）                                   |
+| Unity Localization    | Package Manager                                       |
+| NSubstitute（測試用） | UnityNuGet registry，原本隨 Zenject 附帶              |
 
 ### 套件來源配置
 
@@ -69,13 +69,13 @@ https://github.com/rino3390/SumorinGameFramework.git?path=Core
 
 ## 功能模組
 
-| 模組 | 說明 |
-|------|------|
-| DDDCore | Entity、Repository、CommandResult、EventBus 基礎架構 |
-| Presentation | View 管理框架（ViewRegistry、IViewProvider、IBindableView） |
-| GameManager | 遊戲資料管理編輯器視窗 |
-| ModuleInstaller | 可選模組安裝器（屬性、Buff、存檔等系統） |
-| SumorinUtility | 通用工具方法、配置存取（ConfigManager）與型別下拉（TypeDropdown） |
+| 模組            | 說明                                                              |
+|-----------------|-------------------------------------------------------------------|
+| DDDCore         | Entity、Repository、CommandResult、EventBus 基礎架構              |
+| Presentation    | View 管理框架（ViewRegistry、IViewProvider、IBindableView）       |
+| GameManager     | 遊戲資料管理編輯器視窗                                            |
+| ModuleInstaller | 可選模組安裝器（屬性、Buff、存檔等系統）                          |
+| SumorinUtility  | 通用工具方法、配置存取（ConfigManager）與型別下拉（TypeDropdown） |
 
 ---
 
@@ -314,13 +314,14 @@ public class SettingsEditor : GameEditorMenuBase
 
 ### 可用模組
 
-| 模組 | 說明 |
-|------|------|
-| FolderStructure | 標準專案資料夾結構 |
-| Attribute | 屬性系統（HP、MP、攻擊力等） |
-| Buff | Buff/Debuff 系統（支援堆疊、持續時間） |
-| Save | 存檔系統（存檔槽、Repository 轉接層、存檔加密） |
-| GameSetting | 遊戲設定管理（搭配 GameSettingConfig 使用） |
+| 模組            | 說明                                                        |
+|-----------------|-------------------------------------------------------------|
+| FolderStructure | 標準專案資料夾結構                                          |
+| Attribute       | 屬性系統（HP、MP、攻擊力等）                                |
+| Buff            | Buff/Debuff 系統（支援堆疊、持續時間）                      |
+| Save            | 存檔系統（存檔槽、Repository 轉接層、存檔加密）             |
+| GameSetting     | 遊戲設定管理（搭配 GameSettingConfig 使用）                 |
+| GM              | 開發用的 GM 操作面板，只在 Editor 與 Development Build 編譯 |
 
 ### 模組依賴
 
@@ -329,6 +330,9 @@ public class SettingsEditor : GameEditorMenuBase
 - Buff → Attribute（Buff 效果會修改屬性）
 
 安裝器會顯示依賴狀態，未滿足的依賴需先安裝。
+
+GM 另外需要 Input System 套件（`com.unity.inputsystem`），從 Package Manager 安裝。
+專案的輸入處理要設成新版，GM 不使用舊版 Input。
 
 ### GameSetting
 

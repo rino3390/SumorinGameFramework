@@ -18,7 +18,7 @@ namespace Sumorin.Gm
 		/// </summary>
 		/// <param name="type">要判斷的型別</param>
 		/// <returns>是 <see cref="GmConfigId{TConfig}" /> 的封閉泛型則為 true</returns>
-		public static bool Matches(Type type) => type is { IsGenericType: true } && type.GetGenericTypeDefinition() == typeof(GmConfigId<>);
+		public static bool Matches(Type type) => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(GmConfigId<>);
 
 		/// <summary>
 		///     取該配置型別的全部 Id

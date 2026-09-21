@@ -32,30 +32,32 @@ namespace Sumorin.Gm.Tests
 			return operations;
 		}
 
-		[TestCase("戰鬥/殺死目標", "戰鬥", "殺死目標", TestName = "帶分類的名稱拆成分類與名稱")]
-		[TestCase("重置全部", GmOperation.UncategorizedCategory, "重置全部", TestName = "沒有分類的名稱歸未分類")]
-		public void Build_ParsesOperationName(string fullName, string category, string name)
+		[TestCase("戰鬥/殺死目標", "戰鬥/殺死目標", "戰鬥", "殺死目標", TestName = "帶分類的名稱拆成分類與名稱")]
+		[TestCase("重置全部", "重置全部", GmOperation.UncategorizedCategory, "重置全部", TestName = "沒有分類的名稱歸未分類")]
+		public void Build_ParsesOperationName(string registeredName, string fullName, string category, string name)
 		{
-			var operations = CreateOperations(o => o.Register(fullName, () => CommandResult.Ok()));
+			var operations = CreateOperations(o => o.Register(registeredName, () => CommandResult.Ok()));
 
 			operations.Build();
 
 			operations.Operations.Should().BeEquivalentTo(new[] { new { FullName = fullName, Category = category, Name = name } });
 		}
 
-		[Test]
-		public void Build_WithDuplicatedOperationName_ThrowsWithThatName()
+		[TestCase("戰鬥/殺死目標", "戰鬥/殺死目標", "戰鬥/殺死目標", TestName = "名稱完全相同")]
+		[TestCase("重置全部", "未分類/重置全部", "重置全部", TestName = "省略未分類與明寫未分類")]
+		[TestCase("戰鬥/殺死目標", " 戰鬥 / 殺死目標 ", "戰鬥/殺死目標", TestName = "名稱前後多了空白")]
+		public void Build_WithDuplicatedOperationName_ThrowsWithThatName(string first, string second, string fullName)
 		{
 			var operations = CreateOperations(o =>
 				{
-					o.Register("戰鬥/殺死目標", () => CommandResult.Ok());
-					o.Register("戰鬥/殺死目標", () => CommandResult.Ok());
+					o.Register(first, CommandResult.Ok);
+					o.Register(second, CommandResult.Ok);
 				}
 			);
 
-			Action act = () => operations.Build();
+			Action act = operations.Build;
 
-			act.Should().ThrowExactly<InvalidOperationException>().WithMessage("*戰鬥/殺死目標*");
+			act.Should().ThrowExactly<InvalidOperationException>().WithMessage($"*{fullName}*");
 		}
 
 		[Test]
@@ -82,7 +84,7 @@ namespace Sumorin.Gm.Tests
 		{
 			var operations = CreateOperations(o =>
 				{
-					o.Register("無/命令0", () => CommandResult.Ok());
+					o.Register("無/命令0", CommandResult.Ok);
 					o.Register<int>("無/命令1", a => CommandResult.Ok());
 					o.Register<int, int>("無/命令2", (a, b) => CommandResult.Ok());
 					o.Register<int, int, int>("無/命令3", (a, b, c) => CommandResult.Ok());
@@ -97,7 +99,7 @@ namespace Sumorin.Gm.Tests
 
 			operations.Build();
 
-			operations.Operations.Select(operation => new { operation.Name, Count = operation.Parameters.Count })
+			operations.Operations.Select(operation => new { operation.Name, operation.Parameters.Count })
 					  .Should()
 					  .BeEquivalentTo(
 						  new[]

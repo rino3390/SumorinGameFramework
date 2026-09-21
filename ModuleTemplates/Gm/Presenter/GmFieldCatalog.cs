@@ -5,11 +5,11 @@ using Sumorin.SumorinUtility;
 namespace Sumorin.Gm
 {
 	/// <summary>
-	///     型別到欄位建構器的註冊表
+	///     將型別註冊成欄位，用來判斷此型別要怎麼繪製輸入框
 	/// </summary>
 	/// <remarks>
 	///     比對依序為遊戲側註冊的精確型別、框架內建的精確型別、框架的型別家族。
-	///     家族指一種欄位涵蓋多個型別的情況，列舉與配置 Id 各算一族。
+	///     家族指一種欄位涵蓋多個型別的情況，如 enum 和 ConfigId 會有許多繼承型別。
 	/// </remarks>
 	public class GmFieldCatalog: IGmFieldCatalog
 	{

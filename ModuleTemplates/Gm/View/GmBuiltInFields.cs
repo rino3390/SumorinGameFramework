@@ -7,7 +7,8 @@ using UnityEngine.UI;
 namespace Sumorin.Gm
 {
 	/// <summary>
-	///     框架內建的參數欄位，涵蓋整數、浮點數、布林、字串、列舉與配置 Id
+	///     設定框架內建的參數欄位要如何繪製
+	///		涵蓋整數、浮點數、布林、字串、列舉與配置 Id
 	/// </summary>
 	public static class GmBuiltInFields
 	{
@@ -32,16 +33,10 @@ namespace Sumorin.Gm
 		/// <param name="configs">配置查找入口</param>
 		/// <returns>欄位建構器</returns>
 		public static GmFieldBuilder CreateConfigId(ConfigManager configs) =>
-			(parent, label, valueType) =>
-				Create<GmConfigIdField>(parent, label).Bind(valueType, GmConfigIdLookup.CandidatesOf(valueType, configs));
+			(parent, label, valueType) => Create<GmConfigIdField>(parent, label).Bind(valueType, GmConfigIdLookup.CandidatesOf(valueType, configs));
 
 		// 欄位本體掛在「標籤 + 控制項」的那一列上，控制項由各欄位自己生在同一列內
-		private static TField Create<TField>(Transform parent, string label) where TField: MonoBehaviour
-		{
-			var container = GmUi.Row(parent, $"Field ({label})", 4f);
-			GmUi.Label(container.transform, label, 90f);
-			return container.AddComponent<TField>();
-		}
+		private static TField Create<TField>(Transform parent, string label) where TField: MonoBehaviour => GmUi.FieldRow(parent, label).AddComponent<TField>();
 	}
 
 	/// <summary>
@@ -50,7 +45,7 @@ namespace Sumorin.Gm
 	public sealed class GmIntField: GmField<int>
 	{
 		/// <inheritdoc />
-		public override int Value => int.TryParse(input.text, out var value) ? value : 0;
+		protected override int Value => int.TryParse(input.text, out var value) ? value : 0;
 
 		private InputField input;
 
@@ -75,7 +70,7 @@ namespace Sumorin.Gm
 	public sealed class GmFloatField: GmField<float>
 	{
 		/// <inheritdoc />
-		public override float Value => float.TryParse(input.text, out var value) ? value : 0f;
+		protected override float Value => float.TryParse(input.text, out var value) ? value : 0f;
 
 		private InputField input;
 
@@ -100,7 +95,7 @@ namespace Sumorin.Gm
 	public sealed class GmBoolField: GmField<bool>
 	{
 		/// <inheritdoc />
-		public override bool Value => toggle.isOn;
+		protected override bool Value => toggle.isOn;
 
 		private Toggle toggle;
 
@@ -125,7 +120,7 @@ namespace Sumorin.Gm
 	public sealed class GmStringField: GmField<string>
 	{
 		/// <inheritdoc />
-		public override string Value => input.text;
+		protected override string Value => input.text;
 
 		private InputField input;
 
@@ -150,7 +145,7 @@ namespace Sumorin.Gm
 	public sealed class GmEnumField: GmField<object>
 	{
 		/// <inheritdoc />
-		public override object Value => values.Length == 0 ? null : values.GetValue(dropdown.value);
+		protected override object Value => values.Length == 0 ? null : values.GetValue(dropdown.value);
 
 		private Dropdown dropdown;
 		private Array values;
@@ -174,7 +169,7 @@ namespace Sumorin.Gm
 	public sealed class GmConfigIdField: GmField<object>
 	{
 		/// <inheritdoc />
-		public override object Value => GmConfigIdLookup.Wrap(configIdType, SelectedId);
+		protected override object Value => GmConfigIdLookup.Wrap(configIdType, SelectedId);
 
 		private string SelectedId => ids.Count == 0 ? null : ids[dropdown.value];
 

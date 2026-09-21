@@ -17,9 +17,9 @@ namespace Sumorin.Gm
 		private const char CategorySeparator = '/';
 
 		/// <summary>
-		///     登記時給的完整名稱，格式為 <c>分類/名稱</c>，也是操作的唯一識別
+		///     由分類與名稱組成的完整名稱，格式為 <c>分類/名稱</c>，未分類時只有名稱，也是操作的唯一識別
 		/// </summary>
-		public string FullName { get; }
+		public string FullName => Category == UncategorizedCategory ? Name : $"{Category}{CategorySeparator}{Name}";
 
 		/// <summary>
 		///     分頁名稱
@@ -51,7 +51,6 @@ namespace Sumorin.Gm
 				throw new ArgumentException("GM 操作名稱不可為空", nameof(fullName));
 			}
 
-			FullName = fullName;
 			Parameters = parameters ?? Array.Empty<GmParameter>();
 			this.body = body ?? throw new ArgumentNullException(nameof(body));
 

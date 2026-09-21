@@ -3,7 +3,8 @@
   "references": [
     "Sumorin.Gm.Contract",
     "Sumorin.SumorinUtility",
-    "UnityEngine.UI"
+    "UnityEngine.UI",
+    "Unity.InputSystem"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

@@ -14,7 +14,7 @@ namespace Sumorin.Gm
 		/// <summary>
 		///     欄位的當前值
 		/// </summary>
-		public abstract TValue Value { get; }
+		protected abstract TValue Value { get; }
 
 	#region IGmField Members
 		/// <inheritdoc />

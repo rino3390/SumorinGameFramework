@@ -34,7 +34,10 @@ namespace Sumorin.Gm
 		/// <inheritdoc />
 		public void Install(IContainerBuilder builder)
 		{
-			builder.RegisterComponentOnNewGameObject<GmPanelView>(Lifetime.Singleton, "GM Panel");
+			// 不指定父物件的話面板會建在場景根層。遊戲的 scope 跨場景時 GM scope 跟著活下來、面板卻被換場景帶走，
+			// 啟動點看到 scope 還在就不重建，面板從此消失。掛在 GM scope 底下才會同生同死
+			builder.RegisterComponentOnNewGameObject<GmPanelView>(Lifetime.Singleton, "GM Panel")
+				   .UnderTransform(resolver => (resolver.ApplicationOrigin as LifetimeScope)?.transform);
 
 			foreach(var type in fieldRegistrationTypes)
 			{

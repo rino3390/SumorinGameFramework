@@ -10,7 +10,7 @@ namespace Sumorin.Gm
 	///     GM 操作的登記入口，遊戲側繼承後在 <see cref="Define" /> 內逐條登記操作
 	/// </summary>
 	/// <remarks>
-	///     一款遊戲恰一個子類別，啟動點會掃出它並組裝整個 GM。
+	///     子類別由遊戲側進入點傳給 <see cref="GmBootstrap.Launch{TOperations}" />，由它組裝整個 GM。
 	///     登記的委派一律呼叫 CommandService，驗證留在 Controller，GM 不繞過任何規則。
 	/// </remarks>
 	public abstract class GmOperations
@@ -142,12 +142,12 @@ namespace Sumorin.Gm
 
 		private void Register(string name, MethodInfo method, Func<object[], CommandResult> body)
 		{
-			if(operations.ContainsKey(name))
-			{
-				throw new InvalidOperationException($"GM 操作名稱重複：{name}");
-			}
+			var operation = new GmOperation(name, ParametersOf(method), body);
 
-			operations.Add(name, new(name, ParametersOf(method), body));
+			if(!operations.TryAdd(operation.FullName, operation))
+			{
+				throw new InvalidOperationException($"GM 操作名稱重複：{operation.FullName}");
+			}
 		}
 	}
 }
