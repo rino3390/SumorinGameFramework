@@ -1,0 +1,24 @@
+{
+  "name": "GameGm",
+  "rootNamespace": "",
+  "references": [
+    "Sumorin.Gm",
+    "Sumorin.Gm.Contract",
+    "Sumorin.Gm.View",
+    "Sumorin.DDDCore",
+    "Sumorin.SumorinUtility",
+    "UnityEngine.UI",
+    "VContainer"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_EDITOR || DEVELOPMENT_BUILD"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

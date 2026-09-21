@@ -738,6 +738,7 @@ namespace Sumorin.ModuleInstaller
 				}
 			}
 
+			failedFiles.AddRange(await CreateMissingScaffoldsAsync(module));
 			AssetDatabase.Refresh();
 
 			// 全部下載成功才更新安裝紀錄，有失敗就維持舊版本以便重新更新
@@ -753,6 +754,36 @@ namespace Sumorin.ModuleInstaller
 			{
 				errorMessage = $"安裝 {module.Info.name} 時發生錯誤:\n{string.Join("\n", failedFiles)}";
 			}
+		}
+
+		// 初始檔屬於遊戲側，裡面會有遊戲寫好的內容，所以只補建不存在的，安裝、更新與修復都不覆蓋
+		private async UniTask<List<string>> CreateMissingScaffoldsAsync(ModuleRuntimeData module)
+		{
+			var failedFiles = new List<string>();
+
+			foreach(var scaffold in ModuleScaffolds.Missing(module.Info.scaffolds, Application.dataPath))
+			{
+				try
+				{
+					var request = UnityWebRequest.Get(GetRemoteFileUrl(scaffold.source));
+					await request.SendWebRequest().ToUniTask();
+
+					if(request.result != UnityWebRequest.Result.Success)
+					{
+						failedFiles.Add($"{scaffold.source}: {request.error}");
+					}
+					else
+					{
+						SaveFile(ModuleScaffolds.TargetPath(scaffold, Application.dataPath), request.downloadHandler.data ?? Array.Empty<byte>());
+					}
+				}
+				catch(Exception e)
+				{
+					failedFiles.Add($"{scaffold.source}: {e.Message}");
+				}
+			}
+
+			return failedFiles;
 		}
 
 		private async UniTask<List<string>> FetchFolderContentsAsync(string folderPath)
@@ -822,6 +853,16 @@ namespace Sumorin.ModuleInstaller
 			}
 
 			message += $"確定要移除「{module.Info.name}」嗎？\n\n這將刪除以下項目：\n• {string.Join("\n• ", module.InstalledFiles)}";
+
+			// 初始檔裡有遊戲寫好的內容，不替使用者刪，只提醒它們引用了這個模組
+			var keptScaffolds = module.Info.scaffolds.Where(scaffold => File.Exists(ModuleScaffolds.TargetPath(scaffold, Application.dataPath)))
+									  .Select(scaffold => "Assets/" + scaffold.target)
+									  .ToList();
+
+			if(keptScaffolds.Count > 0)
+			{
+				message += $"\n\n以下遊戲側的檔案會保留，但它們引用了這個模組，移除後會編譯失敗，請自行刪除或修改：\n• {string.Join("\n• ", keptScaffolds)}";
+			}
 
 			// 確認對話框
 			if(!EditorUtility.DisplayDialog("確認移除", message, "確定移除", "取消"))

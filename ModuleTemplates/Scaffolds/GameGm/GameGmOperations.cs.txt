@@ -1,0 +1,20 @@
+using Sumorin.Gm;
+
+namespace GameGm
+{
+	/// <summary>
+	///     這款遊戲的 GM 操作登記
+	/// </summary>
+	/// <remarks>
+	///     ModuleInstaller 安裝 GM 時建立，之後屬於遊戲側，模組更新不會覆蓋。
+	///     要呼叫的 CommandService 用 [Inject] 欄位注入，並在 GameGm.asmdef 補上它所在組件的引用。
+	/// </remarks>
+	public class GameGmOperations: GmOperations
+	{
+		/// <inheritdoc />
+		protected override void Define()
+		{
+			// 例：Add("經濟/給錢", (int amount) => economy.AddGold(amount));
+		}
+	}
+}

@@ -78,7 +78,21 @@
       "folders": [
         "ModuleTemplates/Gm"
       ],
-      "files": []
+      "files": [],
+      "scaffolds": [
+        {
+          "source": "ModuleTemplates/Scaffolds/GameGm/GameGm.asmdef.txt",
+          "target": "Script/GameGm/GameGm.asmdef"
+        },
+        {
+          "source": "ModuleTemplates/Scaffolds/GameGm/GameGmOperations.cs.txt",
+          "target": "Script/GameGm/GameGmOperations.cs"
+        },
+        {
+          "source": "ModuleTemplates/Scaffolds/GameGm/GameGmEntry.cs.txt",
+          "target": "Script/GameGm/GameGmEntry.cs"
+        }
+      ]
     },
     {
       "id": "game-setting",

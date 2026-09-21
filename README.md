@@ -334,6 +334,20 @@ public class SettingsEditor : GameEditorMenuBase
 GM 另外需要 Input System 套件（`com.unity.inputsystem`），從 Package Manager 安裝。
 專案的輸入處理要設成新版，GM 不使用舊版 Input。
 
+### GM
+
+安裝時會一併建立 `Assets/Script/GameGm/`，在 `GameGmOperations.Define()` 登記操作即可，面板會自動出現。
+
+```csharp
+protected override void Define()
+{
+    Add("經濟/給錢", (int amount) => economy.AddGold(amount));
+}
+```
+
+要呼叫的 CommandService 用 `[Inject]` 欄位注入，並在 `GameGm.asmdef` 補上它所在組件的引用。
+`GameGm/` 內的檔案屬於遊戲側，更新模組不會覆蓋，移除模組也不會刪除。
+
 ### GameSetting
 
 將頁籤新增至`GameManager > Tab`中，開啟會自動生成`GameManager > GameSettingConfig`，可自行配置「遊戲設定」頁籤中要顯示的子頁籤。

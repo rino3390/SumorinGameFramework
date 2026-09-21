@@ -1,0 +1,19 @@
+using Sumorin.Gm;
+using UnityEngine;
+
+namespace GameGm
+{
+	/// <summary>
+	///     GM 的進入點，把操作登記與自訂欄位交給 GM 啟動點
+	/// </summary>
+	/// <remarks>
+	///     ModuleInstaller 安裝 GM 時建立，之後屬於遊戲側，模組更新不會覆蓋。
+	/// </remarks>
+	public static class GameGmEntry
+	{
+		// AfterSceneLoad 時場景的 LifetimeScope 已在 Awake 建好容器，GM 才掛得上去。
+		// 有自訂欄位時，把 IGmFieldRegistration 實作的型別加進 Launch 的參數
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+		private static void Launch() => GmBootstrap.Launch<GameGmOperations>();
+	}
+}

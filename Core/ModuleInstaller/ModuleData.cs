@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 namespace Sumorin.ModuleInstaller
@@ -41,6 +42,24 @@ namespace Sumorin.ModuleInstaller
 		public string installPath;
 		public List<string> folders = new();
 		public List<string> files = new();
+		public List<ModuleScaffold> scaffolds = new();
+	}
+
+	/// <summary>
+	/// 模組附帶的初始檔，屬於遊戲側，安裝時只在目標不存在才建立
+	/// </summary>
+	[Serializable]
+	public class ModuleScaffold
+	{
+		/// <summary>
+		/// 範本在 repo 內的路徑，相對 baseUrl。副檔名多一個 .txt，框架專案本身才不會編譯它
+		/// </summary>
+		public string source;
+
+		/// <summary>
+		/// 建立到遊戲專案的路徑，相對 Assets/
+		/// </summary>
+		public string target;
 	}
 
 	/// <summary>
@@ -120,6 +139,23 @@ namespace Sumorin.ModuleInstaller
 	{
 		public string id;
 		public string version;
+	}
+
+	/// <summary>
+	/// 初始檔的建立規則
+	/// </summary>
+	public static class ModuleScaffolds
+	{
+		/// <summary>
+		/// 挑出目標檔還不存在、需要建立的初始檔
+		/// </summary>
+		public static List<ModuleScaffold> Missing(IEnumerable<ModuleScaffold> scaffolds, string assetsPath) =>
+			scaffolds.Where(scaffold => !File.Exists(TargetPath(scaffold, assetsPath))).ToList();
+
+		/// <summary>
+		/// 初始檔在遊戲專案裡的完整路徑
+		/// </summary>
+		public static string TargetPath(ModuleScaffold scaffold, string assetsPath) => Path.Combine(assetsPath, scaffold.target).Replace("\\", "/");
 	}
 
 	/// <summary>
